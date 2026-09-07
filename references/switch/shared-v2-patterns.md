@@ -1,0 +1,70 @@
+# V1 → V2 共享标准
+
+## 证据优先级
+
+`C3` 环境事实、脚本输出、明确文件字段 > `C2` 打包行为、截图、可见积木、Builder 示例 > `C1` 已校验资料和旧文档 > `C0` 模型知识或类比。高等级证据冲突时暂停，不按多数票猜测。
+
+## 共享语料边界
+
+`references/switch/` 是 CREATE 与 CONVERT 共用且**自包含**的语料库：面向零基础用户，
+不假设机器上存在示例项目。设备 ID、sku、compatibilityId、runtimeVersion 等真实项目惯例以
+[conventions.md](conventions.md) 与 [device-ids.json](device-ids.json) 为准（device-ids 由静态检查器强制）。
+用户主动提供的示例项目可作 C2 证据并须记录来源；语料不覆盖且用户未提供参考时停止为
+`REFERENCE.UNSUPPORTED_TOPIC` 并提出具体问题，完整规则见 conventions.md 的"语料自包含边界"。
+
+## 保真规则
+
+- 默认保留 V1 的 opcode/function、参数 key/order/default、菜单实际 value、积木类型、资源和生成代码行为。
+- 每个可见积木、菜单、依赖、库和资源都进入语义矩阵；注释掉的 helper 不自动暴露为积木。
+- 普通 `ArgumentType.STRING` 不因为类型名称自动添加 `symbol`、`menu` 或 `inputParams`。
+- V1 自带源码库与外部依赖分开：源码库复制到模式规定的 `public/libraries/`。Python 外部依赖只从
+  V1 根 `config.json` 的 `asset.python.dependencies` 和 `python/libraries/requirements.txt` 读取；
+  源码 import、README、截图和模型知识不能补充、删除或改写依赖。
+- 缺失封面、图标、库或必要 API 的源证据时停止，不生成占位内容、不选最新版。依赖版本为空时保留
+  这个源事实，不自行判断为平台内置或替换成最新版。
+
+## opcode 与生成函数映射
+
+- V1 的 namespace、作者/id 兼容前缀和序列化 opcode 前缀只用于识别旧项目；它们不是 V2
+  `func.js` 的方法名。V1 解包中形如 `"opcode": "winster-maxbot_driver-thirdex.speed"` 的值映射为 V2
+  `index.js` 的 `opcode: 'speed'` 和 `func.js` 的 `speed(...)`。
+- `func.js` 中禁止 `Maxbot.speed`、`Maxbot.stop`、`winster-maxbot_driver-thirdex.speed` 这类
+  带 namespace 的方法名；方法名必须与 `blocks[].opcode` 和 V1 导出的短函数名逐项一致。
+- Python 积木模式的函数必须返回当前积木生成的 Python 代码；不得把上传模式的
+  `generator.addCode(...)` 机械搬入 Python `func.js`。`addImport`/`addInit` 等区域 API 与积木
+  位置的 `return code` 分工按 Python Topic 执行。
+
+## 颜色与图标门禁
+
+- `getInfo()` 必须提供 `color1`、`color2`、`color3`，不能三个值相同；有 V1 `//% color="#xxxxxx"`
+  时，`color1` 优先采用该值。
+- `blockIcon.svg` 从 V1 `arduinoC/_images/icon.svg` 复制并重命名，可保留原配色。
+- `menuIcon.svg` 以同一图标为底稿但必须重新着色；其 SVG 中必须能确认主色与 `color1` 对齐，
+  不能与 `blockIcon.svg` 原样相同。不能只通过构建成功推断颜色正确。
+
+## 标识与资源
+
+- V2 `id` 只允许字母数字。本转换默认生成小写字母数字 ID：删除 V1 `id` 中的符号并转小写；用户明确指定另一个小写字母数字 ID 时记录决定并传给扫描器。结果为空或与已存在目标冲突时暂停。该规范化只改变 V2 身份，不得改 opcode/function。
+- `compatibilityId` 保留全小写旧加载身份，优先从 V1 根目录实际 `.mpext` 文件名去掉 `-V<版本>.mpext` 后取得；没有包时按 Wiki 的 `author-id-thirdex` 规则从原始 V1 `author`/`id` 转小写派生。多个包身份不一致或 config 与包身份冲突时暂停。不得用清理后的 V2 `id` 反推兼容 ID。
+- 示例：V1 `id: Maxbot_driver` 生成 V2 `id: maxbotdriver`；旧包 `winster-maxbot_driver-thirdex-V0.0.2.mpext` 对应 `compatibilityId: winster-maxbot_driver-thirdex`。
+- 不照抄样例的业务 id、author、版本、颜色、设备、引脚、opcode、菜单值或依赖。
+- 优先复用 V1 封面和图标；`config.cover` 必须指向目标 `public/` 中实际存在的文件。缺失视觉资源时不重画。
+- 复制文件后记录源/目标相对路径、大小和 SHA-256。
+
+## `config.json` 字段契约
+
+- 生成前读取 [`config-schema.md`](config-schema.md)；它是当前两个迁移路由的顶层字段白名单和必需字段清单。V1 `email`、`license`、`isBoard`、`platform`、`asset` 不得进入 V2 配置。
+- 字符串元数据没有可验证描述时写 `""`；`meta.runtimeVersion` 没有实际 Runtime API 证据时写 `""`。`libraryConfig` 等必需数组使用 schema 的空数组默认值；`supportDevices`、`supportArch` 等结构型可选字段没有证据时省略，不能写一个会改变语义的空结构。
+- `config.json` 的严格字段、JSON 类型和固定值检查必须在唯一一次 Builder build 之前完成；检查失败时先修正或记录敏感节点，不用构建成功掩盖配置错误。
+
+## 翻译门禁
+
+- 扫描 V1 `_locales/`、`_menus/`、入口文件和双语 config；“V1 没有完整 locales”不等于“没有可迁移翻译证据”。
+- 扩展名、所有积木 `text`、静态和动态菜单显示文字都必须使用 `formatMessage`；菜单实际 `value` 与顺序保持不变。
+- 翻译 ID 使用稳定的 V2 命名空间，不沿用包含旧非法字符或旧大小写的 V1 `id`。`en.json` 与 `zh-cn.json` 的 key 集必须一致，并覆盖 index.js 中的所有静态 message ID。
+- V1 英文默认文本与中文 locale 可组合成两套目标资源；确实缺少某语言且无法从 config/默认文本证明时进入敏感节点，不直接留下裸字符串，也不编造翻译。
+
+## 硬边界
+
+`boardConfig` 不是 V2 扩展 `public/config.json` 顶层字段；不要因为旧说明或模型知识添加未在当前资料/Builder 中出现的字段。完整审核、目标代码编译、Mind+ 导入、上传和设备观察不属于本 Skill。
+

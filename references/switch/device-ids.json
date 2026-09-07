@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "purpose": "Mind+ V2 supportDevices dictionary shared by creation and conversion. The skill is self-contained: this embedded dictionary plus the generated corpus are all a first-time author needs. Local example projects are never required.",
+  "evidence_policy": "Two evidence sources, both embedded at build time: official development docs (C1, mindplus2-docs-cn upload-mode guide, mirrored in generated/upload/config.md) and verified working ext2 projects (C2, maintainer corpus). New entries require one of these and must record the source here.",
+  "runtime_independence": "Nothing in this file assumes example projects exist on the user machine. Provenance below records where each entry was learned, not a runtime dependency.",
+  "harvested_at": "2026-09-01",
+  "device_ids": {
+    "dev-DFRobot-arduinoLeonardo": {"observed_version_specs": ["^0.0.1"], "evidence": {"verified_projects": ["ext2-ds1302", "ext2-mpu6050"]}},
+    "dev-DFRobot-arduinoMega2560": {"observed_version_specs": ["^0.0.1"], "evidence": {"verified_projects": ["ext2-ds1302", "ext2-mpu6050"]}},
+    "dev-DFRobot-arduinoNano": {"observed_version_specs": ["^0.0.1"], "evidence": {"verified_projects": ["ext2-SU03T01", "ext2-SU03T02", "ext2-SU03T02V2"]}},
+    "dev-DFRobot-arduinoUno": {"observed_version_specs": ["^0.0.1"], "evidence": {"official_docs": true, "verified_projects": ["ext2-LegoDuinoPro", "ext2-SU03T01", "ext2-SU03T02"]}},
+    "dev-DFRobot-dfrobotKitRob0135": {"observed_version_specs": ["^0.0.1"], "evidence": {"official_docs": true}},
+    "dev-DFRobot-Esp32": {"observed_version_specs": ["^0.0.1"], "evidence": {"verified_projects": ["ext2-BLESerial", "ext2-MpythonBT", "ext2-espnow"]}},
+    "dev-DFRobot-Esp32C3": {"observed_version_specs": ["^0.0.1"], "evidence": {"verified_projects": ["ext2-mpu6050"]}},
+    "dev-DFRobot-Esp32S3": {"observed_version_specs": ["^0.0.1"], "evidence": {"verified_projects": ["ext2-BLESerial", "ext2-espnow", "ext2-mpu6050"]}},
+    "dev-DFRobot-firebeetleEsp32": {"observed_version_specs": ["^0.0.1"], "evidence": {"verified_projects": ["ext2-BLESerial", "ext2-MpythonBT", "ext2-espnow"]}},
+    "dev-DFRobot-firebeetleEsp32E": {"observed_version_specs": ["^0.0.1"], "evidence": {"verified_projects": ["ext2-BLESerial", "ext2-MpythonBT", "ext2-espnow"]}},
+    "dev-DFRobot-firebeetleEsp8266": {"observed_version_specs": ["^0.0.1"], "evidence": {"verified_projects": ["ext2-mqttcenter"]}},
+    "dev-DFRobot-handpyESP32S3": {"observed_version_specs": ["^0.0.1"], "evidence": {"verified_projects": ["ext2-BLESerial", "ext2-espnow"]}},
+    "dev-DFRobot-handpyEsp32": {"observed_version_specs": ["^0.0.1"], "evidence": {"verified_projects": ["ext2-BLESerial", "ext2-MpythonBT", "ext2-SU03T01"]}},
+    "dev-DFRobot-microbitV2": {"observed_version_specs": ["^0.0.1"], "evidence": {"official_docs": true, "verified_projects": ["ext2-SU03T01", "ext2-SU03T02", "ext2-SU03T02V2"]}},
+    "dev-DFRobot-piPico": {"observed_version_specs": ["^0.0.1"], "evidence": {"verified_projects": ["ext2-mpu6050"]}},
+    "dev-DFRobot-telloEsp32": {"observed_version_specs": ["^0.0.1"], "evidence": {"verified_projects": ["ext2-mpu6050", "ext2-mqttcenter"]}},
+    "dev-DFRobot-unihikerK10": {"observed_version_specs": ["^0.0.1"], "evidence": {"verified_projects": ["ext2-BLESerial", "ext2-emsmartfarm", "ext2-espnow"]}}
+  },
+  "version_spec_format": "^<major>.<minor>.<patch> (all verified entries and the official docs example use ^0.0.1)",
+  "unknown_device_recovery": "Pick boards from this dictionary by board name. If the user's target board is not listed: (1) search the official mind-plus Gitee organization for an extension supporting that board and read its config.json supportDevices (official-corpus.md protocol, C2-official evidence); (2) ask the user for the exact dev-DFRobot-... ID (visible in Mind+ or its official docs); (3) scope by architecture instead via supportArch, or omit supportDevices for a whole-arch extension. Never invent or approximate an ID, and propose the verified new entry as a dictionary update afterwards.",
+  "sku_format": {
+    "empty": "No DFRobot SKU product (communication/board extensions): use \"\".",
+    "single": "One SKU code, e.g. \"SEN0237\".",
+    "multi": "Multiple boards of one family joined with |, e.g. \"SEN0664|SEN0665\".",
+    "pattern": "^$|^[A-Z0-9]+(\\|[A-Z0-9]+)*$"
+  },
+  "support_arch": {
+    "observed_values": ["all", "arduino:avr"],
+    "format_rule": "Each entry is \"all\" or a board architecture prefix: the first two segments of boardConfig.board, e.g. \"arduino:avr\", \"arduino:samd\" (official docs, C1).",
+    "usage": "supportArch overrides supportDevices when both are set (official docs). Whole-arch extension: [\"all\"] with devices omitted; arch-family extension (upload mode): [\"<platform>:<arch>\"] instead of enumerating boards; device-scoped extension: supportDevices only. Do not set both without evidence."
+  }
+}

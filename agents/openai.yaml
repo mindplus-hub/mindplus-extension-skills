@@ -1,0 +1,6 @@
+interface:
+  display_name: "MindPlus Agent"
+  short_description: "Route Mind+ extension creation, review, and Gitee publishing"
+  default_prompt: "Use $mindplus-agent-skill to route this Mind+ extension task through only the required lifecycle leaves."
+policy:
+  allow_implicit_invocation: true

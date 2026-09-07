@@ -1,0 +1,328 @@
+{
+  "bundle_id": "mindplus-switch-references",
+  "content_sha256": "1dfc2efe046d3f7de8a1f932139e2bd884bf82f2c566a206bf3b7fd2f8f30287",
+  "files": [
+    {
+      "path": "index.json",
+      "sha256": "8e9300c25938a4d7f2f1fa120bfca762fe5055ae2a3087f8abae4685978997b2",
+      "size": 32378
+    },
+    {
+      "path": "index.md",
+      "sha256": "cc5735e25b0fecba5dff9e52cb95ed56425002ff39652fed92ef72fd6c99d946",
+      "size": 9568
+    },
+    {
+      "path": "python/config.md",
+      "sha256": "50e00450af50009e8a7d94bbbb463050700f9c2eae5253b0ef39a9b35ef83d64",
+      "size": 3645
+    },
+    {
+      "path": "python/generator/add-function.md",
+      "sha256": "aed7659a04ac3cdbe37ebaa6f33cec4316083534b2364b09570fb912d94763d0",
+      "size": 1111
+    },
+    {
+      "path": "python/generator/add-import.md",
+      "sha256": "f319aa5ce7696eda711c1ad77cda7292f8f74d05fca120bfec57bd56363ed10e",
+      "size": 766
+    },
+    {
+      "path": "python/generator/add-init.md",
+      "sha256": "3837f1ab6ae871cdd6f6fa4b218b2d396c404529cfbb7fc404a749305e982cfc",
+      "size": 913
+    },
+    {
+      "path": "python/generator/add-variable.md",
+      "sha256": "1a326401931131cc84938ba019bef53c1096e543d10727a96ee64699e290659f",
+      "size": 795
+    },
+    {
+      "path": "python/generator/advanced.md",
+      "sha256": "f1a76ea95d5514c7802ca322ed1a0c8b7dd18c2c3b427c89abf9b24cbb8ceefe",
+      "size": 878
+    },
+    {
+      "path": "python/generator/core.md",
+      "sha256": "503eb59786d8f59e43650788d55d324f3232b958433746268253a92b0fb9ae4f",
+      "size": 650
+    },
+    {
+      "path": "python/generator/event-callback.md",
+      "sha256": "93e52f68ed9a6137b32d2800d07fd59e37a13a300a7983cce7af3e25653dd16d",
+      "size": 571
+    },
+    {
+      "path": "python/generator/inline-code.md",
+      "sha256": "258474a8f3aaa080d4c940b9e15887598f45aeb203cc48f11ea1bb815210bb50",
+      "size": 705
+    },
+    {
+      "path": "python/index-js.md",
+      "sha256": "ac542bf8d76f726b82db00c4b40b556ffc101531404561b24674427ef1cc7ad8",
+      "size": 1865
+    },
+    {
+      "path": "python/locales.md",
+      "sha256": "47421ed52a2e127ffca4285be7fb8c8fac68a0158138fc64b17eaa5e2e704ce1",
+      "size": 942
+    },
+    {
+      "path": "python/requirements.md",
+      "sha256": "20ae20737a223ec498d0b5180e41891eb6c9eee066881e2f5c239fe9fc84c5b8",
+      "size": 539
+    },
+    {
+      "path": "python/structure.md",
+      "sha256": "70b37db177be55605a2a59a2c0be41d9acc1ff303652a3ce60a3563c9e23c735",
+      "size": 1452
+    },
+    {
+      "path": "shared/block/core.md",
+      "sha256": "506c5cc1d3aec9ab86f41c57f17b5b4b7551b0a1a0f5ad63ecb287672d30ac19",
+      "size": 730
+    },
+    {
+      "path": "shared/block/definition.md",
+      "sha256": "010abf9b5464172180c612dfd4997882a2f2e95dbd163a1854abc4d6c773ddf7",
+      "size": 1965
+    },
+    {
+      "path": "shared/block/examples.md",
+      "sha256": "2afa062a5a625c4a05b41af6e381d96dd3c907d858148bb4df19930403023e9d",
+      "size": 1346
+    },
+    {
+      "path": "shared/block/menus.md",
+      "sha256": "bb6abf30a5304f00973665be751c4b82f9a83a6f06b5b41dedb84d60ef3bc167",
+      "size": 1096
+    },
+    {
+      "path": "shared/block/special.md",
+      "sha256": "31b02a9359a1f6cd376d0ba4a15931c3e3fa296a41ace8443215a8420863eb9c",
+      "size": 8627
+    },
+    {
+      "path": "shared/builder-workspace.md",
+      "sha256": "b462327881b5dc7f035d8496ab185668a16ca967e60570096714f49f001fda98",
+      "size": 2842
+    },
+    {
+      "path": "shared/config-identity.md",
+      "sha256": "5ac64c76483d153e2fb1a2256f34c1efb0f5303af699f834eebfc9a4f7779b36",
+      "size": 6232
+    },
+    {
+      "path": "shared/fields/angle.md",
+      "sha256": "87510deb7c8beb38669195b55a9aeb89efa829f55628091c036ed0fc9991ac6c",
+      "size": 766
+    },
+    {
+      "path": "shared/fields/boolean.md",
+      "sha256": "0f9f72135dac92113b0183e70ce681a0068a21ca8e424af1be844c5de92284f1",
+      "size": 655
+    },
+    {
+      "path": "shared/fields/builtinimg.md",
+      "sha256": "1070b4dd666ae3d0f3fd8181d5841dba4008f46b366d5d02c723a3df9efb0a55",
+      "size": 1019
+    },
+    {
+      "path": "shared/fields/color.md",
+      "sha256": "4542b85e0e1e9b2b369670972b863b5e9f64b04e4a0e3173765702c8d2f0f68e",
+      "size": 801
+    },
+    {
+      "path": "shared/fields/colorpalette.md",
+      "sha256": "a68ddef5e9bb151d04c69f39479c3583036460552a9bceb3874f6eddfb3b756e",
+      "size": 1438
+    },
+    {
+      "path": "shared/fields/dirsettings.md",
+      "sha256": "f5c3b0f787817801acdbcf66851e51dab0ee0e0b95705deb4e2b40bd6e34dcae",
+      "size": 960
+    },
+    {
+      "path": "shared/fields/dropdown.md",
+      "sha256": "6401a1cd7182cad56dc8a41427874d6dbe782dfc173a397a81d0a9c01e49ebcb",
+      "size": 3344
+    },
+    {
+      "path": "shared/fields/eventheadinner.md",
+      "sha256": "d0d338d2957558dba03a7be903c09cfd037bd4191f845efdfbd2e268edc24d15",
+      "size": 1589
+    },
+    {
+      "path": "shared/fields/formsetting.md",
+      "sha256": "5c247c268c7de9519b10f23cf439cbbfb46a88550e55611063336fafee779e4b",
+      "size": 2963
+    },
+    {
+      "path": "shared/fields/imgpreview.md",
+      "sha256": "95c089ae5ac96c69f44531c21bc3dfb59cdb23fbe2723e3dc8a51d9ff6e6ea60",
+      "size": 1416
+    },
+    {
+      "path": "shared/fields/imgsettings.md",
+      "sha256": "1a937666fe8b4a1da544c8143b40ce9e14270ae7ec4a77a8bbd6df8aa8d29067",
+      "size": 954
+    },
+    {
+      "path": "shared/fields/infraredtext.md",
+      "sha256": "db8b1deec2cb9dbcb92cecb14610be243c6c15f01a38109df12016a0468a953d",
+      "size": 836
+    },
+    {
+      "path": "shared/fields/matrix.md",
+      "sha256": "7c19bd74f18e483f3be4f98fb6f6c1be4db092cb0c7fce05e16fa351a7d55696",
+      "size": 652
+    },
+    {
+      "path": "shared/fields/matrixicons.md",
+      "sha256": "1e0ba665f468340d0b75f2b856f3def9782bf536fc3c474847738d6365c01f54",
+      "size": 2897
+    },
+    {
+      "path": "shared/fields/mqttparameter.md",
+      "sha256": "80f823d864d40d1b60fd12cb1a4f2dbb266c468675d9b6a00bd2525d9ed1e2c8",
+      "size": 709
+    },
+    {
+      "path": "shared/fields/note.md",
+      "sha256": "915856ebd8f7c91572978afce50399f1cb6a5508b04c68cfef7cc15ac94629aa",
+      "size": 741
+    },
+    {
+      "path": "shared/fields/number.md",
+      "sha256": "2ae8cb198dc85c9a310ec9bdf5b4f12d5e86d34ce5fb1214049ebe5965c1d646",
+      "size": 1517
+    },
+    {
+      "path": "shared/fields/obloqparameter.md",
+      "sha256": "92a81e0109a2a343953f0a7190ab0387dac964454275d2ea068729d0afdad18b",
+      "size": 1010
+    },
+    {
+      "path": "shared/fields/onlineimgsetting.md",
+      "sha256": "6cfc022afd522e1e72f9df06854ee86ba7b61be7db4b85175eddb423d4f993db",
+      "size": 734
+    },
+    {
+      "path": "shared/fields/piano.md",
+      "sha256": "c2ba66b1843f1e0d4efeb23e8c3a7854de71905c5a3456f0c5a7c3322ab64e55",
+      "size": 759
+    },
+    {
+      "path": "shared/fields/slider.md",
+      "sha256": "51fa3b4f727f669467a045421a888caddb10184889ff7bfff1fb8d9ce613a51b",
+      "size": 1284
+    },
+    {
+      "path": "shared/fields/string.md",
+      "sha256": "6108230fce061e9509b4765b5c136de2435c7106d2f088525739f60a89b0a5b4",
+      "size": 785
+    },
+    {
+      "path": "shared/fields/textarea.md",
+      "sha256": "aac13fc80592f960899f5b8aab364433f352344c16aaeff03a230f5082836a15",
+      "size": 1038
+    },
+    {
+      "path": "shared/fields/textpreview.md",
+      "sha256": "33770cd35f03ceb95487e16cf5b5ce5cbea5e0f16686879faf8ea4ab23fc9d8a",
+      "size": 1573
+    },
+    {
+      "path": "shared/runtime.md",
+      "sha256": "9d181bd3b1afb197e384adc118b12c63291060c83262f4b28b737f600b034fd9",
+      "size": 3419
+    },
+    {
+      "path": "shared/v1-compatibility.md",
+      "sha256": "91de9fe07a3cf7513216f8865355eb38004a2571d702b3896aae9f98aa49edad",
+      "size": 939
+    },
+    {
+      "path": "upload/config.md",
+      "sha256": "ddc6656f849ef39a3dff022bc217814391144c5d11a1ac4555729fd003c482dd",
+      "size": 6465
+    },
+    {
+      "path": "upload/generator/add-const.md",
+      "sha256": "6d49025523acf4baa4712aaa7eccc8a6bd49dcf8fc5343b7f1dabd151dbb6fa6",
+      "size": 1653
+    },
+    {
+      "path": "upload/generator/add-define.md",
+      "sha256": "e7e4113e2500f210412377de57ae0747c7bbfb974e10dcb932f5789664effff6",
+      "size": 886
+    },
+    {
+      "path": "upload/generator/add-function.md",
+      "sha256": "92915a5481a6be4abd852d30029838d07d1a6aa69b3f8cfb8330c81524484dc9",
+      "size": 1123
+    },
+    {
+      "path": "upload/generator/add-include.md",
+      "sha256": "a9b529f50638ecbb1f2d585554a202715ea2c895bef64e69c6a1b31de72f6c13",
+      "size": 924
+    },
+    {
+      "path": "upload/generator/add-object.md",
+      "sha256": "fdbfbedd7fb417853e58d42af2b92c51f44b90dc5313636dc7fda39ecd034abf",
+      "size": 924
+    },
+    {
+      "path": "upload/generator/add-setup.md",
+      "sha256": "93e800d5f2a1be506836aaadd45ffc6371508c1d60e1b70cfb816be03aa6eb93",
+      "size": 988
+    },
+    {
+      "path": "upload/generator/add-variable.md",
+      "sha256": "b14df1462afbbd98e75efab62fde4b151687959a3bda250d0620c69a68599fa2",
+      "size": 1247
+    },
+    {
+      "path": "upload/generator/advanced.md",
+      "sha256": "a60f5cb297b7aa88f62fd2202d55ea0ac3b23fc01083c0c0c0e2e8606915bd18",
+      "size": 828
+    },
+    {
+      "path": "upload/generator/core.md",
+      "sha256": "e072790d0e5d9b3017f834db78aee192992817bfa5d47a8676dbbfa43f2714d5",
+      "size": 1509
+    },
+    {
+      "path": "upload/generator/inline-code.md",
+      "sha256": "6751e27eda370e535adecffbf8aea8945ea15cd6dbdd9d0f4888e3b34d1bf97c",
+      "size": 1109
+    },
+    {
+      "path": "upload/index-js.md",
+      "sha256": "5ae135ecf0493d1219d638c0b8f9ae75cc7948e589cc51fbe752481e7af91957",
+      "size": 3067
+    },
+    {
+      "path": "upload/locales.md",
+      "sha256": "57d65607ac44c862af3d6b49765041a31ae95a3cb1d148bc1db5c286c9697fe1",
+      "size": 904
+    },
+    {
+      "path": "upload/pins.md",
+      "sha256": "b21a0b1475e75037599ab791a295bfb98500d9beefe030714be543907d447382",
+      "size": 4713
+    },
+    {
+      "path": "upload/structure.md",
+      "sha256": "872def8b8a714bed539b607100001c386995116856f0b7a1a1abbf06ae4e6870",
+      "size": 1406
+    }
+  ],
+  "min_skill_version": "0.5.0",
+  "release_id": "refs-1dfc2efe046d",
+  "schema_version": 1,
+  "supported_modes": [
+    "UPLOAD",
+    "PYTHON_BLOCK"
+  ]
+}

@@ -1,0 +1,242 @@
+#!/usr/bin/env python3
+"""Validate a MindPlus Agent handoff and the HOST_READY publication gate."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import sys
+from pathlib import Path
+from typing import Any
+
+
+SCHEMA_VERSION = "mindplus-agent.handoff/v1"
+REQUIRED_FIELDS = {
+    "schema_version",
+    "run_id",
+    "parent_run_id",
+    "workflow",
+    "producer",
+    "state",
+    "status",
+    "outcome",
+    "reason_code",
+    "input_provenance",
+    "project_root",
+    "project_sha256",
+    "artifacts",
+    "checks",
+    "authorizations",
+    "next",
+}
+WORKFLOW_PRODUCER = {
+    "CONVERT_FRESH": "mindplus-switch",
+    "CREATE_FRESH": "mindplus-create",
+    "REVIEW_EXISTING": "mindplus-review",
+    "PUBLISH_GITEE": "mindplus-gitee-publish",
+}
+AUTHORIZATION_FIELDS = {
+    "local_write",
+    "install",
+    "build",
+    "mindplus_ui",
+    "commit",
+    "create_repository",
+    "push",
+    "device_upload",
+}
+HOST_READY_CHECKS = {
+    "builder_build",
+    "mindplus_import",
+    "blocks_visible",
+    "representative_target_compile",
+}
+USER_CONFIRMED_CHECKS = {
+    "mindplus_import",
+    "blocks_visible",
+    "representative_target_compile",
+}
+CHECK_RESULTS = {"PASS", "FAIL", "NOT_RUN", "ACCEPTED_LIMITATION", "CARRIED_RISK"}
+CREDENTIAL_URL_RE = re.compile(r"[a-z][a-z0-9+.-]*://[^/\s:@]+:[^@\s/]+@", re.IGNORECASE)
+
+
+def load(path: Path) -> dict[str, Any]:
+    value = json.loads(path.read_text(encoding="utf-8-sig"))
+    if not isinstance(value, dict):
+        raise ValueError("handoff root must be an object")
+    return value
+
+
+def scan_secrets(value: Any, errors: list[str], path: str = "$") -> None:
+    if isinstance(value, dict):
+        for key, child in value.items():
+            folded = str(key).casefold()
+            if any(part in folded for part in ("password", "token", "cookie", "authorization_header")):
+                errors.append(f"secret-like key is forbidden: {path}.{key}")
+            scan_secrets(child, errors, f"{path}.{key}")
+    elif isinstance(value, list):
+        for index, child in enumerate(value):
+            scan_secrets(child, errors, f"{path}[{index}]")
+    elif isinstance(value, str):
+        if CREDENTIAL_URL_RE.search(value) or "access_token=" in value.casefold():
+            errors.append(f"credential-bearing string is forbidden: {path}")
+
+
+def validate(data: dict[str, Any], require_outcome: str | None, check_artifacts: bool) -> list[str]:
+    errors: list[str] = []
+    missing = sorted(REQUIRED_FIELDS - data.keys())
+    if missing:
+        errors.append(f"missing required fields: {missing}")
+    if data.get("schema_version") != SCHEMA_VERSION:
+        errors.append(f"schema_version must be {SCHEMA_VERSION}")
+
+    workflow = data.get("workflow")
+    producer = data.get("producer")
+    if workflow not in WORKFLOW_PRODUCER:
+        errors.append(f"unknown workflow: {workflow!r}")
+    elif producer != WORKFLOW_PRODUCER[workflow]:
+        errors.append(f"producer {producer!r} does not match workflow {workflow!r}")
+
+    state = data.get("state")
+    status = data.get("status")
+    if state not in {"RUNNING", "WAITING_USER", "TERMINAL"}:
+        errors.append(f"invalid state: {state!r}")
+    if status not in {"NOT_RUN", "PASS", "FAIL", "BLOCKED"}:
+        errors.append(f"invalid status: {status!r}")
+    if state == "WAITING_USER" and status != "BLOCKED":
+        errors.append("WAITING_USER requires status BLOCKED")
+    if state == "TERMINAL" and status == "NOT_RUN":
+        errors.append("TERMINAL cannot have status NOT_RUN")
+    if status == "PASS" and data.get("reason_code") is not None:
+        errors.append("PASS requires a null reason_code")
+    if status in {"FAIL", "BLOCKED"} and not data.get("reason_code"):
+        errors.append(f"{status} requires a reason_code")
+    if require_outcome and data.get("outcome") != require_outcome:
+        errors.append(f"required outcome is {require_outcome}, got {data.get('outcome')!r}")
+
+    project_raw = data.get("project_root")
+    project = Path(project_raw).expanduser() if isinstance(project_raw, str) and project_raw else None
+    if project is None or not project.is_absolute():
+        errors.append("project_root must be an absolute path")
+    project_sha256 = data.get("project_sha256")
+    if not isinstance(project_sha256, str) or not re.fullmatch(r"[A-Fa-f0-9]{64}", project_sha256):
+        errors.append("project_sha256 must be a 64-character SHA-256 hex digest")
+
+    provenance = data.get("input_provenance")
+    if not isinstance(provenance, dict) or not provenance.get("sha256"):
+        errors.append("input_provenance must contain sha256")
+
+    authorizations = data.get("authorizations")
+    if not isinstance(authorizations, dict):
+        errors.append("authorizations must be an object")
+    else:
+        missing_auth = sorted(AUTHORIZATION_FIELDS - authorizations.keys())
+        if missing_auth:
+            errors.append(f"missing authorization fields: {missing_auth}")
+        for key in AUTHORIZATION_FIELDS & authorizations.keys():
+            if not isinstance(authorizations[key], bool):
+                errors.append(f"authorization {key} must be boolean")
+
+    checks = data.get("checks")
+    checks_by_id: dict[str, dict[str, Any]] = {}
+    if not isinstance(checks, list):
+        errors.append("checks must be an array")
+    else:
+        for index, check in enumerate(checks):
+            if not isinstance(check, dict):
+                errors.append(f"checks[{index}] must be an object")
+                continue
+            check_id = check.get("id")
+            if not isinstance(check_id, str) or not check_id:
+                errors.append(f"checks[{index}] has no id")
+                continue
+            if check_id in checks_by_id:
+                errors.append(f"duplicate check id: {check_id}")
+            checks_by_id[check_id] = check
+            if check.get("result") not in CHECK_RESULTS:
+                errors.append(f"check {check_id} has invalid result")
+            if check.get("confirmed_by") not in (None, "user"):
+                errors.append(f"check {check_id} has invalid confirmed_by (only 'user' or null)")
+            evidence = check.get("evidence")
+            if (
+                status == "PASS"
+                and check.get("required") is True
+                and check.get("result") == "PASS"
+                and not (isinstance(evidence, list) and evidence)
+            ):
+                errors.append(f"passing required check has no evidence: {check_id}")
+            if check.get("required") is True and status == "PASS" and check.get("result") != "PASS":
+                errors.append(f"passing handoff has non-passing required check: {check_id}")
+
+    if data.get("outcome") == "REVIEWED_HOST_READY":
+        if workflow != "REVIEW_EXISTING" or producer != "mindplus-review":
+            errors.append("REVIEWED_HOST_READY must come from mindplus-review")
+        if state != "TERMINAL" or status != "PASS":
+            errors.append("REVIEWED_HOST_READY requires TERMINAL/PASS")
+        for check_id in sorted(HOST_READY_CHECKS):
+            if check_id not in checks_by_id:
+                errors.append(f"HOST_READY is missing check: {check_id}")
+            elif checks_by_id[check_id].get("result") != "PASS":
+                errors.append(f"HOST_READY check must PASS: {check_id}")
+        for check_id in sorted(USER_CONFIRMED_CHECKS):
+            check = checks_by_id.get(check_id)
+            if (
+                isinstance(check, dict)
+                and check.get("result") == "PASS"
+                and check.get("confirmed_by") != "user"
+            ):
+                errors.append(
+                    f"HOST_READY GUI check requires confirmed_by 'user' (host-observed evidence): {check_id}"
+                )
+
+    if data.get("outcome") == "TOKEN_REQUIRED":
+        if workflow != "PUBLISH_GITEE" or producer != "mindplus-gitee-publish":
+            errors.append("TOKEN_REQUIRED must come from the Gitee publication leaf")
+        if state != "WAITING_USER" or status != "BLOCKED":
+            errors.append("TOKEN_REQUIRED requires WAITING_USER/BLOCKED")
+        if data.get("reason_code") != "AUTH.GITEE_TOKEN_MISSING":
+            errors.append("TOKEN_REQUIRED requires AUTH.GITEE_TOKEN_MISSING")
+        if data.get("artifacts") not in ([], None):
+            errors.append("missing-token handoff must not contain publication artifacts")
+
+    artifacts = data.get("artifacts")
+    if not isinstance(artifacts, list):
+        errors.append("artifacts must be an array")
+    else:
+        for index, artifact in enumerate(artifacts):
+            if not isinstance(artifact, dict) or not isinstance(artifact.get("path"), str):
+                errors.append(f"artifacts[{index}] must contain a path")
+                continue
+            artifact_path = Path(artifact["path"]).expanduser()
+            if not artifact_path.is_absolute():
+                errors.append(f"artifact path must be absolute: {artifact['path']}")
+            elif check_artifacts and not artifact_path.exists():
+                errors.append(f"artifact does not exist: {artifact_path}")
+
+    if check_artifacts and project is not None and not project.is_dir():
+        errors.append(f"project_root does not exist: {project}")
+
+    scan_secrets(data, errors)
+    return errors
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--input", required=True, type=Path)
+    parser.add_argument("--require-outcome")
+    parser.add_argument("--check-artifacts", action="store_true")
+    args = parser.parse_args()
+    path = args.input.expanduser().resolve(strict=False)
+    try:
+        data = load(path)
+        errors = validate(data, args.require_outcome, args.check_artifacts)
+    except (OSError, json.JSONDecodeError, ValueError) as exc:
+        errors = [str(exc)]
+    output = {"status": "PASS" if not errors else "FAIL", "handoff": str(path), "errors": errors}
+    print(json.dumps(output, ensure_ascii=False, indent=2))
+    return 0 if not errors else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

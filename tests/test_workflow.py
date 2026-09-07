@@ -22,10 +22,11 @@ from hash_project import compute_project_hash
 
 def run_script(name: str, *args: str, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        [sys.executable, str(SCRIPTS / name), *args],
+        [sys.executable, "-X", "utf8", str(SCRIPTS / name), *args],
         cwd=ROOT,
         env=env,
         text=True,
+        encoding="utf-8",
         capture_output=True,
         check=False,
     )
@@ -33,9 +34,10 @@ def run_script(name: str, *args: str, env: dict[str, str] | None = None) -> subp
 
 def run_switch_script(name: str, *args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
-        [sys.executable, str(SWITCH_SCRIPTS / name), *args],
+        [sys.executable, "-X", "utf8", str(SWITCH_SCRIPTS / name), *args],
         cwd=ROOT,
         text=True,
+        encoding="utf-8",
         capture_output=True,
         check=False,
     )

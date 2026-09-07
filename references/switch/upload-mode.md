@@ -50,7 +50,7 @@ extension/
 - V1 namespace 或兼容前缀不写入函数名。旧 opcode `winster-maxbot_driver-thirdex.speed` 在 V2
   必须对应 `blocks[].opcode: 'speed'` 与 `func.js` 的 `speed(...)`。
 - `addInclude`、`addObject`、`addVariable`、`addSetup`、`addFunction` 各自只放对应职责。不要机械复制 V1 的 `addObject` 参数形态或 `PROGMEM`。
-- COMMAND 返回语句；REPORTER/BOOLEAN 按当前 Builder 优先级返回 `[code, priority]`。普通 STRING 不自动添加 `symbol/menu`。
+- COMMAND 返回语句；REPORTER/BOOLEAN 按当前 Builder 优先级返回 `[code, priority]`。普通 STRING 不因类型名自动添加 `symbol/menu`；V1 `shadow="string"` 则按共享规则添加 `inputParams.symbol: '""'`，`shadow="normal"` 不显示引号。
 
 ## 颜色与图标
 
@@ -63,4 +63,3 @@ extension/
 ## 库与停止条件
 
 V1 自带 Arduino 库复制到 `public/libraries/<library>/`，保留实际需要的源码和 `library.properties`；外部全局库才进入 `libraryConfig`。版本不明、关键资源缺失、板卡无法映射、冲突未裁决或必须改变旧语义时停止并写敏感节点。
-

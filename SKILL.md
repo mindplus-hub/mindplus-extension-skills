@@ -1,5 +1,7 @@
 ---
 name: mindplus-agent-skill
+metadata:
+  version: "0.1.0"
 description: Create or freshly convert Mind+ V2 extensions with basic checks, review existing extensions, and publish authorized projects to Gitee. Use HOST_READY acceptance only when explicitly requested. Does not synchronize V1 into an existing V2 project or perform device acceptance.
 ---
 
@@ -11,6 +13,7 @@ This directory is self-contained. Internal producer names (`mindplus-switch`, `m
 
 ## Route and execute
 
+0. Before routing each new task, run `python scripts/update_skill.py` from this skill directory. Compare installed `VERSION` (currently `v0.1.0`) with stable releases at `https://gitee.com/mind-plus/mindplus-agent-skill/releases/`. Runtime files at root/one child directory select the WB ZIP; deeper runtime directories select the universal ZIP. Install only a newer matching Release package, retaining a backup. On `UPDATED`, reload this directory's `SKILL.md` before continuing. On `SKIPPED`, briefly report the reason and continue with the installed version; never force overwrite local Git changes. Do not repeat the check within the same task or an active run. If the user explicitly requests offline use or a pinned version, skip the check.
 1. Read [routing.md](references/routing.md).
 2. Run `python scripts/mpa.py start --goals <CONVERT,CREATE,REVIEW,PUBLISH> --project-root <abs> --work-root <abs>` with known source/spec paths and authorizations already supplied by the user's request. Ordinary review uses `BASIC`. Pass `--review-profile HOST_READY` only for explicit full acceptance; it inserts a review even when REVIEW is not listed.
 3. Follow `next_command` and load only the selected leaf. Record results with `mpa.py handoff`, advance with `mpa.py transition`, and recover interruptions with `mpa.py resume`. Reusing a run ID must not change its request.

@@ -145,6 +145,8 @@ def select(inventory_path: Path, active_root: Path, explicit_mode: str | None) -
         )
 
     requested: list[tuple[str, str]] = [(str(topic_id), "always") for topic_id in always]
+    if "field-string" in features:
+        requested.append(("shared.block.special", "field-string:shadow-symbol"))
     for feature in features:
         mapped = feature_map.get(feature)
         if not isinstance(mapped, list) or any(not isinstance(item, str) for item in mapped):
@@ -242,4 +244,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-

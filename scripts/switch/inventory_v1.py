@@ -176,6 +176,7 @@ def common_features(source_text: str, active_text: str, relative_files: list[Pat
         "dropdown": "field-dropdown",
         "range": "field-slider",
         "string": "field-string",
+        "normal": "field-string",
         "number": "field-number",
     }.items():
         if re.search(rf"\.shadow\s*=\s*[\"']{shadow}[\"']", source_text, re.IGNORECASE):
@@ -460,4 +461,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-

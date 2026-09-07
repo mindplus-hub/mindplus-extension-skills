@@ -2,6 +2,8 @@
 
 Read this file before any leaf reference.
 
+At the beginning of a new task, first follow the version-check step in `SKILL.md`: run `python scripts/update_skill.py`, then reload `SKILL.md` if updated. This is a skill-entry step, not a network operation inside the deterministic routing CLI. Continue the installed version if the update is unavailable; keep active runs on their existing version.
+
 ## Make a route request
 
 Preferred: the wizard, which routes, opens the parent run, and prints the next command.

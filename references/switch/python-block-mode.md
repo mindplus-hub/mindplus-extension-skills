@@ -39,7 +39,7 @@ extension/
 
 - `index.js` 使用当前 Builder 的 `ArgumentType`、`BlockType`、图标、Func、translation 和 locales；`getCodePrimitives()` 返回 Func 实例。
 - 每个 opcode、blockType、参数 key/order、menu text/value/default 和 output type 必须来自语义矩阵。扩展名、积木和菜单显示文字均用 `formatMessage`，并在 `en.json`/`zh-cn.json` 中保持 key 对齐；动态菜单可采用 `menuText` + `buildMenuItems` 样式。
-- 普通 STRING 可以只有 `type` 和 `defaultValue`；仅旧 shadow/引号/菜单行为有证据时添加 `symbol`、`menu` 或 `inputParams`。
+- 普通 STRING 可以只有 `type` 和 `defaultValue`；V1 `shadow="normal"` 不显示引号，`shadow="string"` 按共享规则添加 `inputParams.symbol: '""'`。菜单配置仍需独立证据。
 - V1 menu 的显示文字与实际值分别映射，不能按序号重编码。
 - `func.js` 使用 `method(generator, block, parameter)`；参数从 `parameter.NAME.code` 读取。
 - V1 namespace 不属于 Python 方法名：例如旧的 `winster-maxbot_driver-thirdex.speed` 只映射为
@@ -66,4 +66,3 @@ extension/
   在 build 前阻断。
 - 转换阶段不安装 requirements、不运行真实推理；这些属于独立审核。
 - 缺少封面、图标、库源码、依赖版本或生成器 API 证据时停止，不生成替代内容。
-

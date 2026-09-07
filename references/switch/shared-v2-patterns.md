@@ -17,11 +17,28 @@
 - 默认保留 V1 的 opcode/function、参数 key/order/default、菜单实际 value、积木类型、资源和生成代码行为。
 - 每个可见积木、菜单、依赖、库和资源都进入语义矩阵；注释掉的 helper 不自动暴露为积木。
 - 普通 `ArgumentType.STRING` 不因为类型名称自动添加 `symbol`、`menu` 或 `inputParams`。
+- V1 的 `shadow="normal"` 与 `shadow="string"` 不能合并为相同显示行为；按下方映射保留引号。
 - V1 自带源码库与外部依赖分开：源码库复制到模式规定的 `public/libraries/`。Python 外部依赖只从
   V1 根 `config.json` 的 `asset.python.dependencies` 和 `python/libraries/requirements.txt` 读取；
   源码 import、README、截图和模型知识不能补充、删除或改写依赖。
 - 缺失封面、图标、库或必要 API 的源证据时停止，不生成占位内容、不选最新版。依赖版本为空时保留
   这个源事实，不自行判断为平台内置或替换成最新版。
+
+## V1 shadow 输入框与 V2 引号显示
+
+V1 注解中 `.defl="..."` 外层引号是注解语法，不是默认值本身携带的引号：
+
+```typescript
+//% NM.shadow="normal" NM.defl="obj"
+//% SS.shadow="string" SS.defl="mind+"
+```
+
+- `normal`：输入框不显示引号，V2 使用 `type: ArgumentType.STRING, defaultValue: "obj"`，不添加引号 `symbol`。
+- `string`：输入框显示引号，V2 使用 `type: ArgumentType.STRING, defaultValue: "mind+", inputParams: { symbol: '""' }`。对应所选 `shared.block.special` 的「3. 积木 field 符号显示」，`symbol` 放在 `inputParams` 内。
+- 不把默认值改成含额外引号的 `defaultValue: '"mind+"'` 来模拟显示效果。
+- `symbol` 是 field 显示配置，不凭它推断生成代码会自动带引号。继续对照 V1 生成器及 V2 `parameter.NAME.code` 的实际约定，保留标识符/表达式与字符串字面量的差异；不要再无条件包一层引号。
+
+语义矩阵应记录 shadow 类型、默认值、field 引号显示、生成代码引号处理。此规则同时适用于 UPLOAD 和 PYTHON_BLOCK。
 
 ## opcode 与生成函数映射
 
@@ -67,4 +84,3 @@
 ## 硬边界
 
 `boardConfig` 不是 V2 扩展 `public/config.json` 顶层字段；不要因为旧说明或模型知识添加未在当前资料/Builder 中出现的字段。完整审核、目标代码编译、Mind+ 导入、上传和设备观察不属于本 Skill。
-

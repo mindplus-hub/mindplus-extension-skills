@@ -5,25 +5,32 @@
       "leaf": "references/workflows/switch.md",
       "producer": "mindplus-switch",
       "requires_absent_or_empty_target": true,
-      "allowed_next": ["REVIEW_EXISTING"]
+      "allowed_next": [
+        "REVIEW_EXISTING",
+        "PUBLISH_GITEE"
+      ]
     },
     "CREATE_FRESH": {
       "leaf": "references/workflows/create.md",
       "producer": "mindplus-create",
       "requires_absent_or_empty_target": true,
-      "allowed_next": ["REVIEW_EXISTING"]
+      "allowed_next": [
+        "REVIEW_EXISTING",
+        "PUBLISH_GITEE"
+      ]
     },
     "REVIEW_EXISTING": {
       "leaf": "references/workflows/review.md",
       "producer": "mindplus-review",
       "requires_existing_target": true,
-      "allowed_next": ["PUBLISH_GITEE"]
+      "allowed_next": [
+        "PUBLISH_GITEE"
+      ]
     },
     "PUBLISH_GITEE": {
       "leaf": "references/workflows/gitee-publish.md",
       "producer": "mindplus-gitee-publish",
       "requires_existing_target": true,
-      "required_incoming_outcome": "REVIEWED_HOST_READY",
       "allowed_next": []
     }
   }

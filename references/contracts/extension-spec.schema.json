@@ -3,7 +3,7 @@
   "$id": "mindplus-agent.extension-spec/v1",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "identity", "mode", "blocks", "dependencies", "devices", "assets", "review_profile"],
+  "required": ["schema_version", "identity", "mode", "blocks", "dependencies", "devices", "assets"],
   "properties": {
     "schema_version": {"const": "mindplus-agent.extension-spec/v1"},
     "identity": {
@@ -59,6 +59,6 @@
       "description": "Explicit reference-bundle feature ids (e.g. event-callback, advanced) the selection should load in addition to the derived ones."
     },
     "readme_claims": {"type": "array", "items": {"type": "string"}},
-    "review_profile": {"const": "HOST_READY"}
+    "review_profile": {"enum": ["BASIC", "HOST_READY"], "default": "BASIC", "description": "Use HOST_READY only when explicitly requested; do not inherit it from a template."}
   }
 }

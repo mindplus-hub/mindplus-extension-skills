@@ -34,12 +34,12 @@ If the corpus is unavailable or does not cover a requested feature, first apply 
 REFINE_SPEC -> PREPARE -> CREATE -> VERIFY -> HANDOFF
 ```
 
-1. Freeze the approved spec and record its SHA-256.
+1. Freeze the approved spec and record its SHA-256 before project writes. Use the path recorded by `--extension-spec`, otherwise write `<parent_run_root>/extension-spec.json`; the handoff uses that same fallback. Do not inherit HOST_READY from an example spec unless the user requested acceptance.
 2. Use the pinned Scaffold Release through the embedded `scripts/switch/prepare_builder_scaffold.py` helper.
-3. Attempt at most one `npm install`. Record the attempt before starting. Never use `npm ci` or clone the Builder.
+3. When the environment is available and installation is within the request, attempt at most one `npm install`. Record the attempt before starting. Never use `npm ci` or clone the Builder.
 4. Create only the extension files and root README authorized by the spec. Preserve exact IDs, parameter order/defaults, menu values, generator semantics, resources, dependencies, and board conditions. Organize blocks per [block-organization.md](../switch/block-organization.md) using the spec's `blocks[].submenu` annotations; write `supportDevices`, `sku`, and `supportArch` exactly per [conventions.md](../switch/conventions.md) and [device-ids.json](../switch/device-ids.json) — device IDs outside the dictionary stop the run.
 5. Replace the Builder README template with evidence-backed project content per [project-readme.md](../switch/project-readme.md), then run `scripts/switch/check_project_readme.py` and record `readme_check: PASS` or its terminal result.
 6. Run `scripts/switch/check_converted_extension.py --project-root <project_root> --inventory <run_root>/record/spec-inventory.json --mode <selected_mode>` plus resource checks, and at most one `npm run build` when installation passed.
 7. Write a `CREATED` handoff with `review_status: NOT_RUN`, the frozen spec hash, artifacts, checks, and actual install/build evidence.
 
-Creation success is producer success, not `SOURCE_READY` or `HOST_READY`. The next leaf is independent review.
+Creation includes basic static checks. If the build is unavailable, mark it optional/NOT_RUN with the concrete limitation; a skipped build cannot claim SOURCE_READY or HOST_READY. Actual static or attempted-build defects still need resolution. On producer success proceed directly to publication when requested; run independent review only when requested.

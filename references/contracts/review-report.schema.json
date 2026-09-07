@@ -11,7 +11,7 @@
     "source_sha256": {"type": "string", "pattern": "^[A-Fa-f0-9]{64}$"},
     "commit": {"type": ["string", "null"]},
     "status": {"enum": ["PASS", "FAIL", "BLOCKED"]},
-    "profile_achieved": {"enum": ["NONE", "SOURCE_READY", "HOST_READY", "DEVICE_READY"]},
+    "profile_achieved": {"enum": ["NONE", "BASIC", "SOURCE_READY", "HOST_READY", "DEVICE_READY"]},
     "checks": {"type": "array", "items": {"type": "object"}},
     "findings": {
       "type": "array",

@@ -37,7 +37,9 @@ def git(project: Path, *arguments: str) -> subprocess.CompletedProcess[str]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project-root", required=True, type=Path)
-    parser.add_argument("--review-handoff", required=True, type=Path)
+    parser.add_argument("--review-handoff", type=Path, help="optional current producer/review evidence")
+    parser.add_argument("--auth", action="append", choices=["commit", "push", "create_repository"], help="current explicit authorization; repeatable")
+    parser.add_argument("--require-host-ready", action="store_true", help="only for explicitly requested full acceptance")
     parser.add_argument(
         "--create-repo",
         action="store_true",
@@ -65,30 +67,28 @@ def main() -> int:
         return 3
 
     project = args.project_root.expanduser().resolve(strict=False)
-    handoff_path = args.review_handoff.expanduser().resolve(strict=False)
-    try:
-        handoff = load_handoff(handoff_path)
-        errors = validate_handoff(handoff, "REVIEWED_HOST_READY", True)
-    except (OSError, ValueError, json.JSONDecodeError) as exc:
-        errors = [str(exc)]
+    handoff_path = args.review_handoff.expanduser().resolve(strict=False) if args.review_handoff else None
+    handoff = None
+    errors = []
+    if handoff_path:
+        try:
+            handoff = load_handoff(handoff_path)
+            errors = validate_handoff(handoff, "REVIEWED_HOST_READY" if args.require_host_ready else None, True)
+            if handoff.get("state") != "TERMINAL" or handoff.get("status") != "PASS" or handoff.get("workflow") not in {"CONVERT_FRESH", "CREATE_FRESH", "REVIEW_EXISTING"}:
+                errors.append("upstream evidence must be a completed passing producer or review handoff")
+        except (OSError, ValueError, json.JSONDecodeError) as exc:
+            errors = [str(exc)]
+    elif args.require_host_ready:
+        errors = ["explicit HOST_READY acceptance requires a current review handoff"]
     if errors:
-        emit(
-            {
-                "state": "TERMINAL",
-                "status": "BLOCKED",
-                "outcome": "PUBLISH_PRECHECK_FAILED",
-                "reason_code": "REVIEW.HOST_READY_HANDOFF_INVALID",
-                "token_present": True,
-                "token_source": token_source,
-                "errors": errors,
-            },
-            args.output,
-        )
+        emit({"state": "TERMINAL", "status": "BLOCKED", "outcome": "PUBLISH_PRECHECK_FAILED",
+              "reason_code": "REVIEW.HOST_READY_HANDOFF_INVALID" if args.require_host_ready else "REVIEW.HANDOFF_INVALID",
+              "token_present": True, "token_source": token_source, "errors": errors}, args.output)
         return 2
 
-    handoff_authorizations = handoff.get("authorizations")
-    if not isinstance(handoff_authorizations, dict):
-        handoff_authorizations = {}
+    # Explicit current authorization is independent of an optional earlier review.
+    handoff_authorizations = ({name: True for name in args.auth} if args.auth is not None
+                              else (handoff or {}).get("authorizations", {}))
     unauthorized = [
         name for name in ("commit", "push") if handoff_authorizations.get(name) is not True
     ]
@@ -126,7 +126,7 @@ def main() -> int:
         )
         return 3
 
-    handoff_project = Path(handoff["project_root"]).expanduser().resolve(strict=False)
+    handoff_project = Path(handoff["project_root"]).expanduser().resolve(strict=False) if handoff else project
     if handoff_project != project:
         emit(
             {
@@ -142,7 +142,7 @@ def main() -> int:
         )
         return 2
 
-    expected_hash = handoff.get("project_sha256")
+    expected_hash = handoff.get("project_sha256") if handoff else None
     try:
         actual_hash, source_file_count = compute_project_hash(project)
     except (OSError, HashError) as exc:
@@ -159,7 +159,7 @@ def main() -> int:
             args.output,
         )
         return 2
-    if actual_hash != expected_hash:
+    if expected_hash is not None and actual_hash != expected_hash:
         emit(
             {
                 "state": "TERMINAL",
@@ -170,7 +170,7 @@ def main() -> int:
                 "token_source": token_source,
                 "expected_sha256": expected_hash,
                 "actual_sha256": actual_hash,
-                "errors": ["The project changed after HOST_READY review; run review again."],
+                "errors": ["The project changed after the supplied checks; refresh the affected checks and handoff."],
             },
             args.output,
         )
@@ -237,11 +237,13 @@ def main() -> int:
             "token_present": True,
             "token_source": token_source,
             "project_root": str(project),
-            "review_handoff": str(handoff_path),
+            "review_handoff": str(handoff_path) if handoff_path else None,
+            "authorizations": handoff_authorizations,
+            "require_host_ready": args.require_host_ready,
             "project_sha256": actual_hash,
             "source_file_count": source_file_count,
             "git": git_facts,
-            "message": "Token and HOST_READY handoff gates passed. Only read-only Git inspection was performed.",
+            "message": "Token, authorization, and publication snapshot checks passed. Only read-only Git inspection was performed.",
         },
         args.output,
     )

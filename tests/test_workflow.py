@@ -140,7 +140,7 @@ def host_ready_handoff(
 
 
 class RouteTests(unittest.TestCase):
-    def test_convert_publish_inserts_review(self) -> None:
+    def test_convert_publish_skips_independent_review(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
             v1 = base / "v1"
@@ -160,7 +160,7 @@ class RouteTests(unittest.TestCase):
             routed = json.loads(completed.stdout)
             self.assertEqual(
                 routed["workflows"],
-                ["CONVERT_FRESH", "REVIEW_EXISTING", "PUBLISH_GITEE"],
+                ["CONVERT_FRESH", "PUBLISH_GITEE"],
             )
 
     def test_sync_is_explicitly_unsupported(self) -> None:
@@ -805,7 +805,7 @@ class MpaTests(unittest.TestCase):
         evidence.write_text("{}", encoding="utf-8")
         started = self.run_mpa(
             "start",
-            "--goals", "CONVERT,PUBLISH",
+            "--goals", "CONVERT,REVIEW,PUBLISH",
             "--project-root", str(base / "v2"),
             "--v1-source", str(v1),
             "--work-root", str(base),
@@ -1397,7 +1397,7 @@ class MpaEvidenceTests(unittest.TestCase):
         evidence.write_text("{}", encoding="utf-8")
         started = run_script("mpa.py", 
             "start",
-            "--goals", "CONVERT,PUBLISH",
+            "--goals", "CONVERT,REVIEW,PUBLISH",
             "--project-root", str(base / "v2"),
             "--v1-source", str(v1),
             "--work-root", str(base),

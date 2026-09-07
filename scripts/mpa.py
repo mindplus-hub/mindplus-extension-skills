@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import Any
 
 from hash_project import HashError, compute_project_hash
-from init_run import RunError, initialize_run, read_object
+from init_run import RUN_ID_RE, RunError, initialize_run, read_object
 from route_workflow import AUTHORIZATION_FIELDS, REGISTRY_PATH
 from route_workflow import read_json as read_route_json
 from route_workflow import route as route_request_fn
@@ -45,7 +45,7 @@ LEAF_FILES = {
 }
 NEXT_CONDITIONS = {
     "REVIEW_EXISTING": "producer handoff PASS and project exists",
-    "PUBLISH_GITEE": "REVIEWED_HOST_READY and current project hash",
+    "PUBLISH_GITEE": "passing requested checks and current project hash",
 }
 USER_EVIDENCE_CHECKLIST = [
     "1. Import the built extension package into the Mind+ host.",
@@ -98,19 +98,32 @@ def build_context(work_root: Path, request: dict[str, Any], run: dict[str, Any])
     paths = request.get("paths", {}) if isinstance(request, dict) else {}
     authorizations = run.get("authorizations", {}) if isinstance(run.get("authorizations"), dict) else {}
     run_root = work_root / ".mindplus-agent" / "runs" / str(run.get("run_id", ""))
+    upstream = None
+    for workflow in reversed(run.get("workflows", [])):
+        if workflow != "PUBLISH_GITEE":
+            candidate = run_root / "handoffs" / f"{workflow}.json"
+            if candidate.is_file():
+                upstream = candidate.as_posix()
+                break
+    if not any(w != "PUBLISH_GITEE" for w in run.get("workflows", [])):
+        upstream = paths.get("review_handoff")
     return {
         "work_root": work_root.as_posix(),
         "v1_source": paths.get("v1_source"),
         "project_root": paths.get("project_root"),
-        "review_handoff": paths.get("review_handoff")
-        or (run_root / "handoffs" / "REVIEW_EXISTING.json").as_posix(),
+        "review_handoff": upstream,
+        "review_profile": request.get("review_profile", "BASIC"),
+        "authorizations": authorizations,
         "create_repository": authorizations.get("create_repository") is True,
+        "preflight_output": (run_root / "evidence" / "publish-preflight.json").as_posix(),
     }
 
 
 def next_command_for(workflow: str, ctx: dict[str, Any]) -> str:
     skill = SKILL_ROOT.as_posix()
     header = f"Read {leaf_reference(workflow)} fully, then run:"
+    if workflow == "REVIEW_EXISTING":
+        header = f"Use review profile {ctx.get('review_profile', 'BASIC')}. " + header
     if workflow == "CONVERT_FRESH":
         command = f"python {quote(skill + '/scripts/switch/init_run.py')} --work-root {quote(ctx['work_root'])} --v1-source {quote(ctx['v1_source'])}"
         if ctx.get("project_root"):
@@ -123,8 +136,15 @@ def next_command_for(workflow: str, ctx: dict[str, Any]) -> str:
         command = (
             f"python {quote(skill + '/scripts/prepare_gitee_publish.py')}"
             f" --project-root {quote(ctx['project_root'])}"
-            f" --review-handoff {quote(ctx['review_handoff'])}"
+            f" --output {quote(ctx['preflight_output'])}"
         )
+        if ctx.get("review_handoff"):
+            command += f" --review-handoff {quote(ctx['review_handoff'])}"
+        for auth in ("commit", "push", "create_repository"):
+            if ctx.get("authorizations", {}).get(auth):
+                command += f" --auth {auth}"
+        if ctx.get("review_profile") == "HOST_READY":
+            command += " --require-host-ready"
         if ctx.get("create_repository"):
             command += " --create-repo"
     else:
@@ -186,7 +206,21 @@ def cmd_start(args: argparse.Namespace) -> int:
         value = getattr(args, flag)
         if value is not None:
             paths[flag] = str(value.expanduser().resolve(strict=False))
-    request = {"goals": goals, "paths": paths, "authorizations": authorizations}
+    request = {"goals": goals, "paths": paths, "authorizations": authorizations, "review_profile": args.review_profile}
+
+    run_id = args.run_id or uuid.uuid4().hex
+    if not RUN_ID_RE.fullmatch(run_id):
+        return emit({"status": "BLOCKED", "reason_code": "WORKSPACE.RUN_INIT", "error": "run_id contains unsafe characters"}, 2)
+    existing_root = work_root / ".mindplus-agent" / "runs" / run_id
+    if (existing_root / "run.json").is_file():
+        existing_run = read_object(existing_root / "run.json")
+        saved_request = read_request(existing_root)
+        saved_request.setdefault("review_profile", "BASIC")
+        if saved_request != request:
+            return emit({"status": "BLOCKED", "reason_code": "WORKSPACE.RUN_REQUEST_MISMATCH", "error": "run-id already belongs to another request; resume it or choose a new run-id"}, 2)
+        return emit({"status": "PASS_IDEMPOTENT", "run_id": run_id, "run_root": str(existing_root),
+                     "current_workflow": existing_run.get("current_workflow"), "workflows": existing_run.get("workflows"),
+                     "next_command": f"python {quote(Path(__file__).resolve().as_posix())} resume --work-root {quote(work_root.as_posix())} --run-id {quote(run_id)}"}, 0)
 
     try:
         registry = read_route_json(REGISTRY_PATH)
@@ -208,7 +242,6 @@ def cmd_start(args: argparse.Namespace) -> int:
             3,
         )
 
-    run_id = args.run_id or uuid.uuid4().hex
     run_root = work_root / ".mindplus-agent" / "runs" / run_id
     try:
         run_root.mkdir(parents=True, exist_ok=True)
@@ -232,7 +265,7 @@ def cmd_start(args: argparse.Namespace) -> int:
         return emit({"status": "BLOCKED", "reason_code": "WORKSPACE.RUN_INIT", "error": str(exc)}, 2)
 
     current = output.get("current_workflow") or (routed.get("workflows") or [None])[0]
-    ctx = build_context(work_root, request, {"run_id": run_id, "authorizations": authorizations})
+    ctx = build_context(work_root, request, {"run_id": run_id, "authorizations": authorizations, "workflows": routed["workflows"]})
     return emit(
         {
             "status": output.get("status"),
@@ -365,7 +398,7 @@ def cmd_handoff(args: argparse.Namespace) -> int:
             return emit({"status": "FAIL", "reason_code": "REVIEW.PROJECT_HASH_FAILED", "error": f"cannot hash the V1 source: {exc}"}, 1)
         provenance = {"type": "V1_SOURCE", "path": source, "manifest": None, "sha256": source_sha256, "commit": None}
     elif workflow == "CREATE_FRESH":
-        spec = paths.get("extension_spec")
+        spec = paths.get("extension_spec") or str(run_root / "extension-spec.json")
         if not spec or not Path(spec).is_file():
             return emit({"status": "FAIL", "error": "the run request recorded no existing extension_spec"}, 1)
         provenance = {"type": "EXTENSION_SPEC", "path": spec, "manifest": None, "sha256": file_sha256(Path(spec)), "commit": None}
@@ -384,18 +417,15 @@ def cmd_handoff(args: argparse.Namespace) -> int:
             except (OSError, HashError) as exc:
                 return emit({"status": "FAIL", "reason_code": "REVIEW.PROJECT_HASH_FAILED", "error": f"cannot hash the project (was the leaf executed?): {exc}"}, 1)
             provenance = {"type": "EXISTING_V2", "path": str(project), "manifest": None, "sha256": existing_sha256, "commit": None}
-    else:  # PUBLISH_GITEE
-        review_handoff = Path(paths["review_handoff"]) if paths.get("review_handoff") else run_root / "handoffs" / "REVIEW_EXISTING.json"
-        if not review_handoff.is_file():
-            return emit(
-                {
-                    "status": "FAIL",
-                    "reason_code": "REVIEW.HOST_READY_HANDOFF_INVALID",
-                    "error": "no REVIEW_EXISTING handoff recorded for this run",
-                },
-                1,
-            )
-        provenance = {"type": "PRODUCER_HANDOFF", "path": review_handoff.as_posix(), "manifest": None, "sha256": file_sha256(review_handoff), "commit": None}
+    else:  # Publication can run without a separate review.
+        upstream = build_context(work_root, request, run).get("review_handoff")
+        if upstream:
+            upstream_path = Path(upstream)
+            if not upstream_path.is_file():
+                return emit({"status": "FAIL", "reason_code": "INPUT.INVALID_HANDOFF", "error": "upstream handoff is missing"}, 1)
+            provenance = {"type": "PRODUCER_HANDOFF", "path": str(upstream_path), "manifest": None, "sha256": file_sha256(upstream_path), "commit": None}
+        else:
+            provenance = {"type": "EXISTING_V2", "path": str(project), "manifest": None, "sha256": compute_project_hash(project)[0], "commit": None}
 
     try:
         project_sha256 = compute_project_hash(project)[0]
@@ -445,7 +475,8 @@ def cmd_handoff(args: argparse.Namespace) -> int:
         "next": next_entries,
     }
 
-    validation_errors = validate_handoff_data(handoff, None, True)
+    required_outcome = "REVIEWED_HOST_READY" if workflow == "REVIEW_EXISTING" and status == "PASS" and request.get("review_profile") == "HOST_READY" else None
+    validation_errors = validate_handoff_data(handoff, required_outcome, True)
     if validation_errors:
         return emit(
             {
@@ -510,14 +541,15 @@ def cmd_transition(args: argparse.Namespace) -> int:
         )
 
     handoff = load_handoff(handoff_path)
-    errors = validate_handoff_data(handoff, None, True)
+    required_outcome = "REVIEWED_HOST_READY" if current == "REVIEW_EXISTING" and handoff.get("status") == "PASS" and read_request(run_root).get("review_profile") == "HOST_READY" else None
+    errors = validate_handoff_data(handoff, required_outcome, True)
     if errors:
         return emit(
             {
                 "status": "FAIL",
                 "reason_code": "TRANSITION.INVALID_HANDOFF",
                 "errors": errors,
-                "next_command": f"Fix the handoff by rerunning mpa.py handoff for {current} with corrected values.",
+                "next_command": f"Rerun the affected checks in {current}, then record a valid handoff.",
             },
             1,
         )
@@ -529,7 +561,7 @@ def cmd_transition(args: argparse.Namespace) -> int:
                 "status": "WAITING_USER",
                 "reason_code": handoff.get("reason_code"),
                 "message": f"{current} is waiting on the user: {handoff.get('outcome')}",
-                "next_command": "Resolve the recorded user action, then rerun mpa.py handoff with the corrected result for this workflow.",
+                "next_command": "Resolve the recorded user action, rerun the affected checks, then record the new result for this workflow.",
             },
             3,
         )
@@ -539,7 +571,7 @@ def cmd_transition(args: argparse.Namespace) -> int:
                 "status": "FAIL",
                 "reason_code": "TRANSITION.PRODUCER_NOT_PASSING",
                 "errors": [f"{current} handoff status is {handoff.get('status')} / {handoff.get('outcome')}"],
-                "next_command": "Repair the project per the leaf, then rerun mpa.py handoff with a passing result.",
+                "next_command": "Resolve the finding, rerun the affected checks or requested review, then record the new result. Do not mark stale evidence PASS.",
             },
             1,
         )
@@ -581,18 +613,15 @@ def cmd_transition(args: argparse.Namespace) -> int:
         )
 
     next_workflow = workflows[index + 1]
+    registry = read_route_json(REGISTRY_PATH)
+    if next_workflow not in registry["workflows"][current]["allowed_next"]:
+        return emit({"status": "FAIL", "reason_code": "TRANSITION.NOT_ALLOWED", "error": "transition is not registered"}, 1)
     if next_workflow == "PUBLISH_GITEE":
-        gate_errors = validate_handoff_data(handoff, "REVIEWED_HOST_READY", True)
+        profile = read_request(run_root).get("review_profile", "BASIC")
+        gate_errors = validate_handoff_data(handoff, "REVIEWED_HOST_READY" if profile == "HOST_READY" else None, True)
         if gate_errors:
-            return emit(
-                {
-                    "status": "FAIL",
-                    "reason_code": "REVIEW.HOST_READY_HANDOFF_INVALID",
-                    "errors": gate_errors,
-                    "next_command": "The review handoff is not a valid REVIEWED_HOST_READY; rerun the review leaf.",
-                },
-                1,
-            )
+            return emit({"status": "FAIL", "reason_code": "REVIEW.HANDOFF_INVALID", "errors": gate_errors,
+                         "next_command": "Rerun the requested checks and write a current handoff."}, 1)
         project = Path(handoff.get("project_root", "")).expanduser()
         try:
             fresh_hash = compute_project_hash(project)[0]
@@ -603,8 +632,8 @@ def cmd_transition(args: argparse.Namespace) -> int:
                 {
                     "status": "FAIL",
                     "reason_code": "REVIEW.STALE_HOST_READY_HANDOFF",
-                    "errors": ["The project changed after HOST_READY review; run review again."],
-                    "next_command": "Rerun the REVIEW_EXISTING leaf and write a new handoff.",
+                    "errors": ["The project changed after the recorded checks; refresh the affected checks."],
+                    "next_command": "Rerun the affected checks in the current leaf and write a new handoff.",
                 },
                 1,
             )
@@ -774,7 +803,8 @@ def main() -> int:
     start.add_argument("--project-root", required=True, type=Path)
     start.add_argument("--v1-source", type=Path)
     start.add_argument("--extension-spec", type=Path)
-    start.add_argument("--review-handoff", type=Path)
+    start.add_argument("--review-handoff", type=Path, help="optional prior evidence for direct publication")
+    start.add_argument("--review-profile", choices=["BASIC", "HOST_READY"], default="BASIC", help="HOST_READY explicitly adds full Mind+ acceptance; BASIC is the default")
     start.add_argument("--work-root", required=True, type=Path)
     start.add_argument("--run-id")
     start.add_argument("--auth", action="append", help="authorization to grant; repeatable")

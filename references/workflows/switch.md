@@ -53,6 +53,6 @@ Keep the detailed internal `.ms` run log as evidence, then create and validate a
 | --- | --- | --- |
 | `CONVERTED_BUILD_PASS` | `TERMINAL/PASS` | `CONVERTED` |
 | `CONVERTED_BUILD_FAIL` or a blocking conversion result | `TERMINAL/FAIL` or `TERMINAL/BLOCKED` according to evidence | `CONVERSION_NOT_READY` |
-| `HANDED_OFF` or `CONVERTED_HANDOFF` for package-environment action | `WAITING_USER/BLOCKED` | `BUILD_USER_ACTION_REQUIRED` |
+| `HANDED_OFF` or `CONVERTED_HANDOFF` with passing static checks and an unavailable optional build | `TERMINAL/PASS` with build optional/NOT_RUN | `CONVERTED` |
 
-Set `review_status` to `NOT_RUN`. A conversion result proceeds to `REVIEW_EXISTING` only when the project exists and all required producer/static checks are complete. A stalled or skipped HOST_BUILD check cannot become `HOST_READY`.
+Set `review_status` to `NOT_RUN`. Completed producer/static checks may proceed directly to requested publication. Run independent REVIEW_EXISTING only when requested. Keep install/build environment limitations explicit; they do not turn static success into HOST_READY. If the user explicitly required a build or full acceptance, an unavailable build remains blocking for that requested scope.

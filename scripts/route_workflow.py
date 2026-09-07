@@ -94,6 +94,10 @@ def route(request: dict[str, Any], registry: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(registry_workflows, dict) or set(registry_workflows) != expected_workflows:
         raise RouteError("workflow registry must contain exactly the four supported workflows")
 
+    review_profile = request.get("review_profile", "BASIC")
+    if review_profile not in {"BASIC", "HOST_READY"}:
+        raise RouteError("review_profile must be BASIC or HOST_READY")
+
     raw_goals = request.get("goals")
     if not isinstance(raw_goals, list) or not raw_goals:
         return result(
@@ -265,7 +269,7 @@ def route(request: dict[str, Any], registry: dict[str, Any]) -> dict[str, Any]:
     if producer:
         workflows.append(producer)
 
-    review_needed = "REVIEW" in goals or ("PUBLISH" in goals and review_handoff is None)
+    review_needed = "REVIEW" in goals or review_profile == "HOST_READY"
     if review_needed:
         workflows.append("REVIEW_EXISTING")
     if "PUBLISH" in goals:

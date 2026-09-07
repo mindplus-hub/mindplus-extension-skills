@@ -6,17 +6,19 @@ Every leaf writes one `handoff.json` matching [contracts/handoff.schema.json](co
 
 - `state`: `RUNNING`, `WAITING_USER`, or `TERMINAL`.
 - `status`: `NOT_RUN`, `PASS`, `FAIL`, or `BLOCKED`.
-- `outcome`: domain result such as `CONVERTED`, `CREATED`, `REVIEWED_HOST_READY`, `PUSHED`, or `TOKEN_REQUIRED`.
+- `outcome`: domain result such as `CONVERTED`, `CREATED`, `REVIEWED_BASIC`, `REVIEWED_HOST_READY`, `PUSHED`, or `TOKEN_REQUIRED`.
 - `reason_code`: namespaced recovery reason when the run did not pass.
 
 Do not use legacy `CONVERTED_HANDOFF` or `HANDED_OFF` as the universal state. An adapter may translate those values to the fields above while preserving the original log as evidence.
 
 ## Required transition checks
 
-- Producer to review: project exists, producer/static checks are recorded, and provenance is stable.
-- Review to publish: producer is `mindplus-review`, status is `PASS`, outcome is `REVIEWED_HOST_READY`, `project_sha256` equals a fresh `hash_project.py` result, and all HOST_READY checks are `PASS`.
-- Every passing required check carries non-empty `evidence`; the three Mind+ host GUI checks additionally require `confirmed_by: "user"` (observed in the Mind+ host, not self-reported).
-- Publication additionally requires `commit` and `push` authorization in the handoff; `prepare_gitee_publish.py` enforces this after the token gate.
+- Producer to publication or requested review: project exists, selected checks pass and provenance is recorded. No automatic independent review.
+- BASIC review returns `REVIEWED_BASIC` with evidenced `config_schema`, `extension_static_integrity`, and representative `source_semantics` checks. No GUI/build requirement.
+- Explicit HOST_READY returns `REVIEWED_HOST_READY` and retains all host gates; it cannot be replaced by a BASIC result.
+- Before publication, validate the upstream handoff when present and recheck the project hash. Direct publication without a handoff freezes its own current snapshot.
+- Publication needs current commit/push authorization; a current request may grant this after an earlier read-only review without rewriting that review. Missing token still blocks before Git/remote activity.
+- Passing required checks need evidence; host GUI observations additionally need user confirmation.
 
 `input_provenance.sha256` identifies the V1/spec/upstream source. `project_sha256` identifies the exact V2 project content covered by this handoff; never substitute one for the other.
 - Missing Gitee token: state `WAITING_USER`, status `BLOCKED`, outcome `TOKEN_REQUIRED`, reason `AUTH.GITEE_TOKEN_MISSING`, and no Git/remote artifacts.

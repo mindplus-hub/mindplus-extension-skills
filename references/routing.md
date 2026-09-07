@@ -7,7 +7,7 @@ Read this file before any leaf reference.
 Preferred: the wizard, which routes, opens the parent run, and prints the next command.
 
 ```text
-python scripts/mpa.py start --goals <CONVERT,CREATE,REVIEW,PUBLISH> --project-root <abs> --work-root <abs> [--v1-source <abs>] [--extension-spec <abs>] [--review-handoff <abs>] [--auth <name>]... [--run-id <id>]
+python scripts/mpa.py start --goals <CONVERT,CREATE,REVIEW,PUBLISH> --project-root <abs> --work-root <abs> [--v1-source <abs>] [--extension-spec <abs>] [--review-handoff <abs>] [--review-profile BASIC|HOST_READY] [--auth <name>]... [--run-id <id>]
 ```
 
 Raw CLI with the same contract (JSON in, JSON out):
@@ -21,8 +21,9 @@ Request facts, matching [contracts/route-request.schema.json](contracts/route-re
 - `goals`: one or more of `CONVERT`, `CREATE`, `REVIEW`, `PUBLISH`, `SYNC`.
 - `paths.v1_source`: required for fresh conversion.
 - `paths.project_root`: required for all workflows; for conversion/creation it must be absent or empty.
-- `paths.extension_spec`: optional at route time and required before creation writes.
-- `paths.review_handoff`: optional; direct publication needs a current HOST_READY handoff.
+- `paths.extension_spec`: optional at route time. Without it, creation freezes `<parent_run_root>/extension-spec.json` before writing the project.
+- `paths.review_handoff`: optional current producer/review evidence for direct publication. It does not remove a requested review or override this run's new handoff.
+- `review_profile`: BASIC by default. Explicit HOST_READY inserts full acceptance; ordinary publication never inserts review.
 - `authorizations`: booleans describing only actions explicitly requested. Never include a token or other secret; token presence is checked later by the publication leaf.
 
 ## Where the selection logic lives

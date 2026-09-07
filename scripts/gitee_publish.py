@@ -25,6 +25,7 @@ from typing import Any
 from urllib.parse import urlencode
 
 from check_gitee_token import resolve_token
+from validate_handoff import validate as validate_handoff
 from hash_project import IGNORED_DIRECTORIES, HashError, compute_project_hash
 
 SKILL_ROOT = Path(__file__).resolve().parent.parent
@@ -218,15 +219,25 @@ def context(args: argparse.Namespace, need_authorizations: tuple[str, ...] = ())
     if preflight.get("status") != "PASS" or preflight.get("outcome") != "PUBLISH_PREPARE_READY":
         raise StageBlocked({"status": "BLOCKED", "reason_code": "INPUT.PREFLIGHT_INVALID", "error": f"{preflight_path} is not a passing publication preflight"})
 
-    handoff = read_json(Path(preflight["review_handoff"]))
-    authorizations = handoff.get("authorizations") if isinstance(handoff.get("authorizations"), dict) else {}
+    handoff = read_json(Path(preflight["review_handoff"])) if preflight.get("review_handoff") else {}
+    if handoff:
+        errors = validate_handoff(handoff, "REVIEWED_HOST_READY" if preflight.get("require_host_ready") else None, True)
+        if handoff.get("status") != "PASS" or handoff.get("state") != "TERMINAL" or handoff.get("workflow") not in {"CONVERT_FRESH", "CREATE_FRESH", "REVIEW_EXISTING"}:
+            errors.append("upstream handoff is not a passing producer or review")
+        if handoff.get("project_sha256") != preflight.get("project_sha256") or Path(handoff.get("project_root", "")).resolve() != Path(preflight["project_root"]).resolve():
+            errors.append("upstream evidence no longer matches the publication snapshot")
+        if errors:
+            raise StageBlocked({"status": "BLOCKED", "reason_code": "REVIEW.HANDOFF_INVALID", "errors": errors})
+    elif preflight.get("require_host_ready"):
+        raise StageBlocked({"status": "BLOCKED", "reason_code": "REVIEW.HOST_READY_HANDOFF_INVALID", "error": "HOST_READY evidence is missing"})
+    authorizations = preflight.get("authorizations", handoff.get("authorizations", {}))
     missing = [name for name in need_authorizations if authorizations.get(name) is not True]
     if missing:
         raise StageBlocked(
             {
                 "status": "WAITING_USER", "state": "WAITING_USER",
                 "reason_code": "AUTH." + "_".join(name.upper() for name in missing) + "_NOT_AUTHORIZED",
-                "message": f"The review handoff does not authorize: {', '.join(missing)}. Restart from an authorized route request; do not edit the handoff.",
+                "message": f"The publication request does not authorize: {', '.join(missing)}. Restart from an authorized route request; do not edit the handoff.",
             },
             3,
         )
@@ -240,7 +251,7 @@ def context(args: argparse.Namespace, need_authorizations: tuple[str, ...] = ())
         raise StageBlocked(
             {
                 "status": "BLOCKED", "reason_code": "REVIEW.STALE_HOST_READY_HANDOFF",
-                "error": "The project changed after HOST_READY review; run review again before publishing.",
+                "error": "The project changed after publication preflight; refresh the affected checks and publication plan.",
             }
         )
     return {
@@ -735,7 +746,7 @@ def cmd_push(args: argparse.Namespace) -> int:
     next_command = (
         f'python "{mpa.as_posix()}" handoff --work-root <work-root> --run-id <run-id> --workflow PUBLISH_GITEE '
         f'--status PASS --outcome PUSHED '
-        f'--check review_gate_current=PASS --evidence review_gate_current="{ctx["preflight_path"]}" '
+        f'--check publication_snapshot_current=PASS --evidence publication_snapshot_current="{ctx["preflight_path"]}" '
         f'--check publication_set_reviewed=PASS --evidence publication_set_reviewed="{evidence / "publish-plan.json"}" '
         f'--check git_commit=PASS --evidence git_commit="{evidence / "publish-commit.json"}" '
         f'--check gitee_repository=PASS --evidence gitee_repository="{evidence / "publish-remote.json"}" '

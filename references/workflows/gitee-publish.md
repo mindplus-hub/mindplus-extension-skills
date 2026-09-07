@@ -1,8 +1,8 @@
-# Leaf: publish the unchanged reviewed project to Gitee
+# Leaf: publish the frozen project to Gitee
 
 Load this leaf only for `PUBLISH_GITEE`.
 
-Publication is transport, not a repair stage. It may create Git metadata, a commit, a remote repository, and a pushed ref only within explicit authorization. It must not edit, generate, reformat, or “complete” project content after review. If any project file needs changing, stop, let the user change it, and require a new strict review.
+Publication is transport, not a repair stage. It may create Git metadata, a commit, a remote repository, and a pushed ref only within explicit authorization. It must not edit, generate, reformat, or “complete” project content after review. If content needs changing, refresh affected checks and the publication snapshot before staging. Do not repeat semantic review by default.
 
 ## First gate: local token presence
 
@@ -11,7 +11,8 @@ Before reading project paths, the review handoff, Git state, or Gitee API detail
 ```text
 python scripts/prepare_gitee_publish.py \
   --project-root <project_root> \
-  --review-handoff <review-handoff.json> \
+  --auth commit --auth push \
+  [--review-handoff <current-handoff.json>] [--require-host-ready] \
   [--create-repo] \
   --output <run-evidence>/publish-preflight.json
 ```
@@ -26,37 +27,19 @@ The script's first gate checks only for a non-empty `GITEE_TOKEN` or `GITEE_ACCE
 4. Do not ask the user to paste the token into chat or place it in a command line, URL, handoff, report, remote, or tracked file.
 5. Resume only after the user says the token is locally available and the preflight passes.
 
-## Enforced review and authorization gate
+## Authorization and snapshot gate
 
-After token presence, require the preflight to prove all of the following:
+After token presence, require explicit commit/push authorization (`--auth commit --auth push`). New-repository mode additionally requires `--auth create_repository` and `--create-repo`. The current route supplies these authorizations; a prior review need not already carry permission for a later publication request.
 
-- Incoming workflow is `REVIEW_EXISTING` from `mindplus-review` with `TERMINAL/PASS` and outcome `REVIEWED_HOST_READY`.
-- All strict required review checks and the four HOST_READY checks pass with evidence; user-confirmed checks retain `confirmed_by: "user"`.
-- Handoff `project_root` equals the requested absolute project.
-- A fresh `hash_project.py` digest equals handoff `project_sha256`.
-- The handoff carries `commit: true` and `push: true`; new repository mode also carries `create_repository: true`.
+A review handoff is optional. Without one, preflight snapshots the current project and records authorization. If supplied, producer or review evidence must be passing and its project/hash must match. This run's latest producer/review result takes precedence over older external evidence. With explicit `--require-host-ready`, the HOST_READY outcome and user-confirmed host gates remain mandatory.
 
-The generic handoff validator enforces the fixed HOST_READY IDs and every required check that is present. The publication leaf must additionally require `config_schema`, `config_value_provenance`, `extension_static_integrity`, and `source_semantics` to be present, required, `PASS`, and evidenced. Reject an older handoff that omits any of them; do not treat omission as success.
+No separate static audit, provenance ledger, build or GUI acceptance is added by publication. Plan/commit still inspect the exact file set, staged content, secrets and committed tree. Drift invalidates the publication snapshot; refresh affected checks and preflight rather than automatically demanding full acceptance.
 
-Missing authorization is `WAITING_USER`. Do not edit the handoff to add permission; restart from an explicitly authorized route request. A stale hash, project mismatch, or invalid HOST_READY handoff is blocking and must return to Review.
+Missing authorization is WAITING_USER. A supplied invalid/stale handoff blocks; do not edit it to manufacture success.
 
 ## Freeze the publication target
 
-Before mutation, obtain explicit values for:
-
-```text
-repository_mode: existing | create
-owner_type: personal | organization
-owner_or_org
-repository_name
-visibility
-description
-branch
-remote_name
-commit_message
-```
-
-Do not infer any value from the local folder, token account, an existing remote, or a previous run. Public visibility is never a default. For an existing repository, description/visibility are verification facts rather than permission to change them.
+Resolve the requested repository, branch, remote name and commit message before mutation. Reuse unambiguous facts from the current repository and user request; ask only when the destination/effect is ambiguous. For a new repository, also establish owner, name and intended visibility; public visibility is never assumed. Existing-repository description and visibility are verification facts, not permission to change them.
 
 After the token gate, read [gitee-api.md](../gitee-api.md) and recheck its version-sensitive interface if the remote implementation is being changed. Normal publication should follow that API contract and standard Git operations rather than redesigning authentication in this run.
 
@@ -64,7 +47,7 @@ After the token gate, read [gitee-api.md](../gitee-api.md) and recheck its versi
 
 Create the publication plan and evidence outside `project_root`, normally under the parent run's `evidence/` directory. Record:
 
-- Reviewed project hash and source file count.
+- Publication snapshot hash and source file count.
 - Exact staged path list and exclusions.
 - Local repository/branch/HEAD/worktree facts.
 - Sanitized remote name and URL without credentials.
@@ -74,7 +57,7 @@ Create the publication plan and evidence outside `project_root`, normally under 
 The passing publication handoff must include these required check IDs:
 
 ```text
-review_gate_current
+publication_snapshot_current
 publication_set_reviewed
 git_commit
 gitee_repository
@@ -107,13 +90,13 @@ PREPARE -> COMMIT -> ENSURE_REMOTE -> PUSH -> VERIFY
 
 - Use the successful preflight's read-only Git facts.
 - Inspect branch, HEAD, index, full worktree status, remotes, and candidate paths. Classify user-owned and unrelated changes; do not stage them.
-- Build an explicit file manifest for the reviewed project. Never use `git add .`, `git add -A` without path limits, or a wildcard that can absorb unreviewed files.
+- Build an explicit file manifest for the frozen project. Never use `git add .`, `git add -A` without path limits, or a wildcard that can absorb unreviewed files.
 - Exclude `node_modules`, `build`, caches, `.mindplus-agent`, `.ms`, logs, editor state, generated credentials, and unrelated artifacts. Do not assume `.gitignore` makes the set safe.
 - Scan every candidate file and the later staged diff for tokens, passwords, private URLs, certificates/private keys, large accidental archives, and machine-specific paths.
-- Recompute the project hash immediately before staging. It must still equal the reviewed hash.
-- If `.gitignore`, README, metadata, generated files, or any source content needs changing, stop with `REVIEW.STALE_HOST_READY_HANDOFF` after the user changes it and require a new Review. Publishing must not make that edit.
+- Recompute the project hash immediately before staging. It must still equal the snapshot hash.
+- If `.gitignore`, README, metadata, generated files, or any source content needs changing, stop with `REVIEW.STALE_HOST_READY_HANDOFF` after the user changes it and refresh the affected checks and preflight. Publishing must not make that edit.
 
-A dirty Git worktree is not automatically safe merely because its files were hashed. The publication manifest must show that every staged addition, modification, and deletion belongs to the reviewed project and intended repository.
+A dirty Git worktree is not automatically safe merely because its files were hashed. The publication manifest must show that every staged addition, modification, and deletion belongs to the frozen project and intended repository.
 
 ### COMMIT
 
@@ -159,7 +142,7 @@ For a new repository:
 
 - Query the exact remote branch/ref after push and verify its commit SHA equals the approved local commit.
 - Verify owner/name/visibility still match the requested repository.
-- Recompute the local project hash; it must still equal the reviewed hash.
+- Recompute the local project hash; it must still equal the snapshot hash.
 - Record what external actions occurred even when a later stage failed.
 
 If the requested public visibility cannot be confirmed after the push, preserve the verified ref evidence in `publish-push.json` and return `BLOCKED/PUSHED_VISIBILITY_PENDING` with reason `GITEE.VISIBILITY_UPDATE_FAILED`. Do not generate a successful handoff; report that the code was pushed but visibility remains unresolved.

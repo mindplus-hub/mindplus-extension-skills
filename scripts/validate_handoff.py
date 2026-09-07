@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate a MindPlus Agent handoff and the HOST_READY publication gate."""
+"""Validate a MindPlus Agent handoff and its claimed review profile."""
 
 from __future__ import annotations
 
@@ -168,6 +168,14 @@ def validate(data: dict[str, Any], require_outcome: str | None, check_artifacts:
                 errors.append(f"passing required check has no evidence: {check_id}")
             if check.get("required") is True and status == "PASS" and check.get("result") != "PASS":
                 errors.append(f"passing handoff has non-passing required check: {check_id}")
+
+    if data.get("outcome") == "REVIEWED_BASIC":
+        if workflow != "REVIEW_EXISTING" or state != "TERMINAL" or status != "PASS":
+            errors.append("REVIEWED_BASIC requires a TERMINAL/PASS review")
+        for check_id in ("config_schema", "extension_static_integrity", "source_semantics"):
+            check = checks_by_id.get(check_id, {})
+            if check.get("required") is not True or check.get("result") != "PASS" or not check.get("evidence"):
+                errors.append(f"BASIC review requires evidenced PASS: {check_id}")
 
     if data.get("outcome") == "REVIEWED_HOST_READY":
         if workflow != "REVIEW_EXISTING" or producer != "mindplus-review":

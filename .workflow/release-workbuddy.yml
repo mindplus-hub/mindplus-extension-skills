@@ -18,7 +18,7 @@ stages:
         displayName: 构建并发布 WB ZIP
         pythonVersion: '3.9'
         # Configure MP_RELEASE_TOKEN as a secret environment variable in Gitee Go.
-        # The documented base image offers 3.9; uv supplies the required Python 3.11.
+        # The documented base image offers 3.9; the scripts support its bundled Python 3.9.
         commands:
           - |
             set -eu
@@ -38,27 +38,22 @@ stages:
               echo "[FAIL] Checkout not found. Set MP_CHECKOUT_DIR to the repository directory shown by the plugin."
               exit 1
             fi
-            echo "[0/5] Checkout: $(pwd -P)"
+            echo "[0/4] Checkout: $(pwd -P)"
             export PYTHONUTF8=1
             export PYTHONDONTWRITEBYTECODE=1
             export PYTHONUNBUFFERED=1
-            export UV_HTTP_TIMEOUT=30
-            export UV_HTTP_RETRIES=2
-            stage=install_uv
-            echo "[1/5] Installing uv (maximum 180 seconds)"
-            timeout 180s python3 -m pip install --user --disable-pip-version-check --timeout 20 --retries 2 --index-url "${MP_PIP_INDEX_URL:-https://pypi.tuna.tsinghua.edu.cn/simple}" 'uv==0.8.22'
-            stage=install_python
-            echo "[2/5] Preparing Python 3.11 (maximum 300 seconds; separate Python download)"
-            timeout 300s python3 -m uv python install 3.11
+            stage=check_python
+            echo "[1/4] Checking bundled Python (no runtime download)"
+            python3 -c 'import sys; print(sys.version); assert sys.version_info >= (3, 9), "Python 3.9+ required"'
             stage=fetch_tags
-            echo "[3/5] Fetching version tags (maximum 120 seconds)"
+            echo "[2/4] Fetching version tags (maximum 120 seconds)"
             timeout 120s git fetch --tags origin
             stage=tests
-            echo "[4/5] Running tests (maximum 300 seconds)"
-            timeout 300s python3 -m uv run --offline --no-project --python 3.11 python -B -m unittest discover -s tests -v
+            echo "[3/4] Running tests (maximum 300 seconds)"
+            timeout 300s python3 -B -m unittest discover -s tests -v
             stage=publish
-            echo "[5/5] Building WB ZIP and publishing Release (maximum 600 seconds)"
-            timeout 600s python3 -m uv run --offline --no-project --python 3.11 python -B tools/pack_workbuddy.py --publish --tag "v$(tr -d '\r\n' < VERSION)"
+            echo "[4/4] Building WB ZIP and publishing Release (maximum 600 seconds)"
+            timeout 600s python3 -B tools/pack_workbuddy.py --publish --tag "v$(tr -d '\r\n' < VERSION)"
             echo "[DONE] WB Release completed"
         artifacts:
           - name: WB_RELEASE

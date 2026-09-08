@@ -60,7 +60,8 @@ def emit(value: dict[str, Any], output: Path | None) -> int:
     if output:
         target = output.expanduser().resolve(strict=False)
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(encoded, encoding="utf-8", newline="\n")
+        with target.open("w", encoding="utf-8", newline="\n") as output_handle:
+            output_handle.write(encoded)
     print(encoded, end="")
     if value.get("status") == "PASS":
         return 0

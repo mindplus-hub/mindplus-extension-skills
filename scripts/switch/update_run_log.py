@@ -86,7 +86,8 @@ def main() -> int:
     stamp = datetime.now(timezone.utc).isoformat()
     text = text.rstrip() + f"\n- [{stamp}] [{args.step}] [{args.result}] {args.event}\n"
     try:
-        path.write_text(text, encoding="utf-8", newline="\n")
+        with path.open("w", encoding="utf-8", newline="\n") as output_handle:
+            output_handle.write(text)
     except OSError as exc:
         print(json.dumps({"status": "BLOCKED", "reason_code": "WORKSPACE", "error": str(exc)}))
         return 2

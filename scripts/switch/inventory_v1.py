@@ -451,7 +451,8 @@ def main() -> int:
         output = args.output.expanduser().resolve()
         try:
             output.parent.mkdir(parents=True, exist_ok=True)
-            output.write_text(encoded + "\n", encoding="utf-8", newline="\n")
+            with output.open("w", encoding="utf-8", newline="\n") as output_handle:
+                output_handle.write(encoded + "\n")
         except OSError as exc:
             print(json.dumps({"status": "BLOCKED", "reason_code": "WORKSPACE", "error": str(exc)}, ensure_ascii=False))
             return 2

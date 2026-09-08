@@ -41,7 +41,8 @@ def emit(value: dict, output: Path | None) -> None:
     if output:
         path = output.expanduser().resolve(strict=False)
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(encoded, encoding="utf-8", newline="\n")
+        with path.open("w", encoding="utf-8", newline="\n") as output_handle:
+            output_handle.write(encoded)
     print(encoded, end="")
 
 

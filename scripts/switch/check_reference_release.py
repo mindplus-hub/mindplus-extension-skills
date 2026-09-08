@@ -56,11 +56,8 @@ def load_json(path: Path) -> dict:
 def write_json(path: Path, value: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(path.name + ".tmp")
-    temporary.write_text(
-        json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-        newline="\n",
-    )
+    with temporary.open("w", encoding="utf-8", newline="\n") as output_handle:
+        output_handle.write(json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + "\n")
     os.replace(temporary, path)
 
 

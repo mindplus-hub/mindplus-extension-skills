@@ -111,7 +111,8 @@ def main() -> int:
         if not re.fullmatch(r"[a-z0-9]+", str(config.get("id") or "")):
             raise ValueError("inventory has no lowercase alphanumeric canonical_v2_id")
         output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(json.dumps(config, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
+        with output.open("w", encoding="utf-8", newline="\n") as output_handle:
+            output_handle.write(json.dumps(config, ensure_ascii=False, indent=2) + "\n")
     except (OSError, ValueError) as exc:
         print(json.dumps({"status": "BLOCKED", "reason_code": "CONFIG_SKELETON", "error": str(exc)}, ensure_ascii=False))
         return 2

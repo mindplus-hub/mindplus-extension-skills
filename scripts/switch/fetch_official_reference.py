@@ -164,7 +164,8 @@ def cmd_fetch(args: argparse.Namespace) -> int:
     }
     provenance_path = evidence_dir / f"{safe_evidence_name(args.repo, args.path)}.provenance.json"
     try:
-        provenance_path.write_text(json.dumps(provenance, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
+        with provenance_path.open("w", encoding="utf-8", newline="\n") as output_handle:
+            output_handle.write(json.dumps(provenance, ensure_ascii=False, indent=2) + "\n")
     except OSError as exc:
         return emit({"status": "BLOCKED", "reason_code": "OFFICIAL_CORPUS.WRITE", "error": str(exc)}, 2)
 

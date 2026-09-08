@@ -137,7 +137,8 @@ def initialize_run(
         "current_workflow": route.get("workflows", [None])[0] if route.get("workflows") else None,
         "authorizations": request.get("authorizations", {}),
     }
-    run_file.write_text(json.dumps(run, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
+    with run_file.open("w", encoding="utf-8", newline="\n") as output_handle:
+        output_handle.write(json.dumps(run, ensure_ascii=False, indent=2) + "\n")
     hide_path(run_root.parent)
     hide_path(run_root)
     return {"status": "PASS", "run_id": run_id, "run_root": str(run_root), "run_file": str(run_file)}

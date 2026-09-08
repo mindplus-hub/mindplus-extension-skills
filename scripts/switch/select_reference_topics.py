@@ -201,11 +201,8 @@ def select(inventory_path: Path, active_root: Path, explicit_mode: str | None) -
 def write_result(path: Path, result: dict) -> None:
     path = path.expanduser().resolve()
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-        newline="\n",
-    )
+    with path.open("w", encoding="utf-8", newline="\n") as output_handle:
+        output_handle.write(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + "\n")
 
 
 def main() -> int:

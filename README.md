@@ -164,3 +164,50 @@ $mindplus-agent-skill 检查 D:/extensions/v2-demo 的配置和资源引用，�
 | [tests/](tests/) | 路由、校验、发布及回归测试 |
 
 进一步了解实现约定，可阅读 [架构说明](references/architecture.md)、[证据与审核等级](references/evidence.md) 和 [结果交接协议](references/handoff.md)。
+
+## 版本更新
+
+- V0.1.2
+   - 内置 WB 打包工具与发布配置，添加 Gitee Go 标签发布工作流
+   - 自动生成 WB ZIP、核对附件内容并维护发行版下载说明
+- V0.1.0
+   - 初始化第一个版本
+- V0.1.1
+   - 添加自动更新逻辑，确保语料库处于最新状态
+   - 修复 V1 转 V2 中关于 string 的处理
+
+## WB 打包与自动发行
+
+`release-info.json` 中的 `marketplace_introduction` 和 `marketplace_prompts` 是本项目的文案配置，后者每行一条提问。每次打包会在 ZIP 同级生成 `marketplace-info.md`，分别提供市场后台的“介绍”和“试试这样问我”。它不进入 ZIP，也不写入 SKILL.md；[WorkBuddy 官方文档](https://open.workbuddy.cn/docs/skill) 尚未说明这两项的自动导入字段，需要在后台填写。
+
+仓库内只维护一个发布工具：[tools/pack_workbuddy.py](tools/pack_workbuddy.py)。配置位于 [release-info.json](release-info.json)，保持 `version`、[VERSION](VERSION) 和 SKILL.md 中的版本元数据一致。打包产物放在被 Git 忽略的 `dist/`；开发工具、流水线和发布配置不进入 WB ZIP。
+
+本地运行（Python 3.9+，无第三方依赖）：
+
+```sh
+python -X utf8 -B tools/pack_workbuddy.py
+```
+
+[Gitee Go 工作流](.workflow/release-workbuddy.yml) 在推送 `vX.Y.Z` 标签时执行打包和发布。首次使用需在仓库的 Gitee Go 页面启用／导入该工作流，并配置有本仓库 Release 写入权限的凭据。在「通用变量」中创建 `MP_RELEASE_TOKEN`，类型选「文本」，勾选「密文」，填写 Token 后保存。工作流已通过以下声明引用该变量，仓库中只保存名称：
+
+```yaml
+variables:
+  global:
+    - MP_RELEASE_TOKEN
+```
+
+仅创建通用变量不会自动传入流水线；图形界面的等效操作是「编辑流水线 → 图形视图 → 变量设置 → 添加变量 → 通用变量 → MP_RELEASE_TOKEN」。密文由 Gitee Go 在运行时提供，脚本无需自行解密，只读取 `MP_RELEASE_TOKEN`，日志仅报告是否可用。不要将实际 Token 写进 YAML、仓库或日志。手动运行时需选择包含上述声明的分支；此文件本身不会开通 Gitee Go 服务。
+
+发布 `0.1.2` 时，先提交版本和代码，再执行：
+
+```sh
+git tag v0.1.2
+git push origin v0.1.2
+```
+
+工具核对本地标签、远程标签和构建提交一致后，创建或更新对应 Release，上传 `mindplus-agent-skill-0.1.2-workbuddy.zip`；通用版使用 Gitee 自带源码 ZIP。发行说明仅维护 `mindplus-pack` 标记区，保留手写内容和现有标题。同名附件内容相同则复用，不同则失败，绝不自动删除或覆盖；网络中断可重跑以核对已有状态。检查失败不会进入发布；创建或上传后的失败会保留已完成部分，供重跑恢复。
+
+需要本地执行同一发布过程时，配置上述凭据后使用 `python tools/pack_workbuddy.py --publish --tag v0.1.2`。普通打包命令不会访问发布 API。工作流直接使用 Gitee 构建镜像内的 Python 3.9，不安装 uv，也不从 GitHub 下载 Python。
+
+工作流依据：[触发规则](https://help.gitee.com/gitee-go/pipeline/trigger)、[构建插件](https://help.gitee.com/gitee-go/plugin/ci-build)、[Release API](https://gitee.com/sdk/gitee5j/blob/main/docs/RepositoriesApi.md)。本地测试不代表已在云端执行成功。
+

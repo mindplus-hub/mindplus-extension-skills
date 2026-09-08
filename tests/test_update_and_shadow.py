@@ -1,11 +1,12 @@
 import io
 import json
+import os
 import sys
 import tempfile
 import unittest
 import zipfile
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -13,6 +14,8 @@ sys.path.insert(0, str(ROOT / "scripts/switch"))
 import update_skill as updater
 import inventory_v1
 import select_reference_topics as selector
+sys.path.insert(0, str(ROOT / "tools"))
+import pack_workbuddy as packer
 
 
 def archive(kind="wb", number="0.2.0", wrapper="", extra=None):
@@ -105,6 +108,157 @@ class ShadowTests(unittest.TestCase):
                     topics = {x["topic_id"] for x in result["topics"]}
                     self.assertIn("shared.field.string", topics)
                     self.assertIn("shared.block.special", topics)
+
+
+class ReleasePackagingTests(unittest.TestCase):
+    def test_release_token_uses_only_configured_variable(self):
+        with patch.dict(os.environ, {"MP_RELEASE_TOKEN": " fixture-secret "}, clear=True):
+            self.assertEqual(packer.release_token(), "fixture-secret")
+        with patch.dict(os.environ, {"GITEE_TOKEN": "unrelated-secret"}, clear=True):
+            with self.assertRaises(packer.PackageError):
+                packer.release_token()
+
+    def test_invalid_release_token_is_not_exposed(self):
+        value = "fixture-secret\nsecond-line"
+        with patch.dict(os.environ, {"MP_RELEASE_TOKEN": value}, clear=True):
+            with self.assertRaises(packer.PackageError) as caught:
+                packer.release_token()
+            self.assertNotIn("fixture-secret", str(caught.exception))
+
+    def test_adapter_preserves_fstrings_without_unparse(self):
+        adapter = packer.Adapter({"scripts/switch/init_run.py": b""})
+        source = '''# 保留注释
+ctx = {"path": "example"}
+message = f"路径：{ctx['path']}"
+command = f"python {root}/scripts/switch/init_run.py"
+'''
+        with patch.object(packer.ast, "unparse", side_effect=AssertionError("must not unparse")):
+            result = adapter.python(source, "scripts/example.py")
+        self.assertIn("# 保留注释", result)
+        self.assertIn('message = f"路径：{ctx[\'path\']}"', result)
+        namespace = {"root": "/skill"}
+        exec(result, namespace)
+        self.assertEqual(namespace["message"], "路径：example")
+        self.assertEqual(namespace["command"], "python /skill/scripts/switch__init_run.py")
+
+    def test_marketplace_copy_is_separate_from_skill_frontmatter(self):
+        info = packer.load_metadata(ROOT / "release-info.json", False)
+        info.update(marketplace_introduction="测试市场介绍", marketplace_prompts="示例提问一\n示例提问二")
+        text = packer.marketplace_copy(info)
+        self.assertIn("## 介绍", text)
+        self.assertIn(info["marketplace_introduction"], text)
+        self.assertIn("## 试试这样问我", text)
+        for prompt in info["marketplace_prompts"].splitlines():
+            self.assertIn(prompt, text)
+        output, _ = packer.build_files(packer.collect(ROOT), info, False)
+        self.assertNotIn("marketplace-info.md", output)
+        self.assertNotIn("marketplace_prompts:", output["SKILL.md"].decode())
+
+    def test_body_preserves_human_notes_and_is_idempotent(self):
+        info = {"repository": "https://gitee.com/mind-plus/mindplus-agent-skill", "version": "0.1.2"}
+        body = packer.release_body("团队更新说明\n", info, "v0.1.2", "a" * 64, "package.zip")
+        self.assertTrue(body.startswith("团队更新说明\n"))
+        self.assertEqual(packer.release_body(body, info, "v0.1.2", "a" * 64, "package.zip"), body)
+        with self.assertRaises(packer.PackageError):
+            packer.release_body("<!-- mindplus-pack:start -->", info, "v0.1.2", "", "package.zip")
+
+    def test_package_excludes_development_tools_and_workflow(self):
+        files = packer.collect(ROOT)
+        self.assertNotIn("tools/pack_workbuddy.py", files)
+        self.assertNotIn(".workflow/release-workbuddy.yml", files)
+        self.assertNotIn("release-info.json", files)
+        info = packer.load_metadata(ROOT / "release-info.json", False)
+        self.assertEqual(files["VERSION"].decode().strip(), info["version"])
+        output, _ = packer.build_files(files, info, False)
+        packer.validate_layout(output)
+        self.assertIn(f'version: "{info["version"]}"', output["SKILL.md"].decode())
+
+    def test_release_tag_mismatch_stops_before_git(self):
+        with patch.object(packer.subprocess, "run") as git:
+            with self.assertRaises(packer.PackageError):
+                packer.release_commit(ROOT, {"version": "0.1.2"}, "v0.1.1")
+            git.assert_not_called()
+
+    def test_missing_token_and_preview_stop_before_network(self):
+        with tempfile.TemporaryDirectory() as tmp, patch.object(packer.Path, "home", return_value=Path(tmp)), patch.dict(os.environ, {}, clear=True), patch.object(packer, "ReleaseAPI") as api:
+            for result in ({"status": "PASS", "preview": True}, {"status": "PASS", "preview": False}):
+                with self.assertRaises(packer.PackageError):
+                    packer.publish(result, ROOT, ROOT / "release-info.json", "v0.1.2")
+            api.assert_not_called()
+
+    def publication_fixture(self, root):
+        source = root / "skill"
+        (source / "scripts").mkdir(parents=True)
+        (source / "SKILL.md").write_text("skill")
+        (source / "scripts/mpa.py").write_text("pass")
+        info = packer.load_metadata(ROOT / "release-info.json", False)
+        (source / "VERSION").write_text(info["version"])
+        metadata = source / "release-info.json"
+        packer.write_json(metadata, info)
+        zip_path = root / f'mindplus-agent-skill-{info["version"]}-workbuddy.zip'
+        zip_path.write_bytes(b"fixture-archive")
+        report = root / "report.json"
+        packer.write_json(report, {"metadata": info, "source_files": {n: packer.sha(d) for n, d in packer.collect(source).items()}})
+        result = {"status": "PASS", "preview": False, "zip": str(zip_path), "report": str(report), "zip_sha256": packer.sha(zip_path.read_bytes())}
+        return source, metadata, info, result
+
+    def test_reuse_attachment_preserves_release_name(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            source, metadata, info, result = self.publication_fixture(Path(tmp))
+            tag = "v" + info["version"]
+            release = {"id": 1, "tag_name": tag, "name": "团队标题", "body": "团队说明", "prerelease": False}
+            api = Mock()
+            api.attachments.return_value = [{"name": Path(result["zip"]).name}]
+            def request(method, path, payload=None, **kwargs):
+                if method == "PATCH":
+                    release.update(payload)
+                return dict(release)
+            api.request.side_effect = request
+            with patch.dict(os.environ, {"MP_RELEASE_TOKEN": "test-secret"}), patch.object(packer, "ReleaseAPI", return_value=api), patch.object(packer, "release_commit", return_value="a" * 40):
+                published = packer.publish(result, source, metadata, tag)
+                self.assertTrue(published["reused_attachment"])
+                self.assertEqual(release["name"], "团队标题")
+                self.assertTrue(release["body"].startswith("团队说明"))
+                self.assertFalse(any(call.args[0] == "POST" for call in api.request.call_args_list))
+                api.request.reset_mock()
+                packer.publish(result, source, metadata, tag)
+                self.assertFalse(any(call.args[0] != "GET" for call in api.request.call_args_list))
+
+    def test_new_release_uploads_then_patches_and_verifies(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            source, metadata, info, result = self.publication_fixture(Path(tmp))
+            tag = "v" + info["version"]
+            state = {}
+            api = Mock()
+            api.attachments.return_value = []
+            def request(method, path, payload=None, **kwargs):
+                if method == "POST" and path == "/releases":
+                    state.update(payload, id=7)
+                elif method == "POST":
+                    self.assertEqual(path, "/releases/7/attach_files")
+                    return {"name": Path(result["zip"]).name}
+                elif method == "PATCH":
+                    state.update(payload)
+                return dict(state) if state else None
+            api.request.side_effect = request
+            with patch.dict(os.environ, {"MP_RELEASE_TOKEN": "test-secret"}), patch.object(packer, "ReleaseAPI", return_value=api), patch.object(packer, "release_commit", return_value="a" * 40):
+                published = packer.publish(result, source, metadata, tag)
+            self.assertFalse(published["reused_attachment"])
+            self.assertIn("mindplus-pack:start", state["body"])
+            api.verify_attachment.assert_called_once()
+
+    def test_mismatched_attachment_does_not_edit_release(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            source, metadata, info, result = self.publication_fixture(Path(tmp))
+            tag = "v" + info["version"]
+            api = Mock()
+            api.request.return_value = {"id": 1, "tag_name": tag, "prerelease": False}
+            api.attachments.return_value = [{"name": Path(result["zip"]).name}]
+            api.verify_attachment.side_effect = packer.PackageError("different bytes")
+            with patch.dict(os.environ, {"MP_RELEASE_TOKEN": "test-secret"}), patch.object(packer, "ReleaseAPI", return_value=api), patch.object(packer, "release_commit", return_value="a" * 40):
+                with self.assertRaises(packer.PackageError):
+                    packer.publish(result, source, metadata, tag)
+            self.assertFalse(any(call.args[0] != "GET" for call in api.request.call_args_list))
 
 
 if __name__ == "__main__":

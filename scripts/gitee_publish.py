@@ -67,7 +67,8 @@ def read_json(path: Path) -> dict[str, Any]:
 def write_state(state_dir: Path, name: str, value: dict[str, Any]) -> Path:
     state_dir.mkdir(parents=True, exist_ok=True)
     target = state_dir / name
-    target.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
+    with target.open("w", encoding="utf-8", newline="\n") as output_handle:
+        output_handle.write(json.dumps(value, ensure_ascii=False, indent=2) + "\n")
     return target
 
 
@@ -89,18 +90,14 @@ def write_askpass_shim(state_dir: Path) -> Path:
     """
     if os.name == "nt":
         shim = state_dir / "askpass.cmd"
-        shim.write_text(
-            '@echo off\n'
-            'echo %~1 | findstr /C:"assword" >nul && (echo %GITEE_TOKEN%) || (echo %GITEE_AUTH_USER%)\n',
-            encoding="ascii", newline="\r\n",
-        )
+        with shim.open("w", encoding="ascii", newline="\r\n") as output_handle:
+            output_handle.write('@echo off\n'
+            'echo %~1 | findstr /C:"assword" >nul && (echo %GITEE_TOKEN%) || (echo %GITEE_AUTH_USER%)\n')
     else:
         shim = state_dir / "askpass.sh"
-        shim.write_text(
-            '#!/bin/sh\ncase "$1" in *assword*) printf \'%s\\n\' "$GITEE_TOKEN" ;; '
-            '*) printf \'%s\\n\' "$GITEE_AUTH_USER" ;; esac\n',
-            encoding="utf-8", newline="\n",
-        )
+        with shim.open("w", encoding="utf-8", newline="\n") as output_handle:
+            output_handle.write('#!/bin/sh\ncase "$1" in *assword*) printf \'%s\\n\' "$GITEE_TOKEN" ;; '
+            '*) printf \'%s\\n\' "$GITEE_AUTH_USER" ;; esac\n')
         shim.chmod(0o755)
     return shim
 

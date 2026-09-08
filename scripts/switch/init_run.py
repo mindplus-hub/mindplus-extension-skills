@@ -190,11 +190,8 @@ def main() -> int:
     try:
         (run_root / "record").mkdir()
         log_path = run_root / "log.md"
-        log_path.write_text(
-            build_log(run_id, source, work_root, run_root, project_value, args.mode, args.review_policy),
-            encoding="utf-8",
-            newline="\n",
-        )
+        with log_path.open("w", encoding="utf-8", newline="\n") as output_handle:
+            output_handle.write(build_log(run_id, source, work_root, run_root, project_value, args.mode, args.review_policy))
     except OSError as exc:
         return error(f"cannot initialize run files: {exc}")
 

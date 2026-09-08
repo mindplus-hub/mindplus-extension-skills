@@ -115,7 +115,8 @@ def main() -> int:
     if args.output:
         output = args.output.expanduser().resolve(strict=False)
         output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(encoded, encoding="utf-8", newline="\n")
+        with output.open("w", encoding="utf-8", newline="\n") as output_handle:
+            output_handle.write(encoded)
     print(encoded, end="")
     return code
 

@@ -249,8 +249,10 @@ def cmd_start(args: argparse.Namespace) -> int:
         hide_path(run_root)
         request_path = run_root / "request.json"
         route_path = run_root / "route.json"
-        request_path.write_text(json.dumps(request, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
-        route_path.write_text(json.dumps(routed, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
+        with request_path.open("w", encoding="utf-8", newline="\n") as output_handle:
+            output_handle.write(json.dumps(request, ensure_ascii=False, indent=2) + "\n")
+        with route_path.open("w", encoding="utf-8", newline="\n") as output_handle:
+            output_handle.write(json.dumps(routed, ensure_ascii=False, indent=2) + "\n")
         output = initialize_run(
             work_root,
             request,
@@ -489,7 +491,8 @@ def cmd_handoff(args: argparse.Namespace) -> int:
         )
 
     handoff_path = run_root / "handoffs" / f"{workflow}.json"
-    handoff_path.write_text(json.dumps(handoff, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
+    with handoff_path.open("w", encoding="utf-8", newline="\n") as output_handle:
+        output_handle.write(json.dumps(handoff, ensure_ascii=False, indent=2) + "\n")
     mpa = Path(__file__).resolve().as_posix()
     return emit(
         {
@@ -590,7 +593,8 @@ def cmd_transition(args: argparse.Namespace) -> int:
     if index == len(workflows) - 1:
         run["state"] = "TERMINAL"
         run["status"] = "PASS"
-        (run_root / "run.json").write_text(json.dumps(run, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
+        with (run_root / "run.json").open("w", encoding="utf-8", newline="\n") as output_handle:
+            output_handle.write(json.dumps(run, ensure_ascii=False, indent=2) + "\n")
         handoff_names = [p.name for p in sorted((run_root / "handoffs").glob("*.json"))]
         keep_evidence = bool(getattr(args, "keep_evidence", False)) or bool(run.get("keep_evidence"))
         evidence_cleaned = False
@@ -650,7 +654,8 @@ def cmd_transition(args: argparse.Namespace) -> int:
             )
 
     run["current_workflow"] = next_workflow
-    (run_root / "run.json").write_text(json.dumps(run, ensure_ascii=False, indent=2) + "\n", encoding="utf-8", newline="\n")
+    with (run_root / "run.json").open("w", encoding="utf-8", newline="\n") as output_handle:
+        output_handle.write(json.dumps(run, ensure_ascii=False, indent=2) + "\n")
     ctx = build_context(work_root, read_request(run_root), run)
     return emit(
         {

@@ -111,6 +111,18 @@ class ShadowTests(unittest.TestCase):
 
 
 class ReleasePackagingTests(unittest.TestCase):
+    def test_marketplace_copy_is_separate_from_skill_frontmatter(self):
+        info = packer.load_metadata(ROOT / "release-info.json", False)
+        text = packer.marketplace_copy(info)
+        self.assertIn("## 介绍", text)
+        self.assertIn(info["marketplace_introduction"], text)
+        self.assertIn("## 试试这样问我", text)
+        for prompt in info["marketplace_prompts"].splitlines():
+            self.assertIn(prompt, text)
+        output, _ = packer.build_files(packer.collect(ROOT), info, False)
+        self.assertNotIn("marketplace-info.md", output)
+        self.assertNotIn("marketplace_prompts:", output["SKILL.md"].decode())
+
     def test_body_preserves_human_notes_and_is_idempotent(self):
         info = {"repository": "https://gitee.com/mind-plus/mindplus-agent-skill", "version": "0.1.2"}
         body = packer.release_body("团队更新说明\n", info, "v0.1.2", "a" * 64, "package.zip")

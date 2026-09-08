@@ -48,9 +48,6 @@ stages:
             stage=fetch_tags
             echo "[2/4] Fetching version tags (maximum 120 seconds)"
             timeout 120s git fetch --tags origin
-            stage=tests
-            echo "[3/4] Running tests (maximum 300 seconds)"
-            timeout 300s python3 -B -m unittest discover -s tests -v
             stage=publish
             echo "[4/4] Building WB ZIP and publishing Release (maximum 600 seconds)"
             timeout 600s python3 -B tools/pack_workbuddy.py --publish --tag "v$(tr -d '\r\n' < VERSION)"

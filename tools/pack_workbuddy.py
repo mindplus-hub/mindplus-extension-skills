@@ -356,6 +356,17 @@ def smoke(zip_path: Path) -> list[dict]:
     return records
 
 
+def marketplace_copy(info: dict) -> str:
+    """Local copy/paste artifact, not undocumented WorkBuddy frontmatter fields."""
+    introduction = info.get("marketplace_introduction", info["description_zh"]).strip()
+    prompts = [line.strip() for line in info.get("marketplace_prompts", "").splitlines() if line.strip()]
+    return ("# WorkBuddy 市场文案\n\n"
+            "以下内容用于市场后台填写。官方技能文档尚未说明这两个栏目的 ZIP 自动导入字段；本文件不进入技能 ZIP。\n\n"
+            f"展示名称：{info.get('display_name', info['name'])}\n\n版本：{info['version']}\n\n"
+            f"## 介绍\n\n{introduction}\n\n## 试试这样问我\n\n" +
+            ("\n".join("- " + line for line in prompts) if prompts else "请在 release-info.json 中填写 marketplace_prompts，每行一条示例提问。") + "\n")
+
+
 def build(source: Path, metadata: Path, output: Path, preview: bool) -> dict:
     source, output = source.resolve(), output.resolve()
     if output == source or (output.is_relative_to(source) and not output.is_relative_to(source / "dist")):
@@ -372,6 +383,8 @@ def build(source: Path, metadata: Path, output: Path, preview: bool) -> dict:
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
     folder = output / (("preview-" if preview else "release-") + stamp)
     folder.mkdir()
+    marketplace_path = folder / "marketplace-info.md"
+    marketplace_path.write_text(marketplace_copy(info), encoding="utf-8")
     package = folder / "unpacked"
     package.mkdir()
     for name, data in files.items():
@@ -401,7 +414,7 @@ def build(source: Path, metadata: Path, output: Path, preview: bool) -> dict:
         write_json(report_path, report)
         raise PackageError(f"Package checks failed; do not upload. Report: {report_path}\n{exc}") from exc
     write_json(report_path, report)
-    return {"status": "PASS", "preview": preview, "zip": str(zip_path), "unpacked": str(package), "report": str(report_path),
+    return {"status": "PASS", "preview": preview, "zip": str(zip_path), "unpacked": str(package), "report": str(report_path), "marketplace_info": str(marketplace_path),
             "file_count": len(files), "checks": len(report["checks"]), "zip_sha256": report["zip_sha256"], "certification": "NOT_SUBMITTED"}
 
 

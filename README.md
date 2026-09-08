@@ -178,6 +178,8 @@ $mindplus-agent-skill 检查 D:/extensions/v2-demo 的配置和资源引用，�
 
 ## WB 打包与自动发行
 
+`release-info.json` 中的 `marketplace_introduction` 和 `marketplace_prompts` 是本项目的文案配置，后者每行一条提问。每次打包会在 ZIP 同级生成 `marketplace-info.md`，分别提供市场后台的“介绍”和“试试这样问我”。它不进入 ZIP，也不写入 SKILL.md；[WorkBuddy 官方文档](https://open.workbuddy.cn/docs/skill) 尚未说明这两项的自动导入字段，需要在后台填写。
+
 仓库内只维护一个发布工具：[tools/pack_workbuddy.py](tools/pack_workbuddy.py)。配置位于 [release-info.json](release-info.json)，保持 `version`、[VERSION](VERSION) 和 SKILL.md 中的版本元数据一致。打包产物放在被 Git 忽略的 `dist/`；开发工具、流水线和发布配置不进入 WB ZIP。
 
 本地运行（Python 3.9+，无第三方依赖）：

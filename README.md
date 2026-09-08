@@ -188,7 +188,15 @@ $mindplus-agent-skill 检查 D:/extensions/v2-demo 的配置和资源引用，�
 python -X utf8 -B tools/pack_workbuddy.py
 ```
 
-[Gitee Go 工作流](.workflow/release-workbuddy.yml) 在推送 `vX.Y.Z` 标签时执行测试、打包和发布。首次使用需在仓库的 Gitee Go 页面启用／导入该工作流，并配置有本仓库 Release 写入权限的凭据。在 Gitee Go 的变量配置中将 `MP_RELEASE_TOKEN` 设为密钥／敏感变量，并注入当前 Python 构建任务。脚本只读取这个变量，不再回退到其他 Token 或凭据文件。不要将实际 Token 写进 YAML、仓库或日志。此文件本身不会开通 Gitee Go 服务。
+[Gitee Go 工作流](.workflow/release-workbuddy.yml) 在推送 `vX.Y.Z` 标签时执行打包和发布。首次使用需在仓库的 Gitee Go 页面启用／导入该工作流，并配置有本仓库 Release 写入权限的凭据。在「通用变量」中创建 `MP_RELEASE_TOKEN`，类型选「文本」，勾选「密文」，填写 Token 后保存。工作流已通过以下声明引用该变量，仓库中只保存名称：
+
+```yaml
+variables:
+  global:
+    - MP_RELEASE_TOKEN
+```
+
+仅创建通用变量不会自动传入流水线；图形界面的等效操作是「编辑流水线 → 图形视图 → 变量设置 → 添加变量 → 通用变量 → MP_RELEASE_TOKEN」。密文由 Gitee Go 在运行时提供，脚本无需自行解密，只读取 `MP_RELEASE_TOKEN`，日志仅报告是否可用。不要将实际 Token 写进 YAML、仓库或日志。手动运行时需选择包含上述声明的分支；此文件本身不会开通 Gitee Go 服务。
 
 发布 `0.1.2` 时，先提交版本和代码，再执行：
 

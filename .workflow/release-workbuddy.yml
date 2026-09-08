@@ -1,6 +1,10 @@
 version: '1.0'
 name: release-workbuddy
 displayName: MindPlus WB Release
+# Reference the encrypted common variable by name; its value stays in Gitee Go.
+variables:
+  global:
+    - MP_RELEASE_TOKEN
 triggers:
   push:
     tags:
@@ -50,7 +54,7 @@ stages:
             # Export a shell variable supplied by the platform to child processes.
             # Exporting cannot create a value if the platform has not bound it.
             if [ -z "${MP_RELEASE_TOKEN:-}" ]; then
-              echo "[FAIL] MP_RELEASE_TOKEN is absent/empty in the task shell. Bind the common variable to this build task."
+              echo "[FAIL] MP_RELEASE_TOKEN is absent/empty. Check its saved value in Gitee Go common variables and the variables.global reference in this branch's workflow."
               exit 1
             fi
             export MP_RELEASE_TOKEN

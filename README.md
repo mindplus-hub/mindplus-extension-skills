@@ -188,7 +188,7 @@ $mindplus-agent-skill 检查 D:/extensions/v2-demo 的配置和资源引用，�
 python -X utf8 -B tools/pack_workbuddy.py
 ```
 
-[Gitee Go 工作流](.workflow/release-workbuddy.yml) 在推送 `vX.Y.Z` 标签时执行测试、打包和发布。首次使用需在仓库的 Gitee Go 页面启用／导入该工作流，并配置有本仓库 Release 写入权限的凭据。脚本支持读取构建容器中的 `~/.gitee-token` 单行文件，或通过 `--token-file`、`MP_RELEASE_TOKEN_FILE`、`GITEE_TOKEN_FILE` 指定仓库外的凭据文件路径；若平台支持文件凭据挂载，可直接绑定到该路径。也兼容已注入的密钥环境变量 `MP_RELEASE_TOKEN`、`GITEE_TOKEN`、`GITEE_ACCESS_TOKEN`。不要把 Token 写进 YAML、普通参数、仓库或 dist。此文件本身不会开通 Gitee Go 服务。
+[Gitee Go 工作流](.workflow/release-workbuddy.yml) 在推送 `vX.Y.Z` 标签时执行测试、打包和发布。首次使用需在仓库的 Gitee Go 页面启用／导入该工作流，并配置有本仓库 Release 写入权限的凭据。在 Gitee Go 的变量配置中将 `MP_RELEASE_TOKEN` 设为密钥／敏感变量，并注入当前 Python 构建任务。脚本只读取这个变量，不再回退到其他 Token 或凭据文件。不要将实际 Token 写进 YAML、仓库或日志。此文件本身不会开通 Gitee Go 服务。
 
 发布 `0.1.2` 时，先提交版本和代码，再执行：
 
@@ -203,4 +203,3 @@ git push origin v0.1.2
 
 工作流依据：[触发规则](https://help.gitee.com/gitee-go/pipeline/trigger)、[构建插件](https://help.gitee.com/gitee-go/plugin/ci-build)、[Release API](https://gitee.com/sdk/gitee5j/blob/main/docs/RepositoriesApi.md)。本地测试不代表已在云端执行成功。
 
-凭据文件不是平台自动附带的文件，需要在实际执行任务的机器或容器中预先配置；本地电脑的文件不会自动传到云端。如果当前 Gitee Go 界面不提供文件凭据绑定，请使用平台支持的密钥环境变量绑定。仓库不能自行获得 Release 写入身份。显式指定的文件缺失时会报错，不会回退到其他账号凭据。

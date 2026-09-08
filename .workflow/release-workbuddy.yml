@@ -17,8 +17,8 @@ stages:
         name: package_workbuddy
         displayName: 构建并发布 WB ZIP
         pythonVersion: '3.9'
-        # Bind a credential outside the checkout: ~/.gitee-token or GITEE_TOKEN_FILE.
-        # Existing secret GITEE_TOKEN/MP_RELEASE_TOKEN bindings also work; never store values here.
+        # Configure MP_RELEASE_TOKEN as a secret variable injected into this build task.
+        # Never put the actual Token value in this YAML or print it.
         # The documented base image offers 3.9; the scripts support its bundled Python 3.9.
         commands:
           - |

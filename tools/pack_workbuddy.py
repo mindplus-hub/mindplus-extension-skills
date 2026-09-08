@@ -541,33 +541,20 @@ def release_commit(source: Path, info: dict, tag: str) -> str:
     return head
 
 
-def release_token(source: Path, token_file: Path | None = None) -> str:
-    """Read an explicitly bound credential without logging it or invoking Git helpers."""
-    configured = token_file or os.environ.get("MP_RELEASE_TOKEN_FILE") or os.environ.get("GITEE_TOKEN_FILE")
-    if not configured:
-        for name in ("MP_RELEASE_TOKEN", "GITEE_TOKEN", "GITEE_ACCESS_TOKEN"):
-            value = os.environ.get(name, "").strip()
-            if value:
-                if "\n" in value or "\r" in value or len(value) > 256:
-                    raise PackageError("Invalid release credential format")
-                return value
-    path = Path(configured).expanduser() if configured else Path.home() / ".gitee-token"
-    if path.resolve().is_relative_to(source.resolve()):
-        raise PackageError("Release credential file must be outside the repository and build artifacts")
-    try:
-        with path.open("r", encoding="utf-8-sig") as handle:
-            value = handle.read(258).strip()
-    except OSError:
-        value = ""
-    if not value or "\n" in value or "\r" in value or len(value) > 256:
-        raise PackageError("Bind a release credential file outside the checkout (--token-file, GITEE_TOKEN_FILE or ~/.gitee-token), or inject a secret GITEE_TOKEN/MP_RELEASE_TOKEN; no credential is supplied by this repository")
+def release_token() -> str:
+    """Read only the explicitly configured release secret; never print its value."""
+    value = os.environ.get("MP_RELEASE_TOKEN", "").strip()
+    if not value:
+        raise PackageError("Configure secret environment variable MP_RELEASE_TOKEN before publishing")
+    if "\n" in value or "\r" in value or len(value) > 256:
+        raise PackageError("Invalid MP_RELEASE_TOKEN format")
     return value
 
 
-def publish(result: dict, source: Path, metadata: Path, tag: str, token_file: Path | None = None) -> dict:
+def publish(result: dict, source: Path, metadata: Path, tag: str) -> dict:
     if result.get("status") != "PASS" or result.get("preview"):
         raise PackageError("Only a passing non-preview build may be published")
-    token = release_token(source, token_file)
+    token = release_token()
     info = load_metadata(metadata, False)
     api = ReleaseAPI(info["repository"], token)
     if (source / "VERSION").read_text(encoding="utf-8-sig").strip() != info["version"]:
@@ -613,16 +600,15 @@ def main() -> int:
     parser.add_argument("--preview", action="store_true", help="allow incomplete team metadata; mark the package as a preview")
     parser.add_argument("--publish", action="store_true", help="upload the passing build and update its Gitee Release")
     parser.add_argument("--tag", help="existing remote version tag, required with --publish")
-    parser.add_argument("--token-file", type=Path, help="credential file outside the checkout; only its path appears in the command")
     args = parser.parse_args()
     try:
         if args.publish and (args.preview or not args.tag):
             raise PackageError("--publish requires --tag and cannot be combined with --preview")
         if args.publish:
-            release_token(args.source.resolve(), args.token_file)
+            release_token()
         result = build(args.source, args.metadata, args.output_dir, args.preview)
         if args.publish:
-            result["publication"] = publish(result, args.source.resolve(), args.metadata, args.tag, args.token_file)
+            result["publication"] = publish(result, args.source.resolve(), args.metadata, args.tag)
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
     except (PackageError, OSError, ValueError, KeyError, SyntaxError, subprocess.TimeoutExpired) as exc:

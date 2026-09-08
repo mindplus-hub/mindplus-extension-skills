@@ -1,0 +1,9 @@
+{
+  "name": "mindplus-agent-skill",
+  "description": "Create or freshly convert Mind+ V2 extensions, review existing extensions, and publish projects to Gitee",
+  "description_zh": "辅助创建Mind+V2扩展库、将V1库转换到V2库兼容、Gitee仓库创建上传",
+  "version": "0.1.2",
+  "author": "MindPlus",
+  "repository": "https://gitee.com/mind-plus/mindplus-agent-skill",
+  "support_url": "https://mindplus.dfrobot.com.cn/mp2/Extensions/"
+}

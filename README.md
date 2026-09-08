@@ -164,3 +164,39 @@ $mindplus-agent-skill 检查 D:/extensions/v2-demo 的配置和资源引用，�
 | [tests/](tests/) | 路由、校验、发布及回归测试 |
 
 进一步了解实现约定，可阅读 [架构说明](references/architecture.md)、[证据与审核等级](references/evidence.md) 和 [结果交接协议](references/handoff.md)。
+
+## 版本更新
+
+- V0.1.2
+   - 内置 WB 打包工具与发布配置，添加 Gitee Go 标签发布工作流
+   - 自动生成 WB ZIP、核对附件内容并维护发行版下载说明
+- V0.1.0
+   - 初始化第一个版本
+- V0.1.1
+   - 添加自动更新逻辑，确保语料库处于最新状态
+   - 修复 V1 转 V2 中关于 string 的处理
+
+## WB 打包与自动发行
+
+仓库内只维护一个发布工具：[tools/pack_workbuddy.py](tools/pack_workbuddy.py)。配置位于 [release-info.json](release-info.json)，保持 `version`、[VERSION](VERSION) 和 SKILL.md 中的版本元数据一致。打包产物放在被 Git 忽略的 `dist/`；开发工具、流水线和发布配置不进入 WB ZIP。
+
+本地运行（Python 3.11+，无第三方依赖）：
+
+```sh
+python -X utf8 -B tools/pack_workbuddy.py
+```
+
+[Gitee Go 工作流](.workflow/release-workbuddy.yml) 在推送 `vX.Y.Z` 标签时执行测试、打包和发布。首次使用需在仓库的 Gitee Go 页面启用／导入该工作流，并将有本仓库 Release 写入权限的 Token 作为密钥环境变量 `MP_RELEASE_TOKEN` 注入构建任务；不要把 Token 写进 YAML 或普通参数。此文件本身不会开通 Gitee Go 服务。
+
+发布 `0.1.2` 时，先提交版本和代码，再执行：
+
+```sh
+git tag v0.1.2
+git push origin v0.1.2
+```
+
+工具核对本地标签、远程标签和构建提交一致后，创建或更新对应 Release，上传 `mindplus-agent-skill-0.1.2-workbuddy.zip`；通用版使用 Gitee 自带源码 ZIP。发行说明仅维护 `mindplus-pack` 标记区，保留手写内容和现有标题。同名附件内容相同则复用，不同则失败，绝不自动删除或覆盖；网络中断可重跑以核对已有状态。检查失败不会进入发布；创建或上传后的失败会保留已完成部分，供重跑恢复。
+
+需要本地执行同一发布过程时，在环境中提供密钥后使用 `python tools/pack_workbuddy.py --publish --tag v0.1.2`。普通打包命令不会访问发布 API。工作流使用官方已列出的 Python 3.9 构建镜像，再通过固定版本 uv 启动 Python 3.11，因此首次构建需要下载 Python。
+
+工作流依据：[触发规则](https://help.gitee.com/gitee-go/pipeline/trigger)、[构建插件](https://help.gitee.com/gitee-go/plugin/ci-build)、[Release API](https://gitee.com/sdk/gitee5j/blob/main/docs/RepositoriesApi.md)。本地测试不代表已在云端执行成功。

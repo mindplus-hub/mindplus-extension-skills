@@ -1,0 +1,35 @@
+version: '1.0'
+name: release-workbuddy
+displayName: MindPlus WB Release
+triggers:
+  push:
+    tags:
+      include:
+        - '^v[0-9]+\.[0-9]+\.[0-9]+$'
+stages:
+  - stage:
+    name: package_release
+    displayName: 打包并更新发行版
+    strategy: naturally
+    trigger: auto
+    steps:
+      - step: build@python
+        name: package_workbuddy
+        displayName: 构建并发布 WB ZIP
+        pythonVersion: '3.9'
+        # Configure MP_RELEASE_TOKEN as a secret environment variable in Gitee Go.
+        # The documented base image offers 3.9; uv supplies the required Python 3.11.
+        commands:
+          - |
+            set -eu
+            set +x
+            export PYTHONUTF8=1
+            export PYTHONDONTWRITEBYTECODE=1
+            python3 -m pip install --user 'uv==0.8.22'
+            git fetch --tags origin
+            python3 -m uv run --no-project --python 3.11 python -B -m unittest discover -s tests
+            python3 -m uv run --no-project --python 3.11 python -B tools/pack_workbuddy.py --publish --tag "v$(tr -d '\r\n' < VERSION)"
+        artifacts:
+          - name: WB_RELEASE
+            path:
+              - ./dist

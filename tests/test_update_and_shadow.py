@@ -111,8 +111,25 @@ class ShadowTests(unittest.TestCase):
 
 
 class ReleasePackagingTests(unittest.TestCase):
+    def test_adapter_preserves_fstrings_without_unparse(self):
+        adapter = packer.Adapter({"scripts/switch/init_run.py": b""})
+        source = '''# 保留注释
+ctx = {"path": "example"}
+message = f"路径：{ctx['path']}"
+command = f"python {root}/scripts/switch/init_run.py"
+'''
+        with patch.object(packer.ast, "unparse", side_effect=AssertionError("must not unparse")):
+            result = adapter.python(source, "scripts/example.py")
+        self.assertIn("# 保留注释", result)
+        self.assertIn('message = f"路径：{ctx[\'path\']}"', result)
+        namespace = {"root": "/skill"}
+        exec(result, namespace)
+        self.assertEqual(namespace["message"], "路径：example")
+        self.assertEqual(namespace["command"], "python /skill/scripts/switch__init_run.py")
+
     def test_marketplace_copy_is_separate_from_skill_frontmatter(self):
         info = packer.load_metadata(ROOT / "release-info.json", False)
+        info.update(marketplace_introduction="测试市场介绍", marketplace_prompts="示例提问一\n示例提问二")
         text = packer.marketplace_copy(info)
         self.assertIn("## 介绍", text)
         self.assertIn(info["marketplace_introduction"], text)

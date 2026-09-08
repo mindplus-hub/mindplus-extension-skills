@@ -189,7 +189,20 @@ class Adapter:
                 text = text.replace(before, after)
         adapter = self
 
-        class Paths(ast.NodeTransformer):
+        # AST offsets are UTF-8 byte offsets, including on Python 3.9.0.
+        encoded = text.encode("utf-8")
+        lines = encoded.splitlines(keepends=True)
+        offsets = [0]
+        for line in lines:
+            offsets.append(offsets[-1] + len(line))
+        edits = []
+
+        def replace(node, replacement):
+            start = offsets[node.lineno - 1] + node.col_offset
+            end = offsets[node.end_lineno - 1] + node.end_col_offset
+            edits.append((start, end, replacement.encode("utf-8")))
+
+        class Paths(ast.NodeVisitor):
             def visit_BinOp(self, node):
                 parts = []
                 base = node
@@ -198,21 +211,31 @@ class Adapter:
                     base = base.left
                 dest = adapter.targets.get("/".join(parts))
                 if dest is not None:
-                    rebuilt = self.visit(base)
-                    for part in PurePosixPath(dest).parts:
-                        rebuilt = ast.BinOp(left=rebuilt, op=ast.Div(), right=ast.Constant(part))
-                    return ast.copy_location(rebuilt, node)
-                return self.generic_visit(node)
+                    original_base = ast.get_source_segment(text, base)
+                    replace(node, "(" + original_base + ")" + "".join(" / " + repr(part) for part in PurePosixPath(dest).parts))
+                    return
+                self.generic_visit(node)
+
+            def visit_JoinedStr(self, node):
+                # Never unparse f-strings: 3.9.0 can insert illegal backslashes.
+                original = ast.get_source_segment(text, node)
+                changed = adapter.root_paths(original)
+                if changed != original:
+                    replace(node, changed)
 
             def visit_Constant(self, node):
                 if isinstance(node.value, str):
-                    return ast.copy_location(ast.Constant(adapter.root_paths(node.value)), node)
-                return node
+                    changed = adapter.root_paths(node.value)
+                    if changed != node.value:
+                        replace(node, repr(changed))
 
-        tree = Paths().visit(ast.parse(text, filename=old))
-        result = ast.unparse(ast.fix_missing_locations(tree)) + "\n"
-        ast.parse(result)
+        Paths().visit(ast.parse(text, filename=old))
+        for start, end, replacement in sorted(edits, reverse=True):
+            encoded = encoded[:start] + replacement + encoded[end:]
+        result = encoded.decode("utf-8")
+        ast.parse(result, filename=old)
         return result
+
 
 
 def build_files(source_files: dict[str, bytes], info: dict, preview: bool) -> tuple[dict[str, bytes], dict]:
@@ -274,7 +297,7 @@ def build_files(source_files: dict[str, bytes], info: dict, preview: bool) -> tu
         "path_mapping": adapter.mapping,
         "original_corpus_manifest_sha256": original_manifest_hash,
         "adapted_corpus_manifest_sha256": sha(result["assets/manifest.json"]),
-        "notes": ["Python AST rewriting preserves code semantics but omits source comments; original source remains unchanged.",
+        "notes": ["Python paths are patched at AST source locations; original f-strings and unaffected comments are preserved.",
                   "Flat corpus has a separate bundle ID and cache namespace; original nested release channel is disabled."],
     }
     return result, audit
@@ -578,7 +601,7 @@ def main() -> int:
             result["publication"] = publish(result, args.source.resolve(), args.metadata, args.tag)
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
-    except (PackageError, OSError, ValueError, KeyError, subprocess.TimeoutExpired) as exc:
+    except (PackageError, OSError, ValueError, KeyError, SyntaxError, subprocess.TimeoutExpired) as exc:
         print(json.dumps({"status": "FAIL", "error": str(exc)}, ensure_ascii=False, indent=2))
         return 1
 

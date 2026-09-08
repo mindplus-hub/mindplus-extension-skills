@@ -23,12 +23,31 @@ stages:
           - |
             set -eu
             set +x
+            cd "${WORKSPACE:?Gitee WORKSPACE is not set}"
+            test -f VERSION
+            test -f tools/pack_workbuddy.py
             export PYTHONUTF8=1
             export PYTHONDONTWRITEBYTECODE=1
-            python3 -m pip install --user 'uv==0.8.22'
-            git fetch --tags origin
-            python3 -m uv run --no-project --python 3.11 python -B -m unittest discover -s tests
-            python3 -m uv run --no-project --python 3.11 python -B tools/pack_workbuddy.py --publish --tag "v$(tr -d '\r\n' < VERSION)"
+            export PYTHONUNBUFFERED=1
+            export UV_HTTP_TIMEOUT=30
+            export UV_HTTP_RETRIES=2
+            trap 'code=$?; if [ "$code" -ne 0 ]; then echo "[FAIL] stage=$stage exit=$code (124 means timeout)"; fi' EXIT
+            stage=install_uv
+            echo "[1/5] Installing uv (maximum 180 seconds)"
+            timeout 180s python3 -m pip install --user --disable-pip-version-check --timeout 20 --retries 2 --index-url "${MP_PIP_INDEX_URL:-https://pypi.tuna.tsinghua.edu.cn/simple}" 'uv==0.8.22'
+            stage=install_python
+            echo "[2/5] Preparing Python 3.11 (maximum 300 seconds; separate Python download)"
+            timeout 300s python3 -m uv python install 3.11
+            stage=fetch_tags
+            echo "[3/5] Fetching version tags (maximum 120 seconds)"
+            timeout 120s git fetch --tags origin
+            stage=tests
+            echo "[4/5] Running tests (maximum 300 seconds)"
+            timeout 300s python3 -m uv run --offline --no-project --python 3.11 python -B -m unittest discover -s tests -v
+            stage=publish
+            echo "[5/5] Building WB ZIP and publishing Release (maximum 600 seconds)"
+            timeout 600s python3 -m uv run --offline --no-project --python 3.11 python -B tools/pack_workbuddy.py --publish --tag "v$(tr -d '\r\n' < VERSION)"
+            echo "[DONE] WB Release completed"
         artifacts:
           - name: WB_RELEASE
             path:

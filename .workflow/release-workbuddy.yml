@@ -17,7 +17,8 @@ stages:
         name: package_workbuddy
         displayName: 构建并发布 WB ZIP
         pythonVersion: '3.9'
-        # Configure MP_RELEASE_TOKEN as a secret environment variable in Gitee Go.
+        # Bind a credential outside the checkout: ~/.gitee-token or GITEE_TOKEN_FILE.
+        # Existing secret GITEE_TOKEN/MP_RELEASE_TOKEN bindings also work; never store values here.
         # The documented base image offers 3.9; the scripts support its bundled Python 3.9.
         commands:
           - |
@@ -38,18 +39,18 @@ stages:
               echo "[FAIL] Checkout not found. Set MP_CHECKOUT_DIR to the repository directory shown by the plugin."
               exit 1
             fi
-            echo "[0/4] Checkout: $(pwd -P)"
+            echo "[0/3] Checkout: $(pwd -P)"
             export PYTHONUTF8=1
             export PYTHONDONTWRITEBYTECODE=1
             export PYTHONUNBUFFERED=1
             stage=check_python
-            echo "[1/4] Checking bundled Python (no runtime download)"
+            echo "[1/3] Checking bundled Python (no runtime download)"
             python3 -c 'import sys; print(sys.version); assert sys.version_info >= (3, 9), "Python 3.9+ required"'
             stage=fetch_tags
-            echo "[2/4] Fetching version tags (maximum 120 seconds)"
+            echo "[2/3] Fetching version tags (maximum 120 seconds)"
             timeout 120s git fetch --tags origin
             stage=publish
-            echo "[4/4] Building WB ZIP and publishing Release (maximum 600 seconds)"
+            echo "[3/3] Building WB ZIP and publishing Release (maximum 600 seconds)"
             timeout 600s python3 -B tools/pack_workbuddy.py --publish --tag "v$(tr -d '\r\n' < VERSION)"
             echo "[DONE] WB Release completed"
         artifacts:

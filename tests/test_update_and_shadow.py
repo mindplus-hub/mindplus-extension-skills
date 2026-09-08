@@ -111,6 +111,24 @@ class ShadowTests(unittest.TestCase):
 
 
 class ReleasePackagingTests(unittest.TestCase):
+    def test_file_credential_without_token_environment(self):
+        with tempfile.TemporaryDirectory() as tmp, patch.dict(os.environ, {}, clear=True):
+            root = Path(tmp)
+            token = root / "release-token"
+            token.write_text("fixture-secret\n", encoding="utf-8")
+            self.assertEqual(packer.release_token(root / "checkout", token), "fixture-secret")
+            with patch.object(packer.Path, "home", return_value=root):
+                token.rename(root / ".gitee-token")
+                self.assertEqual(packer.release_token(root / "checkout"), "fixture-secret")
+
+    def test_explicit_invalid_credential_does_not_fall_back(self):
+        with tempfile.TemporaryDirectory() as tmp, patch.dict(os.environ, {"MP_RELEASE_TOKEN": "another-secret"}):
+            with self.assertRaises(packer.PackageError):
+                packer.release_token(Path(tmp) / "checkout", Path(tmp) / "missing")
+            token = Path(tmp) / "checkout" / "token"
+            with self.assertRaises(packer.PackageError):
+                packer.release_token(Path(tmp) / "checkout", token)
+
     def test_adapter_preserves_fstrings_without_unparse(self):
         adapter = packer.Adapter({"scripts/switch/init_run.py": b""})
         source = '''# 保留注释
@@ -166,7 +184,7 @@ command = f"python {root}/scripts/switch/init_run.py"
             git.assert_not_called()
 
     def test_missing_token_and_preview_stop_before_network(self):
-        with patch.dict(os.environ, {}, clear=True), patch.object(packer, "ReleaseAPI") as api:
+        with tempfile.TemporaryDirectory() as tmp, patch.object(packer.Path, "home", return_value=Path(tmp)), patch.dict(os.environ, {}, clear=True), patch.object(packer, "ReleaseAPI") as api:
             for result in ({"status": "PASS", "preview": True}, {"status": "PASS", "preview": False}):
                 with self.assertRaises(packer.PackageError):
                     packer.publish(result, ROOT, ROOT / "release-info.json", "v0.1.2")

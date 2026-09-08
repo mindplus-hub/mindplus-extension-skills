@@ -23,15 +23,27 @@ stages:
           - |
             set -eu
             set +x
-            cd "${WORKSPACE:?Gitee WORKSPACE is not set}"
-            test -f VERSION
-            test -f tools/pack_workbuddy.py
+            stage=locate_checkout
+            trap 'code=$?; if [ "$code" -ne 0 ]; then echo "[FAIL] stage=$stage exit=$code (124 means timeout)"; fi' EXIT
+            checkout_found=false
+            # The plugin logs WORKSPACE but may not export it to COMMAND.sh.
+            for candidate in "${MP_CHECKOUT_DIR:-}" "${WORKSPACE:-}" "$(pwd -P 2>/dev/null || true)" /root/workspace/mind-plus/mindplus-agent-skill; do
+              if [ -n "$candidate" ] && [ -f "$candidate/VERSION" ] && [ -f "$candidate/tools/pack_workbuddy.py" ] && [ -f "$candidate/SKILL.md" ]; then
+                cd "$candidate"
+                checkout_found=true
+                break
+              fi
+            done
+            if [ "$checkout_found" != true ]; then
+              echo "[FAIL] Checkout not found. Set MP_CHECKOUT_DIR to the repository directory shown by the plugin."
+              exit 1
+            fi
+            echo "[0/5] Checkout: $(pwd -P)"
             export PYTHONUTF8=1
             export PYTHONDONTWRITEBYTECODE=1
             export PYTHONUNBUFFERED=1
             export UV_HTTP_TIMEOUT=30
             export UV_HTTP_RETRIES=2
-            trap 'code=$?; if [ "$code" -ne 0 ]; then echo "[FAIL] stage=$stage exit=$code (124 means timeout)"; fi' EXIT
             stage=install_uv
             echo "[1/5] Installing uv (maximum 180 seconds)"
             timeout 180s python3 -m pip install --user --disable-pip-version-check --timeout 20 --retries 2 --index-url "${MP_PIP_INDEX_URL:-https://pypi.tuna.tsinghua.edu.cn/simple}" 'uv==0.8.22'

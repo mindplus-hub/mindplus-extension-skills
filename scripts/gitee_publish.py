@@ -206,7 +206,7 @@ def context(args: argparse.Namespace, need_authorizations: tuple[str, ...] = ())
         raise StageBlocked(
             {
                 "status": "WAITING_USER", "state": "WAITING_USER", "reason_code": "AUTH.GITEE_TOKEN_MISSING",
-                "message": "Expose a Gitee personal access token locally as GITEE_TOKEN or GITEE_ACCESS_TOKEN, or as a single-line file ~/.gitee-token, then rerun. Nothing was read or modified.",
+                "message": "Save the Gitee personal access token as the password for git:https://gitee.com in Windows Credential Manager with Git Credential Manager enabled, then rerun. On non-Windows hosts, GITEE_TOKEN, GITEE_ACCESS_TOKEN, or a single-line ~/.gitee-token file is supported. Nothing was read or modified.",
                 "application_url": "https://gitee.com/profile/personal_access_tokens",
             },
             3,

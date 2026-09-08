@@ -8,6 +8,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -274,6 +275,8 @@ class TokenTests(unittest.TestCase):
         env.pop("GITEE_TOKEN", None)
         env.pop("GITEE_ACCESS_TOKEN", None)
         env["GITEE_TOKEN_FILE"] = str(Path(tempfile.gettempdir()) / "no-such-gitee-token-file")
+        env["GIT_CONFIG_NOSYSTEM"] = "1"
+        env["GIT_CONFIG_GLOBAL"] = str(Path(tempfile.gettempdir()) / "no-such-gitconfig")
         env.update(overrides)
         return env
 
@@ -285,6 +288,7 @@ class TokenTests(unittest.TestCase):
         self.assertEqual(output["reason_code"], "AUTH.GITEE_TOKEN_MISSING")
         self.assertFalse(output["token_present"])
 
+    @unittest.skipIf(os.name == "nt", "Windows local tokens use Windows Credential Manager")
     def test_token_file_source_is_accepted_without_env(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             token_file = Path(directory) / "gitee-token"
@@ -299,6 +303,37 @@ class TokenTests(unittest.TestCase):
             self.assertTrue(output["token_present"])
             self.assertTrue(output["source"].startswith("file:"))
             self.assertNotIn(secret, completed.stdout)
+
+    @unittest.skipUnless(os.name == "nt", "Windows Credential Manager test")
+    def test_windows_credential_manager_source_is_accepted_without_secret_output(self) -> None:
+        import check_gitee_token as token_checker
+
+        source = "windows-credential-manager:git:https://gitee.com"
+        secret = "credential-manager-test-token"
+        completed = subprocess.CompletedProcess(
+            ["git", "credential", "fill"],
+            0,
+            stdout=f"protocol=https\nhost=gitee.com\nusername=mds890mn\npassword={secret}\n",
+            stderr="",
+        )
+        with patch.object(token_checker.subprocess, "run", return_value=completed) as run:
+            resolved_source, resolved_token = token_checker.resolve_windows_credential()
+        self.assertEqual(resolved_source, source)
+        self.assertEqual(resolved_token, secret)
+        self.assertEqual(run.call_args.args[0], ["git", "credential", "fill"])
+        self.assertEqual(run.call_args.kwargs["input"], "protocol=https\nhost=gitee.com\n\n")
+
+    @unittest.skipUnless(os.name == "nt", "Windows Credential Manager test")
+    def test_resolve_token_uses_windows_credential_manager(self) -> None:
+        import check_gitee_token as token_checker
+
+        source = "windows-credential-manager:git:https://gitee.com"
+        with patch.dict(os.environ, {}, clear=True), patch.object(
+            token_checker, "resolve_windows_credential", return_value=(source, "credential-manager-test-token")
+        ):
+            resolved_source, resolved_token = token_checker.resolve_token()
+        self.assertEqual(resolved_source, source)
+        self.assertEqual(resolved_token, "credential-manager-test-token")
 
     def test_present_token_is_never_printed(self) -> None:
         secret = "test-token-value-that-must-not-appear"

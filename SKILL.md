@@ -1,7 +1,7 @@
 ---
 name: mindplus-agent-skill
 metadata:
-  version: "0.1.2"
+  version: "0.1.3"
 description: Create or freshly convert Mind+ V2 extensions with basic checks, review existing extensions, and publish authorized projects to Gitee. Use HOST_READY acceptance only when explicitly requested. Does not synchronize V1 into an existing V2 project or perform device acceptance.
 ---
 

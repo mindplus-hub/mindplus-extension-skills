@@ -114,9 +114,18 @@ class ReleasePackagingTests(unittest.TestCase):
     def test_release_token_uses_only_configured_variable(self):
         with patch.dict(os.environ, {"MP_RELEASE_TOKEN": " fixture-secret "}, clear=True):
             self.assertEqual(packer.release_token(), "fixture-secret")
-        with patch.dict(os.environ, {"GITEE_TOKEN": "unrelated-secret"}, clear=True):
+        with patch.dict(os.environ, {"GITEE_TOKEN": "unrelated-secret"}, clear=True), patch.object(
+            packer, "resolve_windows_credential", return_value=(None, "")
+        ):
             with self.assertRaises(packer.PackageError):
                 packer.release_token()
+
+    def test_release_token_uses_windows_credential_manager_without_ci_env(self):
+        source = "windows-credential-manager:git:https://gitee.com"
+        with patch.dict(os.environ, {}, clear=True), patch.object(
+            packer, "resolve_windows_credential", return_value=(source, "credential-manager-test-token")
+        ):
+            self.assertEqual(packer.release_token(), "credential-manager-test-token")
 
     def test_invalid_release_token_is_not_exposed(self):
         value = "fixture-secret\nsecond-line"

@@ -19,10 +19,10 @@ python scripts/prepare_gitee_publish.py \
 
 Use `--create-repo` only for an explicitly requested new repository.
 
-The script's first gate checks only for a non-empty `GITEE_TOKEN` or `GITEE_ACCESS_TOKEN` and never prints the value. When neither environment variable is set, a local token file `~/.gitee-token` (a single line containing only the token) is accepted as the same credential. If no token is present:
+The script's first gate never prints the credential value. On Windows it asks Git Credential Manager for `protocol=https` and `host=gitee.com`; with `credential.helper=manager` or `manager-core`, this reads the password stored under `git:https://gitee.com` in Windows Credential Manager. A non-empty `GITEE_TOKEN` or `GITEE_ACCESS_TOKEN` remains an explicit CI/test override. On non-Windows hosts, a single-line `~/.gitee-token` file is also accepted. If no token is present:
 
 1. Return `WAITING_USER/BLOCKED`, outcome `TOKEN_REQUIRED`, reason `AUTH.GITEE_TOKEN_MISSING`.
-2. Tell the user to sign in to Gitee, apply for a personal access token, and expose it locally through one of those environment variables.
+2. Tell the user to sign in to Gitee, apply for a personal access token, and save it as the password of the `git:https://gitee.com` Windows Credential Manager entry (or use the documented non-Windows/CI source).
 3. Do not read [gitee-api.md](../gitee-api.md), resolve the project/handoff, run Git, inspect remotes, contact Gitee, or create anything.
 4. Do not ask the user to paste the token into chat or place it in a command line, URL, handoff, report, remote, or tracked file.
 5. Resume only after the user says the token is locally available and the preflight passes.
@@ -78,7 +78,7 @@ python scripts/gitee_publish.py remote  --preflight <preflight.json> --state-dir
 python scripts/gitee_publish.py push    --preflight <preflight.json> --state-dir <run-evidence>/publish
 ```
 
-`--ssh` / `--https` pick the git transport explicitly. **Default (neither flag): the tool probes non-interactive SSH first (BatchMode) and uses SSH (`git@gitee.com:...`) when it passes; on probe failure it falls back to HTTPS+token and records `fallback_reason` in the remote record.** With `--ssh` a failed probe stops as `AUTH.SSH_KEY_NOT_USABLE` instead of falling back. HTTPS transport supplies the token through a generated process-local `GIT_ASKPASS` shim (written into the state directory, reading `GITEE_TOKEN`/`GITEE_AUTH_USER` from the environment; system credential helpers are reset so no GUI dialog can appear). All Gitee API operations (token-account resolution, repository creation/verification, post-push ref verification) always use the token regardless of transport.
+`--ssh` / `--https` pick the git transport explicitly. **Default (neither flag): the tool probes non-interactive SSH first (BatchMode) and uses SSH (`git@gitee.com:...`) when it passes; on probe failure it falls back to HTTPS+token and records `fallback_reason` in the remote record.** With `--ssh` a failed probe stops as `AUTH.SSH_KEY_NOT_USABLE` instead of falling back. HTTPS transport supplies the token resolved in process memory through a generated process-local `GIT_ASKPASS` shim (the shim itself contains no secret). All Gitee API operations (token-account resolution, repository creation/verification, post-push ref verification) always use the token regardless of transport.
 
 The tool enforces the stage rules below and writes `publish-plan.json`, `publish-commit.json`, `publish-remote.json`, `publish-push.json` into the state directory; on `PASS` its output carries the ready-made `mpa.py handoff` command with the five required check IDs pre-filled. The token never enters a URL, command argument, log, or file.
 

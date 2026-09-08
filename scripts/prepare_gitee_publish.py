@@ -60,7 +60,7 @@ def main() -> int:
                 "outcome": "TOKEN_REQUIRED",
                 "reason_code": "AUTH.GITEE_TOKEN_MISSING",
                 "token_present": False,
-                "message": "Apply for a Gitee personal access token, expose it locally as GITEE_TOKEN or GITEE_ACCESS_TOKEN, or as a single-line file ~/.gitee-token, then resume. No project, Git, or Gitee operation was performed.",
+                "message": "Save the Gitee personal access token as the password for git:https://gitee.com in Windows Credential Manager with Git Credential Manager enabled, then resume. On non-Windows hosts, GITEE_TOKEN, GITEE_ACCESS_TOKEN, or a single-line ~/.gitee-token file is supported. No project, Git, or Gitee operation was performed.",
                 "application_url": "https://gitee.com/profile/personal_access_tokens",
             },
             args.output,

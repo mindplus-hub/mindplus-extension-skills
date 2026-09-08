@@ -25,8 +25,13 @@ from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 
 HERE = Path(__file__).resolve().parent
+SCRIPTS = HERE.parent / "scripts"
 GENERATED = "references/switch/generated/"
 IGNORED = {".git", "__pycache__", ".ms", ".mindplus-agent", "node_modules", "dist"}
+
+if str(SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS))
+from check_gitee_token import resolve_windows_credential
 
 
 class PackageError(Exception):
@@ -542,13 +547,16 @@ def release_commit(source: Path, info: dict, tag: str) -> str:
 
 
 def release_token() -> str:
-    """Read only the explicitly configured release secret; never print its value."""
+    """Read a CI secret or the local Windows Credential Manager secret."""
     value = os.environ.get("MP_RELEASE_TOKEN", "").strip()
-    if not value:
-        raise PackageError("Configure secret environment variable MP_RELEASE_TOKEN before publishing")
-    if "\n" in value or "\r" in value or len(value) > 256:
+    if value and ("\n" in value or "\r" in value or len(value) > 256):
         raise PackageError("Invalid MP_RELEASE_TOKEN format")
-    return value
+    if value:
+        return value
+    source, token = resolve_windows_credential()
+    if source:
+        return token
+    raise PackageError("Configure MP_RELEASE_TOKEN in Gitee Go or save the PAT as the password for git:https://gitee.com in Windows Credential Manager")
 
 
 def publish(result: dict, source: Path, metadata: Path, tag: str) -> dict:

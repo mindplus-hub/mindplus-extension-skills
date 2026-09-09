@@ -9,10 +9,11 @@
     "workflows": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["CONVERT_FRESH", "CREATE_FRESH", "REVIEW_EXISTING", "PUBLISH_GITEE"],
+      "required": ["CONVERT_FRESH", "CREATE_FRESH", "UPGRADE_EXISTING", "REVIEW_EXISTING", "PUBLISH_GITEE"],
       "properties": {
         "CONVERT_FRESH": {"$ref": "#/$defs/workflow"},
         "CREATE_FRESH": {"$ref": "#/$defs/workflow"},
+        "UPGRADE_EXISTING": {"$ref": "#/$defs/workflow"},
         "REVIEW_EXISTING": {"$ref": "#/$defs/workflow"},
         "PUBLISH_GITEE": {"$ref": "#/$defs/workflow"}
       }

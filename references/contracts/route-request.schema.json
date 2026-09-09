@@ -10,7 +10,7 @@
       "type": "array",
       "minItems": 1,
       "uniqueItems": true,
-      "items": {"enum": ["CONVERT", "CREATE", "REVIEW", "PUBLISH", "SYNC"]}
+      "items": {"enum": ["CONVERT", "CREATE", "UPGRADE", "REVIEW", "PUBLISH", "SYNC"]}
     },
     "paths": {
       "type": "object",

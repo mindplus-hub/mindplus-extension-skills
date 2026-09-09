@@ -33,6 +33,7 @@ REQUIRED_FIELDS = {
 WORKFLOW_PRODUCER = {
     "CONVERT_FRESH": "mindplus-switch",
     "CREATE_FRESH": "mindplus-create",
+    "UPGRADE_EXISTING": "mindplus-upgrade",
     "REVIEW_EXISTING": "mindplus-review",
     "PUBLISH_GITEE": "mindplus-gitee-publish",
 }
@@ -169,6 +170,14 @@ def validate(data: dict[str, Any], require_outcome: str | None, check_artifacts:
             if check.get("required") is True and status == "PASS" and check.get("result") != "PASS":
                 errors.append(f"passing handoff has non-passing required check: {check_id}")
 
+    if workflow == "UPGRADE_EXISTING" and status == "PASS":
+        if data.get("outcome") != "UPGRADED" or state != "TERMINAL":
+            errors.append("passing upgrade requires TERMINAL/UPGRADED")
+        for check_id in ("repository_ownership", "version_bump", "config_schema", "extension_static_integrity", "source_semantics", "upgrade_regression"):
+            check = checks_by_id.get(check_id, {})
+            if check.get("required") is not True or check.get("result") != "PASS" or not check.get("evidence"):
+                errors.append(f"upgrade requires evidenced PASS: {check_id}")
+
     if data.get("outcome") == "REVIEWED_BASIC":
         if workflow != "REVIEW_EXISTING" or state != "TERMINAL" or status != "PASS":
             errors.append("REVIEWED_BASIC requires a TERMINAL/PASS review")
@@ -199,8 +208,8 @@ def validate(data: dict[str, Any], require_outcome: str | None, check_artifacts:
                 )
 
     if data.get("outcome") == "TOKEN_REQUIRED":
-        if workflow != "PUBLISH_GITEE" or producer != "mindplus-gitee-publish":
-            errors.append("TOKEN_REQUIRED must come from the Gitee publication leaf")
+        if workflow not in {"PUBLISH_GITEE", "UPGRADE_EXISTING"}:
+            errors.append("TOKEN_REQUIRED must come from publication or upgrade")
         if state != "WAITING_USER" or status != "BLOCKED":
             errors.append("TOKEN_REQUIRED requires WAITING_USER/BLOCKED")
         if data.get("reason_code") != "AUTH.GITEE_TOKEN_MISSING":

@@ -1,12 +1,15 @@
 # Architecture contract
 
-One self-contained skill contains four progressively loaded leaves. The router selects work; the leaves implement domain behavior; scripts enforce routing, handoffs and publication transport. No sibling skills or checkouts are required.
+One self-contained skill contains five progressively loaded leaves. The router selects work; the leaves implement domain behavior; scripts enforce routing, handoffs and publication transport. No sibling skills or checkouts are required.
+
+Entry sequence: skill version check -> [official repository discovery and user source choice](official-repository-discovery.md) -> deterministic routing -> selected leaf. Public discovery reuses the corpus lookup helper but runs before routing, independently of technical-reference fallback.
 
 ## Default lifecycle
 
 ```text
 CREATE_FRESH  -- basic producer checks --> optional PUBLISH_GITEE
 CONVERT_FRESH -- basic producer checks --> optional PUBLISH_GITEE
+UPGRADE_EXISTING -- basic upgrade checks --> optional PUBLISH_GITEE
 REVIEW_EXISTING (BASIC)                  --> optional PUBLISH_GITEE
 PUBLISH_GITEE                            # standalone is supported
 ```

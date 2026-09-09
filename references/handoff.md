@@ -6,7 +6,7 @@ Every leaf writes one `handoff.json` matching [contracts/handoff.schema.json](co
 
 - `state`: `RUNNING`, `WAITING_USER`, or `TERMINAL`.
 - `status`: `NOT_RUN`, `PASS`, `FAIL`, or `BLOCKED`.
-- `outcome`: domain result such as `CONVERTED`, `CREATED`, `REVIEWED_BASIC`, `REVIEWED_HOST_READY`, `PUSHED`, or `TOKEN_REQUIRED`.
+- `outcome`: domain result such as `CONVERTED`, `CREATED`, `UPGRADED`, `REVIEWED_BASIC`, `REVIEWED_HOST_READY`, `PUSHED`, or `TOKEN_REQUIRED`.
 - `reason_code`: namespaced recovery reason when the run did not pass.
 
 Do not use legacy `CONVERTED_HANDOFF` or `HANDED_OFF` as the universal state. An adapter may translate those values to the fields above while preserving the original log as evidence.

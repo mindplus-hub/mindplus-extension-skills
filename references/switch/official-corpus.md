@@ -4,6 +4,8 @@
 **第一回退层**：检索 Mind+ 官方 Gitee 组织 `https://gitee.com/organizations/mind-plus/projects`。
 本协议对 CREATE 与 CONVERT 同效。
 
+仓库发现入口也复用下面的只读检索工具，具体见 [official-repository-discovery.md](../official-repository-discovery.md)。该入口在 skill 版本检查之后执行，不以语料不足为前提；用户选择 fork 后转入升级流程执行，不能在本只读语料检索流程里直接 fork。
+
 ## 证据等级与边界
 
 - 官方组织仓库中的已发布扩展源码按 **C2（官方已发布行为）** 记录，高于普通本地示例，

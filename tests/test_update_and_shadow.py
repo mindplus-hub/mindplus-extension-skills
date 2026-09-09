@@ -66,9 +66,49 @@ class UpdateTests(unittest.TestCase):
             root.mkdir()
             updater.unpack(archive(number="0.1.0"), root, (0, 1, 0), "wb")
             (root / "local.txt").write_text("preserve")
-            backup = Path(updater.install(root, archive(), (0, 2, 0), "wb"))
+            info = updater.install(root, archive(), (0, 2, 0), "wb")
+            backup = Path(info["backup"])
             self.assertEqual(updater.version(root), (0, 2, 0))
             self.assertEqual((backup / "local.txt").read_text(), "preserve")
+            self.assertEqual((root / "local.txt").read_text(), "preserve")
+            self.assertEqual(info["pruned"], 0)
+
+    def test_update_preserves_local_files_and_prunes_stale_release_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "skill"
+            root.mkdir()
+            updater.unpack(archive(number="0.1.0"), root, (0, 1, 0), "wb")
+            (root / "_user_meta.json").write_text('{"source": "userImport"}', encoding="utf-8")
+            (root / "references/stale.md").write_text("stale")
+            (root / "references/deep/nested.md").parent.mkdir(parents=True)
+            (root / "references/deep/nested.md").write_text("deep")
+            info = updater.install(root, archive(), (0, 2, 0), "wb")
+            self.assertEqual(updater.version(root), (0, 2, 0))
+            self.assertEqual(updater.variant(root), "wb")
+            self.assertFalse((root / "references/stale.md").exists())
+            self.assertFalse((root / "references/deep/nested.md").exists())
+            self.assertTrue((root / "_user_meta.json").exists())
+            self.assertTrue((Path(info["backup"]) / "references/stale.md").exists())
+            self.assertEqual(info["pruned"], 2)
+
+    def test_overlay_failure_rolls_back(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "skill"
+            root.mkdir()
+            updater.unpack(archive(number="0.1.0"), root, (0, 1, 0), "wb")
+            (root / "local.txt").write_text("preserve")
+            real_copy = updater.copy_file
+            state = {"calls": 0}
+            def flaky(src, dst, **kwargs):
+                state["calls"] += 1
+                if state["calls"] == 2:
+                    raise OSError("simulated locked file")
+                return real_copy(src, dst, **kwargs)
+            with patch.object(updater, "copy_file", flaky), self.assertRaises(ValueError) as caught:
+                updater.install(root, archive(), (0, 2, 0), "wb")
+            self.assertIn("retry", str(caught.exception))
+            self.assertEqual(updater.version(root), (0, 1, 0))
+            self.assertEqual((root / "local.txt").read_text(), "preserve")
 
     def test_failure_before_switch_preserves_install(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -79,19 +119,106 @@ class UpdateTests(unittest.TestCase):
                 updater.install(root, archive(number="0.9.0"), (0, 2, 0), "wb")
             self.assertEqual(updater.version(root), (0, 1, 0))
 
-    def test_switch_failure_rolls_back(self):
+    def test_staging_cleanup_is_deferred_and_swept_next_run(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "skill"
             root.mkdir()
             updater.unpack(archive(number="0.1.0"), root, (0, 1, 0), "wb")
-            original = Path.rename
-            def rename(path, target):
-                if path.name.startswith("skill-update-"):
-                    raise OSError("simulated switch failure")
-                return original(path, target)
-            with patch.object(Path, "rename", rename), self.assertRaises(OSError):
-                updater.install(root, archive(), (0, 2, 0), "wb")
-            self.assertEqual(updater.version(root), (0, 1, 0))
+            updater.install(root, archive(), (0, 2, 0), "wb")
+            temp = Path(tempfile.gettempdir())
+            stages = [p for p in temp.glob(updater.STAGE_PREFIX + "*") if p.is_dir()]
+            self.assertTrue(stages and any((s / "SKILL.md").is_file() for s in stages))
+            swept = updater.cleanup_stale_stages()
+            self.assertGreaterEqual(swept, 1)
+            remaining = [p for p in temp.glob(updater.STAGE_PREFIX + "*") if p.is_dir()]
+            self.assertEqual(remaining, [])
+
+    def test_download_requires_gitee_host(self):
+        for url in ["http://gitee.com/a.zip", "https://evil.example.com/a.zip",
+                    "https://gitee.com.evil.example.com/a.zip"]:
+            with self.subTest(), self.assertRaises(ValueError):
+                updater.download(url)
+
+    def test_check_cache_reuse_expiry_and_invalidation(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "skill"
+            root.mkdir()
+            updater.unpack(archive(number="0.1.3"), root, (0, 1, 3), "wb")
+            cache = Path(tmp) / "cache.json"
+            with patch.object(updater, "cache_path", lambda: cache):
+                updater.store_cache(root, (0, 1, 3), "wb", None)
+                with patch.object(updater, "download",
+                                  Mock(side_effect=AssertionError("network used"))):
+                    result = updater.update(root)
+                self.assertTrue(result["cache_hit"])
+                self.assertEqual(result["status"], "CURRENT")
+
+                payload = json.loads(cache.read_text())
+                self.assertEqual(payload["version"], "0.1.3")
+                self.assertEqual(payload["version_sha256"], updater.version_digest(root))
+
+                payload["checked_at"] -= updater.CACHE_TTL_SECONDS + 1
+                cache.write_text(json.dumps(payload))
+                with patch.object(updater, "download", Mock(return_value="[]")):
+                    result = updater.update(root)
+                self.assertFalse(result["cache_hit"])
+                self.assertEqual(result["status"], "CURRENT")
+
+                updater.store_cache(root, (0, 1, 3), "wb", None)
+                (root / "VERSION").write_text("0.1.4")
+                self.assertIsNone(updater.load_cache(root, (0, 1, 4), "wb"))
+
+                updater.store_cache(root, (0, 1, 3), "wb", None)
+                cache.write_text("not json")
+                self.assertIsNone(updater.load_cache(root, (0, 1, 3), "wb"))
+
+    def test_check_cache_stores_update_available(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "skill"
+            root.mkdir()
+            updater.unpack(archive(number="0.1.3"), root, (0, 1, 3), "wb")
+            asset = {"name": "mindplus-agent-skill-0.2.0-wb.zip",
+                     "browser_download_url": "https://gitee.com/mind-plus/x.zip"}
+            with patch.object(updater, "cache_path", lambda: Path(tmp) / "cache.json"):
+                updater.store_cache(root, (0, 1, 3), "wb", ((0, 2, 0), asset))
+                with patch.object(updater, "download",
+                                  Mock(side_effect=AssertionError("network used"))):
+                    result = updater.update(root, check_only=True)
+                self.assertTrue(result["cache_hit"])
+                self.assertEqual(result["status"], "UPDATE_AVAILABLE")
+                self.assertEqual(result["remote_version"], "0.2.0")
+
+    def test_backup_retention_keeps_recent_three(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            backup_root = Path(tmp) / ".mindplus-skill-backups"
+            backup_root.mkdir()
+            for i in range(5):
+                stale = backup_root / f"skill-old{i}"
+                stale.mkdir()
+                (stale / "f.txt").write_text("x")
+                os.utime(stale, (i, i))
+            removed = updater.prune_old_backups(backup_root)
+            self.assertEqual(removed, 2)
+            kept = sorted(p.name for p in backup_root.iterdir())
+            self.assertEqual(kept, ["skill-old2", "skill-old3", "skill-old4"])
+
+    def test_install_prunes_old_backups(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "skill"
+            root.mkdir()
+            updater.unpack(archive(number="0.1.0"), root, (0, 1, 0), "wb")
+            backup_root = root.parent / ".mindplus-skill-backups"
+            backup_root.mkdir()
+            for i in range(4):
+                stale = backup_root / f"skill-old{i}"
+                stale.mkdir()
+                (stale / "f.txt").write_text("x")
+                os.utime(stale, (i, i))
+            info = updater.install(root, archive(), (0, 2, 0), "wb")
+            self.assertEqual(info["removed_backup_dirs"], 2)
+            names = sorted(p.name for p in backup_root.iterdir())
+            self.assertEqual(len(names), 3)
+            self.assertTrue(all(f"old{i}" not in names for i in (0, 1)))
 
 
 class ShadowTests(unittest.TestCase):

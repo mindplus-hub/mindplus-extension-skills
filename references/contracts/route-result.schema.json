@@ -13,7 +13,7 @@
     "facts": {"type": "object"},
     "workflows": {
       "type": "array",
-      "items": {"enum": ["CONVERT_FRESH", "CREATE_FRESH", "REVIEW_EXISTING", "PUBLISH_GITEE"]}
+      "items": {"enum": ["CONVERT_FRESH", "CREATE_FRESH", "UPGRADE_EXISTING", "REVIEW_EXISTING", "PUBLISH_GITEE"]}
     },
     "leaf_references": {"type": "array", "items": {"type": "string"}}
   }

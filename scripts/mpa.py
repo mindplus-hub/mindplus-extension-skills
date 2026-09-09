@@ -40,6 +40,7 @@ CHECK_RESULTS = {"PASS", "FAIL", "NOT_RUN", "ACCEPTED_LIMITATION", "CARRIED_RISK
 LEAF_FILES = {
     "CONVERT_FRESH": "switch.md",
     "CREATE_FRESH": "create.md",
+    "UPGRADE_EXISTING": "upgrade.md",
     "REVIEW_EXISTING": "review.md",
     "PUBLISH_GITEE": "gitee-publish.md",
 }
@@ -55,15 +56,15 @@ USER_EVIDENCE_CHECKLIST = [
 ]
 ROUTE_FIX = {
     "AUTH.PUSH_NOT_AUTHORIZED": "Ask the user for commit and push authorization, then rerun the same command with --auth commit --auth push.",
-    "AUTH.LOCAL_WRITE_REQUIRED": "Ask the user for permission to write the new project directory, then rerun with --auth local_write.",
+    "AUTH.LOCAL_WRITE_REQUIRED": "Ask the user for permission to write the project, then rerun with --auth local_write.",
     "INPUT.PROJECT_ROOT_REQUIRED": "Rerun with --project-root <absolute path>.",
     "INPUT.V1_SOURCE_REQUIRED": "Rerun with --v1-source <absolute directory>.",
-    "ROUTE.CONFLICTING_PRODUCERS": "Rerun with exactly one of CONVERT or CREATE in --goals.",
+    "ROUTE.CONFLICTING_PRODUCERS": "Rerun with exactly one of CONVERT, CREATE or UPGRADE in --goals.",
     "ROUTE.UNSUPPORTED_EXISTING_V2_SYNC": "Unsupported: the project_root is non-empty. Choose a new empty --project-root; existing-V2 sync has no fallback.",
     "WORKSPACE.TARGET_NOT_EMPTY": "Fresh creation needs an absent or empty --project-root; pick another directory.",
-    "WORKSPACE.EXISTING_PROJECT_REQUIRED": "Review or publication needs an existing non-empty --project-root.",
+    "WORKSPACE.EXISTING_PROJECT_REQUIRED": "Upgrade, review or publication needs an existing non-empty --project-root.",
     "INPUT.REVIEW_HANDOFF_NOT_FOUND": "The supplied --review-handoff file does not exist; fix the path or drop the flag to insert a review first.",
-    "INPUT.GOALS_REQUIRED": "Rerun with --goals (one or more of CONVERT, CREATE, REVIEW, PUBLISH).",
+    "INPUT.GOALS_REQUIRED": "Rerun with --goals (one or more of CONVERT, CREATE, UPGRADE, REVIEW, PUBLISH).",
 }
 
 
@@ -130,7 +131,7 @@ def next_command_for(workflow: str, ctx: dict[str, Any]) -> str:
             command += f" --project-root {quote(ctx['project_root'])}"
     elif workflow == "CREATE_FRESH":
         command = f"python {quote(skill + '/scripts/switch/check_reference_release.py')} --skill-root {quote(skill)} --offline"
-    elif workflow == "REVIEW_EXISTING":
+    elif workflow in {"REVIEW_EXISTING", "UPGRADE_EXISTING"}:
         command = f"python {quote(skill + '/scripts/hash_project.py')} --project-root {quote(ctx['project_root'])}"
     elif workflow == "PUBLISH_GITEE":
         command = (
@@ -253,6 +254,10 @@ def cmd_start(args: argparse.Namespace) -> int:
             output_handle.write(json.dumps(request, ensure_ascii=False, indent=2) + "\n")
         with route_path.open("w", encoding="utf-8", newline="\n") as output_handle:
             output_handle.write(json.dumps(routed, ensure_ascii=False, indent=2) + "\n")
+        if "UPGRADE_EXISTING" in routed["workflows"]:
+            baseline_project = Path(paths["project_root"])
+            baseline = {"project_root": str(baseline_project), "sha256": compute_project_hash(baseline_project)[0]}
+            (run_root / "upgrade-baseline.json").write_text(json.dumps(baseline, indent=2) + "\n", encoding="utf-8")
         output = initialize_run(
             work_root,
             request,
@@ -263,7 +268,7 @@ def cmd_start(args: argparse.Namespace) -> int:
             allow_staging=True,
             keep_evidence=args.keep_evidence,
         )
-    except (OSError, RunError) as exc:
+    except (OSError, RunError, HashError) as exc:
         return emit({"status": "BLOCKED", "reason_code": "WORKSPACE.RUN_INIT", "error": str(exc)}, 2)
 
     current = output.get("current_workflow") or (routed.get("workflows") or [None])[0]
@@ -404,9 +409,15 @@ def cmd_handoff(args: argparse.Namespace) -> int:
         if not spec or not Path(spec).is_file():
             return emit({"status": "FAIL", "error": "the run request recorded no existing extension_spec"}, 1)
         provenance = {"type": "EXTENSION_SPEC", "path": spec, "manifest": None, "sha256": file_sha256(Path(spec)), "commit": None}
+    elif workflow == "UPGRADE_EXISTING":
+        baseline_path = run_root / "upgrade-baseline.json"
+        if not baseline_path.is_file():
+            return emit({"status": "FAIL", "error": "upgrade baseline is missing; do not reconstruct it from modified content"}, 1)
+        baseline = read_object(baseline_path)
+        provenance = {"type": "EXISTING_V2", "path": str(project), "manifest": str(baseline_path), "sha256": baseline["sha256"], "commit": None}
     elif workflow == "REVIEW_EXISTING":
         upstream = None
-        for producer in ("CONVERT_FRESH", "CREATE_FRESH"):
+        for producer in ("CONVERT_FRESH", "CREATE_FRESH", "UPGRADE_EXISTING"):
             producer_handoff = run_root / "handoffs" / f"{producer}.json"
             if producer_handoff.is_file():
                 upstream = load_handoff(producer_handoff).get("input_provenance")
@@ -804,7 +815,7 @@ def main() -> int:
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     start = subparsers.add_parser("start", help="route a request and open a parent run")
-    start.add_argument("--goals", required=True, help="comma-separated: CONVERT, CREATE, REVIEW, PUBLISH")
+    start.add_argument("--goals", required=True, help="comma-separated: CONVERT, CREATE, UPGRADE, REVIEW, PUBLISH")
     start.add_argument("--project-root", required=True, type=Path)
     start.add_argument("--v1-source", type=Path)
     start.add_argument("--extension-spec", type=Path)

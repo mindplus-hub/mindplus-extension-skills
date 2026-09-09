@@ -11,7 +11,7 @@ from typing import Any
 
 
 SCHEMA_VERSION = "mindplus-agent.route-result/v1"
-SUPPORTED_GOALS = {"CONVERT", "CREATE", "REVIEW", "PUBLISH", "SYNC"}
+SUPPORTED_GOALS = {"CONVERT", "CREATE", "UPGRADE", "REVIEW", "PUBLISH", "SYNC"}
 AUTHORIZATION_FIELDS = {
     "local_write",
     "install",
@@ -90,9 +90,9 @@ def route(request: dict[str, Any], registry: dict[str, Any]) -> dict[str, Any]:
     if registry.get("schema_version") != "mindplus-agent.workflow-registry/v1":
         raise RouteError("unsupported workflow registry schema_version")
     registry_workflows = registry.get("workflows")
-    expected_workflows = {"CONVERT_FRESH", "CREATE_FRESH", "REVIEW_EXISTING", "PUBLISH_GITEE"}
+    expected_workflows = {"CONVERT_FRESH", "CREATE_FRESH", "UPGRADE_EXISTING", "REVIEW_EXISTING", "PUBLISH_GITEE"}
     if not isinstance(registry_workflows, dict) or set(registry_workflows) != expected_workflows:
-        raise RouteError("workflow registry must contain exactly the four supported workflows")
+        raise RouteError("workflow registry must contain exactly the five supported workflows")
 
     review_profile = request.get("review_profile", "BASIC")
     if review_profile not in {"BASIC", "HOST_READY"}:
@@ -159,12 +159,12 @@ def route(request: dict[str, Any], registry: dict[str, Any]) -> dict[str, Any]:
             message="Existing-V2 synchronization is not supported; fresh conversion must not overwrite it.",
             facts=facts,
         )
-    if "CONVERT" in goals and "CREATE" in goals:
+    if len(goals & {"CONVERT", "CREATE", "UPGRADE"}) > 1:
         return result(
             state="WAITING_USER",
             status="BLOCKED",
             reason_code="ROUTE.CONFLICTING_PRODUCERS",
-            message="Choose either fresh V1 conversion or creation from a specification.",
+            message="Choose one producer: fresh conversion, creation, or existing V2 upgrade.",
             facts=facts,
         )
     if "PUBLISH" in goals and not (authorizations["commit"] and authorizations["push"]):
@@ -175,12 +175,12 @@ def route(request: dict[str, Any], registry: dict[str, Any]) -> dict[str, Any]:
             message="Publication requires explicit commit and push authorization in the request. Ask the user, then resubmit with authorizations.commit and authorizations.push set to true.",
             facts=facts,
         )
-    if goals & {"CONVERT", "CREATE"} and not authorizations["local_write"]:
+    if goals & {"CONVERT", "CREATE", "UPGRADE"} and not authorizations["local_write"]:
         return result(
             state="WAITING_USER",
             status="BLOCKED",
             reason_code="AUTH.LOCAL_WRITE_REQUIRED",
-            message="Fresh conversion or creation writes a new project directory. Ask the user, then resubmit with authorizations.local_write set to true.",
+            message="Creation, conversion and upgrade require local project writes. Ask the user, then resubmit with authorizations.local_write set to true.",
             facts=facts,
         )
     if project is None:
@@ -237,6 +237,13 @@ def route(request: dict[str, Any], registry: dict[str, Any]) -> dict[str, Any]:
                 facts=facts,
             )
         producer = "CREATE_FRESH"
+
+    elif "UPGRADE" in goals:
+        if project_state != "NON_EMPTY":
+            return result(state="TERMINAL", status="BLOCKED",
+                          reason_code="WORKSPACE.EXISTING_PROJECT_REQUIRED",
+                          message="Upgrade requires an existing V2 project; inspect its format in the upgrade leaf.", facts=facts)
+        producer = "UPGRADE_EXISTING"
 
     if producer and not project.parent.is_dir():
         return result(

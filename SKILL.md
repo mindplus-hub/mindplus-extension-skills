@@ -1,35 +1,37 @@
 ---
 name: mindplus-agent-skill
 metadata:
-  version: "0.1.3"
-description: Create or freshly convert Mind+ V2 extensions with basic checks, review existing extensions, and publish authorized projects to Gitee. Use HOST_READY acceptance only when explicitly requested. Does not synchronize V1 into an existing V2 project or perform device acceptance.
+  version: "0.1.4"
+description: Create, upgrade existing, or freshly convert Mind+ V2 extensions with basic checks, review existing extensions, and publish authorized projects to Gitee. Use HOST_READY acceptance only when explicitly requested. Does not synchronize V1 into an existing V2 project or perform device acceptance.
 ---
 
 # MindPlus Agent
 
-Use the smallest workflow matching the request. Default: create/convert with basic checks, then publish only if requested. Do not insert a separate review or Mind+ GUI acceptance into ordinary development or publication.
+Use the smallest workflow matching the request. Default: create/convert/upgrade with basic checks, then publish only if requested. Do not insert a separate review or Mind+ GUI acceptance into ordinary development or publication.
 
-This directory is self-contained. Internal producer names (`mindplus-switch`, `mindplus-create`, `mindplus-review`, `mindplus-gitee-publish`) are not separately installed skills. For maintenance read [architecture.md](references/architecture.md).
+This directory is self-contained. Internal producer names (`mindplus-switch`, `mindplus-create`, `mindplus-upgrade`, `mindplus-review`, `mindplus-gitee-publish`) are not separately installed skills. For maintenance read [architecture.md](references/architecture.md).
 
 ## Route and execute
 
-0. Before routing each new task, run `python scripts/update_skill.py` from this skill directory. Compare installed `VERSION` (see root `VERSION`) with stable releases at `https://gitee.com/mind-plus/mindplus-agent-skill/releases/`. Runtime files at root/one child directory select the WB ZIP; deeper runtime directories select the universal ZIP. Install only a newer matching Release package, retaining a backup. On `UPDATED`, reload this directory's `SKILL.md` before continuing. On `SKIPPED`, briefly report the reason and continue with the installed version; never force overwrite local Git changes. Do not repeat the check within the same task or an active run. If the user explicitly requests offline use or a pinned version, skip the check.
-1. Read [routing.md](references/routing.md).
-2. Run `python scripts/mpa.py start --goals <CONVERT,CREATE,REVIEW,PUBLISH> --project-root <abs> --work-root <abs>` with known source/spec paths and authorizations already supplied by the user's request. Ordinary review uses `BASIC`. Pass `--review-profile HOST_READY` only for explicit full acceptance; it inserts a review even when REVIEW is not listed.
-3. Follow `next_command` and load only the selected leaf. Record results with `mpa.py handoff`, advance with `mpa.py transition`, and recover interruptions with `mpa.py resume`. Reusing a run ID must not change its request.
+0. Before routing each new task, run `python <absolute path of this skill directory>/scripts/update_skill.py` from any working directory (always pass the absolute script path; the working directory does not matter and the script never renames the skill directory). Compare installed `VERSION` (see root `VERSION`) with stable releases at `https://gitee.com/mind-plus/mindplus-agent-skill/releases/`. Runtime files at root/one child directory select the WB ZIP; deeper runtime directories select the universal ZIP. Install only a newer matching Release package, retaining a backup. On `UPDATED`, reload this directory's `SKILL.md` before continuing. On `SKIPPED`, briefly report the reason and continue with the installed version; never force overwrite local Git changes. Do not repeat the check within the same task or an active run. If the user explicitly requests offline use or a pinned version, skip the check.
+1. Immediately after the version check, follow [official-repository-discovery.md](references/official-repository-discovery.md): check the official `https://gitee.com/mind-plus` organization for repositories mentioned in the active conversation. For a matching development base, show verified candidates and ask whether to fork an existing repository before source-dependent writes; reuse an explicit choice already supplied. Public discovery does not require a token; actual fork development follows the upgrade leaf token/ownership gates.
+2. Read [routing.md](references/routing.md).
+3. Run `python scripts/mpa.py start --goals <CONVERT,CREATE,UPGRADE,REVIEW,PUBLISH> --project-root <abs> --work-root <abs>` with known source/spec paths and authorizations already supplied by the user's request. Ordinary review uses `BASIC`. Pass `--review-profile HOST_READY` only for explicit full acceptance; it inserts a review even when REVIEW is not listed.
+4. Follow `next_command` and load only the selected leaf. Record results with `mpa.py handoff`, advance with `mpa.py transition`, and recover interruptions with `mpa.py resume`. Reusing a run ID must not change its request.
 
 | Workflow | Reference |
 | --- | --- |
 | CONVERT_FRESH | [switch.md](references/workflows/switch.md) |
 | CREATE_FRESH | [create.md](references/workflows/create.md) |
+| UPGRADE_EXISTING | [upgrade.md](references/workflows/upgrade.md) |
 | REVIEW_EXISTING | [review.md](references/workflows/review.md) |
 | PUBLISH_GITEE | [gitee-publish.md](references/workflows/gitee-publish.md) |
 
-Creation and conversion already include static checks. Reuse those checks; no independent review is required before publishing. Explicit REVIEW runs use BASIC by default. Direct PUBLISH needs authorization and a current publication snapshot, not a HOST_READY certificate. Optional prior handoffs must still match the current project.
+Creation, conversion and upgrade already include static checks. Reuse those checks; no independent review is required before publishing. Explicit REVIEW runs use BASIC by default. Direct PUBLISH needs authorization and a current publication snapshot, not a HOST_READY certificate. Optional prior handoffs must still match the current project.
 
 ## Boundaries and evidence
 
-- Fresh conversion/creation requires an absent or empty target. Existing-V2 synchronization remains unsupported.
+- Fresh conversion/creation requires an absent or empty target. Use UPGRADE for feature changes to existing V2 repositories; V1-to-existing-V2 synchronization remains unsupported. For non-owned repositories, authenticate with a personal token and verify a personal fork before modifying extension files; see the upgrade leaf.
 - Keep the pinned Scaffold Release and bounded install/build attempts. Build when the environment is available; report skipped or unavailable build separately from static success. Never call skipped work PASS.
 - Review is read-only. Rerun affected checks after correction; changing a handoff is not verification.
 - Only explicit HOST_READY acceptance requires build, Mind+ import, block visibility and representative compilation. Host observations need user confirmation. Build or publication success never proves hardware behavior.

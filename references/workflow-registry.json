@@ -32,6 +32,15 @@
       "producer": "mindplus-gitee-publish",
       "requires_existing_target": true,
       "allowed_next": []
+    },
+    "UPGRADE_EXISTING": {
+      "leaf": "references/workflows/upgrade.md",
+      "producer": "mindplus-upgrade",
+      "requires_existing_target": true,
+      "allowed_next": [
+        "REVIEW_EXISTING",
+        "PUBLISH_GITEE"
+      ]
     }
   }
 }

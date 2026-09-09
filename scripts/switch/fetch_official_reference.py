@@ -62,17 +62,20 @@ def default_branch(repo: str) -> str:
 def cmd_list(args: argparse.Namespace) -> int:
     repositories: list[dict[str, Any]] = []
     page = args.page or 1
+    if page < 1:
+        return emit({"status": "BLOCKED", "reason_code": "OFFICIAL_CORPUS.INVALID_PAGE", "error": "page must be positive"}, 2)
+    first_page = page
+    reached_end = False
     try:
         while True:
             batch = http_get_json(f"{API_BASE}/orgs/{ORG}/repos?page={page}&per_page=100")
-            if not isinstance(batch, list) or not batch:
-                break
-            repositories.extend(item for item in batch if isinstance(item, dict))
-            if len(batch) < 100 or args.page:
+            if not isinstance(batch, list) or any(not isinstance(item, dict) for item in batch):
+                raise FetchError("Repository listing returned an invalid response; absence cannot be determined")
+            repositories.extend(batch)
+            reached_end = len(batch) < 100
+            if reached_end or args.page or page >= 10:
                 break
             page += 1
-            if page > 10:
-                break
     except FetchError as exc:
         return emit({"status": "BLOCKED", "reason_code": "OFFICIAL_CORPUS.NETWORK", "error": str(exc)}, 2)
 
@@ -93,6 +96,11 @@ def cmd_list(args: argparse.Namespace) -> int:
             "status": "PASS",
             "org": ORG,
             "count": len(entries),
+            "first_page": first_page,
+            "last_page": page,
+            "reached_end": reached_end,
+            "complete": first_page == 1 and reached_end,
+            "next_page": None if reached_end else page + 1,
             "repositories": entries,
             "next_command": "python scripts/switch/fetch_official_reference.py tree --repo <name>  to locate config.json, then fetch",
         },

@@ -1,6 +1,6 @@
 # Gitee API boundary
 
-Read this file only after `check_gitee_token.py` reports a local token present and publication preconditions are otherwise satisfiable.
+Read this file only after `check_gitee_token.py` reports a local token present and the requested publication or fork preconditions are otherwise satisfiable. Fork preparation is described in [workflows/upgrade.md](workflows/upgrade.md).
 
 ## Verified interface baseline
 

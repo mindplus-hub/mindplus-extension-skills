@@ -605,11 +605,11 @@ class RunAndContractTests(unittest.TestCase):
             with self.subTest(path=path):
                 json.loads(path.read_text(encoding="utf-8-sig"))
 
-    def test_registry_contains_only_four_supported_leaves(self) -> None:
+    def test_registry_contains_only_five_supported_leaves(self) -> None:
         registry = json.loads((REFERENCES / "workflow-registry.json").read_text(encoding="utf-8"))
         self.assertEqual(
             set(registry["workflows"]),
-            {"CONVERT_FRESH", "CREATE_FRESH", "REVIEW_EXISTING", "PUBLISH_GITEE"},
+            {"CONVERT_FRESH", "CREATE_FRESH", "UPGRADE_EXISTING", "REVIEW_EXISTING", "PUBLISH_GITEE"},
         )
 
     def test_entrypoint_references_exist(self) -> None:

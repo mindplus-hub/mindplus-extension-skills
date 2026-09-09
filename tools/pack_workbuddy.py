@@ -178,7 +178,7 @@ class Adapter:
         if old.startswith("scripts/switch/"):
             text = text.replace("Path(__file__).resolve().parents[2]", "Path(__file__).resolve().parents[1]")
         if old == "scripts/mpa.py":
-            for leaf in ("switch.md", "create.md", "review.md", "gitee-publish.md"):
+            for leaf in ("switch.md", "create.md", "upgrade.md", "review.md", "gitee-publish.md"):
                 text = text.replace('"' + leaf + '"', '"workflows__' + leaf + '"')
         if old == "scripts/switch/check_reference_release.py":
             replacements = {

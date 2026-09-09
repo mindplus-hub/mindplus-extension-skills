@@ -69,7 +69,8 @@ class UpdateTests(unittest.TestCase):
             info = updater.install(root, archive(), (0, 2, 0), "wb")
             backup = Path(info["backup"])
             self.assertEqual(updater.version(root), (0, 2, 0))
-            self.assertEqual((backup / "local.txt").read_text(), "preserve")
+            with zipfile.ZipFile(backup) as saved:
+                self.assertEqual(saved.read("local.txt"), b"preserve")
             self.assertEqual((root / "local.txt").read_text(), "preserve")
             self.assertEqual(info["pruned"], 0)
 
@@ -88,7 +89,8 @@ class UpdateTests(unittest.TestCase):
             self.assertFalse((root / "references/stale.md").exists())
             self.assertFalse((root / "references/deep/nested.md").exists())
             self.assertTrue((root / "_user_meta.json").exists())
-            self.assertTrue((Path(info["backup"]) / "references/stale.md").exists())
+            with zipfile.ZipFile(info["backup"]) as saved:
+                self.assertEqual(saved.read("references/stale.md"), b"stale")
             self.assertEqual(info["pruned"], 2)
 
     def test_overlay_failure_rolls_back(self):
@@ -119,19 +121,14 @@ class UpdateTests(unittest.TestCase):
                 updater.install(root, archive(number="0.9.0"), (0, 2, 0), "wb")
             self.assertEqual(updater.version(root), (0, 1, 0))
 
-    def test_staging_cleanup_is_deferred_and_swept_next_run(self):
+    def test_check_does_not_delete_files(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "skill"
             root.mkdir()
-            updater.unpack(archive(number="0.1.0"), root, (0, 1, 0), "wb")
-            updater.install(root, archive(), (0, 2, 0), "wb")
-            temp = Path(tempfile.gettempdir())
-            stages = [p for p in temp.glob(updater.STAGE_PREFIX + "*") if p.is_dir()]
-            self.assertTrue(stages and any((s / "SKILL.md").is_file() for s in stages))
-            swept = updater.cleanup_stale_stages()
-            self.assertGreaterEqual(swept, 1)
-            remaining = [p for p in temp.glob(updater.STAGE_PREFIX + "*") if p.is_dir()]
-            self.assertEqual(remaining, [])
+            updater.unpack(archive(number="0.1.3"), root, (0, 1, 3), "wb")
+            with patch.object(updater, "cache_path", lambda: Path(tmp) / "cache.json"), patch.object(updater, "download", return_value=b"[]"), patch.object(Path, "unlink", side_effect=AssertionError("check must not delete")):
+                result = updater.update(root, check_only=True, refresh=True)
+            self.assertEqual(result["swept_stage_files"], 0)
 
     def test_download_requires_gitee_host(self):
         for url in ["http://gitee.com/a.zip", "https://evil.example.com/a.zip",
@@ -188,37 +185,44 @@ class UpdateTests(unittest.TestCase):
                 self.assertEqual(result["status"], "UPDATE_AVAILABLE")
                 self.assertEqual(result["remote_version"], "0.2.0")
 
-    def test_backup_retention_keeps_recent_three(self):
+    def test_repeated_updates_reuse_one_zip(self):
         with tempfile.TemporaryDirectory() as tmp:
-            backup_root = Path(tmp) / ".mindplus-skill-backups"
-            backup_root.mkdir()
-            for i in range(5):
-                stale = backup_root / f"skill-old{i}"
-                stale.mkdir()
-                (stale / "f.txt").write_text("x")
-                os.utime(stale, (i, i))
-            removed = updater.prune_old_backups(backup_root)
-            self.assertEqual(removed, 2)
-            kept = sorted(p.name for p in backup_root.iterdir())
-            self.assertEqual(kept, ["skill-old2", "skill-old3", "skill-old4"])
+            root = Path(tmp) / "skills" / "skill"
+            root.mkdir(parents=True)
+            updater.unpack(archive(number="0.1.0"), root, (0, 1, 0), "wb")
+            backup = Path(tmp) / "state" / "previous.zip"
+            with patch.object(updater, "backup_path", return_value=backup):
+                updater.install(root, archive(number="0.1.3"), (0, 1, 3), "wb")
+                updater.install(root, archive(number="0.1.4"), (0, 1, 4), "wb")
+            self.assertEqual(list(backup.parent.iterdir()), [backup])
+            self.assertFalse((root.parent / ".mindplus-skill-backups").exists())
+            with zipfile.ZipFile(backup) as saved:
+                self.assertEqual(saved.read("VERSION"), b"0.1.3")
+            self.assertEqual(updater.version(root), (0, 1, 4))
 
-    def test_install_prunes_old_backups(self):
+    def test_backup_and_stage_copies_block_before_network(self):
+        for name in (".mindplus-skill-backups/skill-old", "mindplus-agent-skill-update-abcd1234"):
+            with tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp) / name
+                root.mkdir(parents=True)
+                updater.unpack(archive(), root, (0, 2, 0), "wb")
+                with patch.object(updater, "download") as network, self.assertRaisesRegex(ValueError, "active installed"):
+                    updater.update(root)
+                network.assert_not_called()
+
+    def test_upgrade_reports_verified_target_without_deletion(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp) / "skill"
             root.mkdir()
-            updater.unpack(archive(number="0.1.0"), root, (0, 1, 0), "wb")
-            backup_root = root.parent / ".mindplus-skill-backups"
-            backup_root.mkdir()
-            for i in range(4):
-                stale = backup_root / f"skill-old{i}"
-                stale.mkdir()
-                (stale / "f.txt").write_text("x")
-                os.utime(stale, (i, i))
-            info = updater.install(root, archive(), (0, 2, 0), "wb")
-            self.assertEqual(info["removed_backup_dirs"], 2)
-            names = sorted(p.name for p in backup_root.iterdir())
-            self.assertEqual(len(names), 3)
-            self.assertTrue(all(f"old{i}" not in names for i in (0, 1)))
+            updater.unpack(archive(number="0.1.3"), root, (0, 1, 3), "wb")
+            asset = {"name": "mindplus-agent-skill-0.1.4-workbuddy.zip", "browser_download_url": "https://gitee.com/test.zip"}
+            releases = json.dumps([{"tag_name": "v0.1.4", "assets": [asset]}]).encode()
+            with patch.object(updater, "cache_path", lambda: Path(tmp) / "cache.json"), patch.object(updater, "download", side_effect=[releases, archive(number="0.1.4")]), patch.object(Path, "unlink", side_effect=AssertionError("same-layout update must not delete")):
+                result = updater.update(root, refresh=True)
+            self.assertEqual(result["status"], "UPDATED")
+            self.assertEqual(result["installed_version"], "0.1.4")
+            self.assertEqual(result["installation_root"], str(root.resolve()))
+
 
 
 class ShadowTests(unittest.TestCase):

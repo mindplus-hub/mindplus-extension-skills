@@ -1,21 +1,9 @@
 #!/usr/bin/env python3
-"""Install newer official Release ZIPs, selecting WB or universal by layout depth.
+"""Update the active skill in place, with one compressed rollback snapshot.
 
-The skill directory is never renamed or deleted wholesale. Renaming it fails on
-Windows whenever any process holds the directory open (a shell whose working
-directory is inside, an editor, antivirus -> WinError 32), and wholesale
-replacement would discard host metadata such as _user_meta.json. Instead the
-pre-update state is copied to a backup, the release is overlaid file by file,
-and release-managed directories are pruned of files the release no longer
-ships, one file per operation. Deletions therefore stay far below the host
-sandbox bulk-delete guard (50+ files per operation), and pure-overwrite
-releases delete nothing at all. The staging copy lives in the system temp dir
-and is swept by the next update run instead of being deleted in the same run.
-
-Successful network checks are cached in the system temp dir, bound to the
-VERSION content digest and layout, for CACHE_TTL_SECONDS so repeated
-task-start checks stay offline; pass --refresh to force a network check.
-Pre-update backups are pruned to the newest KEEP_BACKUPS entries.
+Do not sweep temporary directories or old backups during an update. Host safety
+reviews still apply to required filesystem changes; never split deletion work
+to avoid review. Backups live outside skill discovery directories as ZIP files.
 """
 from __future__ import annotations
 import argparse
@@ -30,7 +18,6 @@ import subprocess
 import tempfile
 import time
 import urllib.request
-import uuid
 import zipfile
 from pathlib import Path, PurePosixPath
 from urllib.parse import urlparse
@@ -43,7 +30,6 @@ LIMIT = 64 * 1024 * 1024
 DOWNLOAD_HOST = "gitee.com"
 CACHE_FILE = "mindplus-agent-skill-check-cache.json"
 CACHE_TTL_SECONDS = 3600
-KEEP_BACKUPS = 3
 # Release-managed directories are synced exactly to the release content and
 # pruned of superseded files; everything else in the installation (e.g.
 # _user_meta.json, .git, local notes) belongs to the host and is preserved.
@@ -130,8 +116,7 @@ def load_cache(root: Path, current: tuple, kind: str) -> dict | None:
 
     The cache binds to the VERSION content digest and layout variant, lives in
     the system temp dir, and never outlives CACHE_TTL_SECONDS or a local
-    version change, so a newer published release cannot be masked by stale
-    state. Anything unreadable, tampered, or from the clock's future is
+    version change, so cached results expire within an hour. Use --refresh when a newer release is known to exist. Anything unreadable, tampered, or from the clock's future is
     rejected and treated as a cache miss.
     """
     try:
@@ -141,7 +126,7 @@ def load_cache(root: Path, current: tuple, kind: str) -> dict | None:
             return None
         if not 0 <= time.time() - checked <= CACHE_TTL_SECONDS:
             return None
-        if (data["version"] != ".".join(map(str, current))
+        if (data.get("installation_root") != str(root.resolve()) or data["version"] != ".".join(map(str, current))
                 or data["version_sha256"] != version_digest(root)
                 or data["variant"] != kind):
             return None
@@ -165,6 +150,7 @@ def store_cache(root: Path, current: tuple, kind: str, selected) -> None:
     try:
         payload = {
             "checked_at": time.time(),
+            "installation_root": str(root.resolve()),
             "ttl_seconds": CACHE_TTL_SECONDS,
             "version": ".".join(map(str, current)),
             "version_sha256": version_digest(root),
@@ -224,75 +210,29 @@ def unpack(data: bytes, stage: Path, expected: tuple, kind: str) -> None:
         raise ValueError("Release version or layout does not match the selected package")
 
 
-def _remove_tree_file_by_file(root: Path) -> int:
-    """Delete a directory tree with one unlink per operation.
-
-    The host sandbox treats a single operation that removes 50+ files as a
-    bulk delete and blocks it until approved. Unlinking files individually
-    stays far below that threshold; the number of removed files is returned
-    for reporting. Locked files are tolerated and left in place.
-    """
-    removed = 0
-    for path in sorted(root.rglob("*"), key=lambda p: len(p.parts), reverse=True):
-        if path.is_symlink() or path.is_file():
-            try:
-                path.unlink()
-                removed += 1
-            except OSError:
-                pass
-    for path in sorted(root.rglob("*"), key=lambda p: len(p.parts), reverse=True):
-        try:
-            path.rmdir()
-        except OSError:
-            pass
-    try:
-        root.rmdir()
-    except OSError:
-        pass
-    return removed
+def validate_install_root(root: Path) -> None:
+    for part in root.parts:
+        if part == ".mindplus-skill-backups" or part.startswith(STAGE_PREFIX) or part == "mindplus-skill-updater":
+            raise ValueError("Refusing to update a backup or staging copy. Run the updater from the active installed skill directory.")
 
 
-def cleanup_stale_stages() -> int:
-    """Sweep staging dirs left by earlier update runs (deferred cleanup).
-
-    Staging copies are deliberately not deleted in the run that created them;
-    the next update run sweeps the system temp dir instead, and anything this
-    cannot remove is left to the system temp policy. Sweeping matches only
-    staging dirs created by this script.
-    """
-    removed = 0
-    try:
-        candidates = list(Path(tempfile.gettempdir()).glob(STAGE_PREFIX + "*"))
-    except OSError:
-        return 0
-    for stage in candidates:
-        if stage.is_dir() and STAGE_NAME.fullmatch(stage.name):
-            removed += _remove_tree_file_by_file(stage)
-    return removed
+def backup_path(root: Path) -> Path:
+    identity = hashlib.sha256(str(root.resolve()).casefold().encode()).hexdigest()[:20]
+    return Path(tempfile.gettempdir()) / "mindplus-skill-updater" / identity / "previous.zip"
 
 
-def prune_old_backups(backup_root: Path, keep: int = KEEP_BACKUPS) -> int:
-    """Keep only the newest `keep` pre-update backups; best-effort.
-
-    Retention bounds the growth of `.mindplus-skill-backups`, whose entries
-    each contain a full pre-update copy. Removal reuses the per-file unlink
-    used everywhere else in this script, so it never looks like a bulk delete.
-    """
-    try:
-        dirs = [d for d in backup_root.iterdir() if d.is_dir() and not d.is_symlink()]
-    except OSError:
-        return 0
-
-    def mtime(path: Path) -> float:
-        try:
-            return path.stat().st_mtime
-        except OSError:
-            return 0.0
-
-    removed = 0
-    for stale in sorted(dirs, key=mtime, reverse=True)[keep:]:
-        removed += _remove_tree_file_by_file(stale)
-    return removed
+def write_backup(root: Path, backup: Path) -> None:
+    # Assemble fully before replacing the previous snapshot, so a read failure
+    # leaves the existing rollback archive intact.
+    stream = io.BytesIO()
+    with zipfile.ZipFile(stream, "w", zipfile.ZIP_DEFLATED) as archive:
+        for path in root.rglob("*"):
+            if path.is_file() and not any(part in IGNORED for part in path.relative_to(root).parts):
+                archive.write(path, path.relative_to(root).as_posix())
+    backup.parent.mkdir(parents=True, exist_ok=True)
+    pending = backup.with_suffix(".pending.zip")
+    pending.write_bytes(stream.getvalue())
+    os.replace(pending, backup)
 
 
 def sync_release(stage: Path, root: Path) -> int:
@@ -301,11 +241,10 @@ def sync_release(stage: Path, root: Path) -> int:
     Files are copied over their existing counterparts instead of swapping the
     whole directory, so local files the release does not ship (e.g.
     _user_meta.json, .git) survive untouched. Afterwards the release-managed
-    directories are pruned of files the release no longer contains, one file
-    per operation, keeping the installation layout identical to the release.
+    directories are pruned of files the release no longer contains, subject to host permissions, keeping the installation layout identical to the release.
     Returns the number of pruned files (0 for pure-overwrite releases).
     """
-    for src in stage.rglob("*"):
+    for src in sorted(stage.rglob("*"), key=lambda p: (p.name == "VERSION", str(p))):
         if src.is_symlink() or not src.is_file():
             continue
         dst = root / src.relative_to(stage)
@@ -319,41 +258,38 @@ def sync_release(stage: Path, root: Path) -> int:
             continue
         for path in list(base.rglob("*")):
             if (path.is_symlink() or path.is_file()) and path.relative_to(root) not in staged:
-                try:
-                    path.unlink()
-                    pruned += 1
-                except OSError:
-                    pass
+                path.unlink()
+                pruned += 1
     return pruned
 
 
-def restore_installation(backup: Path, root: Path) -> None:
-    """Best-effort rollback to the pre-update copy after a failed overlay."""
-    for src in backup.rglob("*"):
-        if src.is_symlink() or not src.is_file():
-            continue
-        dst = root / src.relative_to(backup)
-        dst.parent.mkdir(parents=True, exist_ok=True)
-        try:
-            copy_file(src, dst)
-        except OSError:
-            pass
-    kept = {p.relative_to(backup) for p in backup.rglob("*") if p.is_file() or p.is_symlink()}
-    for path in list(root.rglob("*")):
-        if (path.is_symlink() or path.is_file()) and path.relative_to(root) not in kept:
-            try:
+def restore_installation(backup: Path, root: Path, staged_files: set[Path]) -> None:
+    """Restore snapshot; propagate any incomplete rollback instead of hiding it."""
+    with zipfile.ZipFile(backup) as archive:
+        kept = {Path(name) for name in archive.namelist()}
+        for name in archive.namelist():
+            dst = root / name
+            if not dst.resolve().is_relative_to(root.resolve()):
+                raise ValueError("Rollback path escapes installation")
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            dst.write_bytes(archive.read(name))
+        for relative in staged_files - kept:
+            path = root / relative
+            if path.is_file():
                 path.unlink()
-            except OSError:
-                pass
 
 
 def install(root: Path, data: bytes, number: tuple, kind: str) -> dict:
+    root = root.resolve()
+    validate_install_root(root)
+    if number <= version(root):
+        raise ValueError("Selected release is not newer than the installed version")
     try:
         stage = Path(tempfile.mkdtemp(prefix=STAGE_PREFIX))
     except OSError as exc:
         raise ValueError("Cannot create the update staging directory in the system temp "
                          "folder; the sandbox may deny writes there. " + str(exc)) from exc
-    backup = root.parent / ".mindplus-skill-backups" / (root.name + "-" + uuid.uuid4().hex)
+    backup = backup_path(root)
     unpack(data, stage, number, kind)
     for path in root.rglob("*"):
         if path.is_symlink() or getattr(path.lstat(), "st_file_attributes", 0) & 0x400:
@@ -363,38 +299,31 @@ def install(root: Path, data: bytes, number: tuple, kind: str) -> dict:
                                 capture_output=True, text=True, timeout=10)
         if result.returncode or result.stdout.strip():
             raise ValueError("Local Git changes or unavailable Git: update skipped")
-    backup.parent.mkdir(exist_ok=True)
-    try:
-        shutil.copytree(root, backup)
-    except OSError as exc:
-        if backup.exists():
-            _remove_tree_file_by_file(backup)
-        raise ValueError("Could not copy the pre-update backup; the skill directory or one of its "
-                         "files is likely held open by another program (editor, antivirus). Close "
-                         f"it and retry. " + str(exc)) from exc
+    write_backup(root, backup)
+    staged_files = {p.relative_to(stage) for p in stage.rglob("*") if p.is_file()}
     try:
         pruned = sync_release(stage, root)
-        if version(root) != number:
-            raise ValueError("Installed files do not match the selected release")
-    except OSError as exc:
-        restore_installation(backup, root)
-        raise ValueError("Could not copy the update into the skill directory; a file inside it is "
-                         "likely held open by another program (editor, antivirus, or a shell whose "
-                         "working directory is inside the directory). Close it and retry; the "
-                         f"pre-update copy is at {backup}. " + str(exc)) from exc
-    except ValueError:
-        restore_installation(backup, root)
-        raise
-    removed_backups = prune_old_backups(backup.parent)
-    return {"backup": str(backup), "pruned": pruned, "removed_backup_dirs": removed_backups}
+        if version(root) != number or variant(root) != kind:
+            raise ValueError("Installed version or layout does not match selected release")
+        for relative in staged_files:
+            if (root / relative).read_bytes() != (stage / relative).read_bytes():
+                raise ValueError(f"Installed file verification failed: {relative}")
+    except (OSError, ValueError) as exc:
+        try:
+            restore_installation(backup, root, staged_files)
+        except (OSError, ValueError) as rollback:
+            raise ValueError(f"Update failed and rollback is incomplete. Stop using this installation; recovery ZIP: {backup}; {rollback}") from exc
+        raise ValueError(f"Update failed; original files restored. Resolve the reported error before retry: {exc}") from exc
+    return {"backup": str(backup), "pruned": pruned, "removed_backup_dirs": 0}
 
 
 def update(root: Path, check_only: bool = False, refresh: bool = False) -> dict:
     root = root.resolve()
-    swept = cleanup_stale_stages()
+    validate_install_root(root)
+    swept = 0
     current, kind = version(root), variant(root)
     result = {"current_version": ".".join(map(str, current)), "variant": kind, "releases": RELEASE_PAGE,
-              "swept_stage_files": swept}
+              "swept_stage_files": swept, "installation_root": str(root)}
     cached = None if refresh else load_cache(root, current, kind)
     selected = None
     if cached is not None and cached.get("remote_version") is not None:
@@ -422,6 +351,7 @@ def update(root: Path, check_only: bool = False, refresh: bool = False) -> dict:
         return {**result, "status": "UPDATE_AVAILABLE"}
     info = install(root, download(asset["browser_download_url"]), number, kind)
     return {**result, "status": "UPDATED", "backup": info["backup"],
+            "installed_version": ".".join(map(str, version(root))),
             "pruned_release_files": info["pruned"],
             "removed_backup_dirs": info["removed_backup_dirs"],
             "next_action": "Reload SKILL.md before routing. Do not run the update check again in this task."}

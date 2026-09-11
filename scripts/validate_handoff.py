@@ -159,6 +159,21 @@ def validate(data: dict[str, Any], require_outcome: str | None, check_artifacts:
                 errors.append(f"check {check_id} has invalid result")
             if check.get("confirmed_by") not in (None, "user"):
                 errors.append(f"check {check_id} has invalid confirmed_by (only 'user' or null)")
+            priority = check.get("priority")
+            if priority is not None and priority not in {"P0", "P1", "P2"}:
+                errors.append(f"invalid priority for check: {check_id}")
+            if priority == "P0" and check.get("required") is not True:
+                errors.append(f"P0 check must be required: {check_id}")
+            if priority in {"P1", "P2"} and check.get("required") is not False:
+                errors.append(f"advisory check must be optional: {check_id}")
+            protected = {"config_schema", "extension_static_integrity", "source_semantics",
+                         "repository_ownership", "version_bump", "upgrade_regression",
+                         "publication_snapshot_current", "publication_set_reviewed",
+                         "git_commit", "gitee_repository", "remote_ref_verified", "repository_topic_verified"} | HOST_READY_CHECKS
+            if priority in {"P1", "P2"} and check_id in protected:
+                errors.append(f"required gate cannot be downgraded: {check_id}")
+            if priority and check.get("result") == "FAIL" and not check.get("evidence"):
+                errors.append(f"classified finding needs evidence: {check_id}")
             evidence = check.get("evidence")
             if (
                 status == "PASS"

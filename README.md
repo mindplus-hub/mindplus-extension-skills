@@ -1,4 +1,4 @@
-# MindPlus Agent Skill
+# MindPlus Extension Skills
 
 Mind+扩展库用着不顺手？需要新的功能？试试这个skill也能体验一把开发的快乐！
 
@@ -11,7 +11,7 @@ Mind+扩展库用着不顺手？需要新的功能？试试这个skill也能体�
 | 官方仓库发现 | 检查 mind-plus 官方组织中与当前对话相关的仓库，确认开发来源 |
 | 已有 V2 升级 | 实现功能并提升扩展版本；非本人仓库使用个人令牌 fork 并核验后修改 |
 | 基础检查 | 配置、资源引用、本地化、生成器映射、明显语义问题和项目说明等 |
-| Gitee 发布 | 发布到已有仓库，或按授权创建仓库；检查文件集合、敏感信息、提交树、推送和远端引用 |
+| Gitee 发布 | 发布到已有仓库，或按授权创建仓库；检查文件集合、敏感信息、提交树、推送和远端引用；成功后自动添加仓库 Topic `MindPlus-Ext2` |
 | 组合任务 | 创建后发布、转换后发布、升级后发布、审核后发布；只串联本次要求的步骤 |
 
 ## 架构说明
@@ -28,7 +28,7 @@ Mind+扩展库用着不顺手？需要新的功能？试试这个skill也能体�
 
 | 目标 | 提示词示例 |
 | --- | --- |
-| 新建 | “使用 mindplus-agent-skill，为这个库创建 V2 扩展，先确认积木功能，输出到一个新目录。” |
+| 新建 | “使用 mindplus-extension-skills，为这个库创建 V2 扩展，先确认积木功能，输出到一个新目录。” |
 | 转换 | “将这里的 V1 转换为 V2，保留默认行为，只做基础检查。” |
 | 升级 | “为这个已有 V2 增加指定功能，保留原有行为，提升版本并做基础检查；非本人仓库先 fork。” |
 | 普通审核 | “用 BASIC 审核这个扩展，列出具体问题，不修改文件。” |
@@ -58,39 +58,39 @@ skill 通过 Git Credential Manager 执行 `git credential fill` 读取该凭据
 
 | 范围 | 相对安装目录 |
 | --- | --- |
-| 用户级，跨项目使用 | `.agents/skills/mindplus-agent-skill/` |
-| 项目级，随项目共享 | `.agents/skills/mindplus-agent-skill/` |
+| 用户级，跨项目使用 | `.agents/skills/mindplus-extension-skills/` |
+| 项目级，随项目共享 | `.agents/skills/mindplus-extension-skills/` |
 
 在选定的安装基目录中执行：
 
 ```powershell
 New-Item -ItemType Directory -Force ".agents/skills" | Out-Null
-git clone https://gitee.com/mind-plus/mindplus-agent-skill.git ".agents/skills/mindplus-agent-skill"
+git clone https://gitee.com/mind-plus/mindplus-extension-skills.git ".agents/skills/mindplus-extension-skills"
 ```
 
 如果目标已存在，不必再次 clone。安装后查看技能列表；CLI / IDE 可用 `/skills`，并通过 `$` 选择技能：
 
 ```text
-$mindplus-agent-skill 帮我把 extensions/v1-demo 转换到 extensions/v2-demo，只做转换和基础检查。
+$mindplus-extension-skills 帮我把 extensions/v1-demo 转换到 extensions/v2-demo，只做转换和基础检查。
 ```
 
 桌面端也可在技能界面选择后补充任务。未识别时重开会话或重启客户端。已有版本若使用其他技能目录，应以该客户端显示的实际来源为准，避免重复安装同名副本。见 [Codex 官方技能文档](https://learn.chatgpt.com/docs/build-skills)。
 
 ### Claude Code
 
-将整个目录放到用户主目录或项目根目录下的 `.claude/skills/mindplus-agent-skill/`。
+将整个目录放到用户主目录或项目根目录下的 `.claude/skills/mindplus-extension-skills/`。
 
 在选定的安装基目录中执行：
 
 ```powershell
 New-Item -ItemType Directory -Force ".claude/skills" | Out-Null
-git clone https://gitee.com/mind-plus/mindplus-agent-skill.git ".claude/skills/mindplus-agent-skill"
+git clone https://gitee.com/mind-plus/mindplus-extension-skills.git ".claude/skills/mindplus-extension-skills"
 ```
 
 在 Claude Code 中调用：
 
 ```text
-/mindplus-agent-skill 审核 extensions/v2-demo，使用 BASIC，只报告问题和建议。
+/mindplus-extension-skills 审核 extensions/v2-demo，使用 BASIC，只报告问题和建议。
 ```
 
 也可通过自然语言明确要求使用该技能。若会话启动时尚不存在技能父目录，安装后重启会话。见 [Claude Code 官方技能文档](https://code.claude.com/docs/en/skills)。
@@ -99,30 +99,30 @@ git clone https://gitee.com/mind-plus/mindplus-agent-skill.git ".claude/skills/m
 
 推荐使用官方的本地技能包导入入口：
 
-1. 从 [发行版](https://gitee.com/mind-plus/mindplus-agent-skill/releases/) 下载名称含 `workbuddy` 的 ZIP，保留完整包内容。
+1. 从 [发行版](https://gitee.com/mind-plus/mindplus-extension-skills/releases/) 下载名称含 `workbuddy` 的 ZIP，保留完整包内容。
 2. 打开 **技能 → 添加技能 → 上传技能**，选择本地技能包并导入。
-3. 在已安装列表中确认 `mindplus-agent-skill` 已启用，并让任务可以访问扩展所在目录。
+3. 在已安装列表中确认 `mindplus-extension-skills` 已启用，并让任务可以访问扩展所在目录。
 4. 在对话中明确说明：
 
 ```text
-请使用 mindplus-agent-skill，为这个传感器创建 Mind+ V2 上传模式扩展。
+请使用 mindplus-extension-skills，为这个传感器创建 Mind+ V2 上传模式扩展。
 需求和库源码在 extensions/sensor-source，输出到 extensions/sensor-v2。
 先整理规格并完成创建和基础检查，不发布。
 ```
 
 ### ZCode
 
-用户主目录下的相对安装目录为 `.zcode/skills/mindplus-agent-skill/`。在用户主目录中执行：
+用户主目录下的相对安装目录为 `.zcode/skills/mindplus-extension-skills/`。在用户主目录中执行：
 
 ```powershell
 New-Item -ItemType Directory -Force ".zcode/skills" | Out-Null
-git clone https://gitee.com/mind-plus/mindplus-agent-skill.git ".zcode/skills/mindplus-agent-skill"
+git clone https://gitee.com/mind-plus/mindplus-extension-skills.git ".zcode/skills/mindplus-extension-skills"
 ```
 
 安装后进入 **设置 → 技能 → 刷新**，确认已启用；在对话中输入 `$` 选择：
 
 ```text
-$mindplus-agent-skill 检查 extensions/v2-demo 的配置和资源引用，使用 BASIC。
+$mindplus-extension-skills 检查 extensions/v2-demo 的配置和资源引用，使用 BASIC。
 ```
 
 如果已在 Codex 或 Claude Code 安装，也可以从 ZCode 的 **设置 → 技能 → 导入** 扫描外部技能，并选择复制或软链接；复制为独立副本，软链接需要来源目录持续可用。见 [ZCode 官方技能文档](https://zcode.z.ai/cn/docs/skill)。
@@ -134,7 +134,7 @@ $mindplus-agent-skill 检查 extensions/v2-demo 的配置和资源引用，使�
 没有原生 Skill 功能，但能读文件和执行命令的工具，可以把仓库放在可访问的位置，在任务开始时明确指定入口：
 
 ```text
-请先完整读取 tools/mindplus-agent-skill/SKILL.md，
+请先完整读取 tools/mindplus-extension-skills/SKILL.md，
 以该目录为技能根目录，按路由只加载本次需要的参考文件，
 使用其 scripts 中的工具完成任务。
 
@@ -160,6 +160,11 @@ $mindplus-agent-skill 检查 extensions/v2-demo 的配置和资源引用，使�
 进一步了解实现约定，可阅读 [架构说明](references/architecture.md)、[证据与审核等级](references/evidence.md) 和 [结果交接协议](references/handoff.md)。
 
 ## 版本更新
+
+- V0.2.1
+   - 发布扩展时自动添加并核验仓库 Topic `MindPlus-Ext2`
+   - 审核使用P0/P1/P2三级分类处理
+   - 修改名称为 MindPlus-Extension-Skills
 
 - V0.2.0
    - 推送正式版

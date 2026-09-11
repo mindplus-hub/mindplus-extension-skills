@@ -28,3 +28,9 @@ Treat endpoint schemas and token permissions as version-sensitive. Recheck the c
 - A new empty remote is a real external side effect. Record its URL and result even if a later push fails.
 - Do not delete or recreate a colliding repository automatically.
 - Do not treat an HTTP success alone as publication success; verify the intended owner/name/visibility and later the pushed ref/SHA.
+
+## Repository Topic addition (0.2.1)
+
+`GET /repos/{owner}/{repo}/project_labels` lists repository Topics; POST on the same path adds a JSON string array. Use `["MindPlus-Ext2"]`, not issue `/labels` or Git `/tags`. Never replace all Topics with PUT. Read back to verify.
+
+Interface reference checked 2026-09-10: [LabelsApi SDK contract](https://github.com/gitee-php/gitee-sdk/blob/main/docs/Api/LabelsApi.md#postv5reposownerrepoprojectlabels). This documents POST string-array input and ProjectLabel-array output. Reuse the existing in-memory token header transport; a denied request blocks Topic completion and must never trigger a credential-bearing URL fallback. Live token permissions and server acceptance require integration verification; no token value belongs in evidence.

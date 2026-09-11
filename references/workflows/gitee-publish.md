@@ -62,6 +62,7 @@ publication_set_reviewed
 git_commit
 gitee_repository
 remote_ref_verified
+repository_topic_verified
 ```
 
 Every passing check needs non-empty evidence. Never record the token, authorization header, credential-helper payload, or credential-bearing diagnostics.
@@ -80,7 +81,7 @@ python scripts/gitee_publish.py push    --preflight <preflight.json> --state-dir
 
 `--ssh` / `--https` pick the git transport explicitly. **Default (neither flag): the tool probes non-interactive SSH first (BatchMode) and uses SSH (`git@gitee.com:...`) when it passes; on probe failure it falls back to HTTPS+token and records `fallback_reason` in the remote record.** With `--ssh` a failed probe stops as `AUTH.SSH_KEY_NOT_USABLE` instead of falling back. HTTPS transport supplies the token resolved in process memory through a generated process-local `GIT_ASKPASS` shim (the shim itself contains no secret). All Gitee API operations (token-account resolution, repository creation/verification, post-push ref verification) always use the token regardless of transport.
 
-The tool enforces the stage rules below and writes `publish-plan.json`, `publish-commit.json`, `publish-remote.json`, `publish-push.json` into the state directory; on `PASS` its output carries the ready-made `mpa.py handoff` command with the five required check IDs pre-filled. The token never enters a URL, command argument, log, or file.
+The tool enforces the stage rules below and writes `publish-plan.json`, `publish-commit.json`, `publish-remote.json`, `publish-push.json` into the state directory; on `PASS` its output carries the ready-made `mpa.py handoff` command with the six required check IDs pre-filled. The token never enters a URL, command argument, log, or file.
 
 ```text
 PREPARE -> COMMIT -> ENSURE_REMOTE -> PUSH -> VERIFY
@@ -147,7 +148,11 @@ For a new repository:
 
 If the requested public visibility cannot be confirmed after the push, preserve the verified ref evidence in `publish-push.json` and return `BLOCKED/PUSHED_VISIBILITY_PENDING` with reason `GITEE.VISIBILITY_UPDATE_FAILED`. Do not generate a successful handoff; report that the code was pushed but visibility remains unresolved.
 
-Only verified ref equality may return `TERMINAL/PASS`, outcome `PUSHED`. Repository creation or an HTTP success without the intended pushed ref is not publication success.
+After ref and requested visibility verification, `cmd_push` queries `GET /repos/{owner}/{repo}/project_labels`. If `MindPlus-Ext2` is absent, it sends one POST with JSON body `["MindPlus-Ext2"]`, then GETs again to verify it and preservation of existing Topics. Existing Topics are never replaced or removed; do not use PUT/DELETE. This Topic is part of the normal extension publication plan; do not confuse it with a Git tag or create a Release. Keep the token in the existing authentication header, never in a URL.
+
+On failure preserve the verified SHA in `publish-push.json`, return `BLOCKED/PUSHED_TOPIC_PENDING` with `GITEE.TOPIC_UPDATE_FAILED`, and do not generate a successful handoff. Resume the same push stage after resolving the failure; it skips a branch push when the remote SHA already matches and re-queries Topics before writing. After a POST timeout, one GET checks whether it applied; never blindly retry POST. Topic presence does not promise immediate public Explore indexing, and private repositories remain private.
+
+Only verified ref equality and completed requested visibility/Topic checks may return `TERMINAL/PASS`, outcome `PUSHED`. Repository creation or an HTTP success without the intended pushed ref is not publication success.
 
 ## Stop behavior and exclusions
 
@@ -164,4 +169,6 @@ Use a precise namespaced reason, including:
 
 Finalize through `scripts/mpa.py handoff`. On `PASS`, attach the sanitized publication plan, staged file manifest, commit evidence, repository evidence, and remote-ref verification. On failure or blocking, report the exact completed external actions and the safest recovery point.
 
-Gitee tags, Release objects, attachments, repository deletion/recreation, force push, automatic merge/rebase, and hardware/device operations remain outside this leaf.
+Git version tags, Release objects, attachments, repository deletion/recreation, force push, automatic merge/rebase, and hardware/device operations remain outside this leaf.
+
+Before publication, preserve producer/review findings under [issue-levels.md](../issue-levels.md): unresolved P0 blocks; P1/P2 do not require repeated user approval or automatic fixes. These levels do not relax credential, authorization, target, secret, snapshot or remote-ref gates. Do not repeat a full audit just to reassign priorities.

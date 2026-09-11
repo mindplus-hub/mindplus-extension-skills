@@ -351,6 +351,19 @@ def cmd_handoff(args: argparse.Namespace) -> int:
             continue
         results_by_id[check_id] = normalized
     optional = {value.strip() for value in args.optional or []}
+    priorities = {}
+    for check_id, priority in parse_pairs(args.priority, "priority", errors):
+        priority = priority.upper()
+        if check_id not in results_by_id or priority not in {"P0", "P1", "P2"} or check_id in priorities:
+            errors.append(f"invalid or duplicate priority for check: {check_id}")
+            continue
+        priorities[check_id] = priority
+        if priority in {"P1", "P2"}:
+            optional.add(check_id)
+        elif check_id in optional:
+            errors.append(f"P0 check cannot be optional: {check_id}")
+    if errors:
+        return emit({"status": "FAIL", "errors": errors}, 1)
     confirmed = {value.strip() for value in args.confirmed or []}
     evidence_by_id: dict[str, list[str]] = {}
     for check_id, joined in parse_pairs(args.evidence, "evidence", errors):
@@ -380,6 +393,7 @@ def cmd_handoff(args: argparse.Namespace) -> int:
                 "id": check_id,
                 "layer": "HOST_BUILD" if check_id in HOST_READY_CHECKS else "STATIC",
                 "claim": check_id.replace("_", " "),
+                **({"priority": priorities[check_id]} if check_id in priorities else {}),
                 "required": check_id not in optional,
                 "result": result,
                 "evidence": evidence_by_id.get(check_id, []),
@@ -840,6 +854,7 @@ def main() -> int:
     handoff.add_argument("--confirmed", action="append", help="check id confirmed by the user; repeatable")
     handoff.add_argument("--optional", action="append", help="check id to mark not required; repeatable")
     handoff.add_argument("--artifact", action="append", help="artifact as kind=path; repeatable")
+    handoff.add_argument("--priority", action="append", help="check_id=P0|P1|P2; P1/P2 are advisory, P0 cannot be optional")
     handoff.set_defaults(handler=cmd_handoff)
 
     transition = subparsers.add_parser("transition", help="validate the current handoff and advance the run")

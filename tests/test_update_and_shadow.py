@@ -32,7 +32,7 @@ def archive(kind="wb", number="0.2.0", wrapper="", extra=None):
 class UpdateTests(unittest.TestCase):
     def test_release_selection(self):
         releases = [{"tag_name": "0.2.0", "assets": [
-            {"name": "mindplus-agent-skill-0.2.0-workbuddy.zip"}, {"name": "0.2.0.zip"}]},
+            {"name": "mindplus-extension-skills-0.2.0-workbuddy.zip"}, {"name": "0.2.0.zip"}]},
             {"tag_name": "0.3.0-rc1", "assets": []}]
         self.assertTrue(updater.choose(releases, (0, 1, 0), "wb")[1]["name"].endswith("workbuddy.zip"))
         self.assertEqual(updater.choose(releases, (0, 1, 0), "universal")[1]["name"], "0.2.0.zip")
@@ -174,7 +174,7 @@ class UpdateTests(unittest.TestCase):
             root = Path(tmp) / "skill"
             root.mkdir()
             updater.unpack(archive(number="0.1.3"), root, (0, 1, 3), "wb")
-            asset = {"name": "mindplus-agent-skill-0.2.0-wb.zip",
+            asset = {"name": "mindplus-extension-skills-0.2.0-wb.zip",
                      "browser_download_url": "https://gitee.com/mind-plus/x.zip"}
             with patch.object(updater, "cache_path", lambda: Path(tmp) / "cache.json"):
                 updater.store_cache(root, (0, 1, 3), "wb", ((0, 2, 0), asset))
@@ -201,7 +201,7 @@ class UpdateTests(unittest.TestCase):
             self.assertEqual(updater.version(root), (0, 1, 4))
 
     def test_backup_and_stage_copies_block_before_network(self):
-        for name in (".mindplus-skill-backups/skill-old", "mindplus-agent-skill-update-abcd1234"):
+        for name in (".mindplus-skill-backups/skill-old", "mindplus-extension-skills-update-abcd1234"):
             with tempfile.TemporaryDirectory() as tmp:
                 root = Path(tmp) / name
                 root.mkdir(parents=True)
@@ -215,7 +215,7 @@ class UpdateTests(unittest.TestCase):
             root = Path(tmp) / "skill"
             root.mkdir()
             updater.unpack(archive(number="0.1.3"), root, (0, 1, 3), "wb")
-            asset = {"name": "mindplus-agent-skill-0.1.4-workbuddy.zip", "browser_download_url": "https://gitee.com/test.zip"}
+            asset = {"name": "mindplus-extension-skills-0.1.4-workbuddy.zip", "browser_download_url": "https://gitee.com/test.zip"}
             releases = json.dumps([{"tag_name": "v0.1.4", "assets": [asset]}]).encode()
             with patch.object(updater, "cache_path", lambda: Path(tmp) / "cache.json"), patch.object(updater, "download", side_effect=[releases, archive(number="0.1.4")]), patch.object(Path, "unlink", side_effect=AssertionError("same-layout update must not delete")):
                 result = updater.update(root, refresh=True)
@@ -295,7 +295,7 @@ command = f"python {root}/scripts/switch/init_run.py"
         self.assertNotIn("marketplace_prompts:", output["SKILL.md"].decode())
 
     def test_body_preserves_human_notes_and_is_idempotent(self):
-        info = {"repository": "https://gitee.com/mind-plus/mindplus-agent-skill", "version": "0.1.2"}
+        info = {"repository": "https://gitee.com/mind-plus/mindplus-extension-skills", "version": "0.1.2"}
         body = packer.release_body("团队更新说明\n", info, "v0.1.2", "a" * 64, "package.zip")
         self.assertTrue(body.startswith("团队更新说明\n"))
         self.assertEqual(packer.release_body(body, info, "v0.1.2", "a" * 64, "package.zip"), body)
@@ -335,7 +335,7 @@ command = f"python {root}/scripts/switch/init_run.py"
         (source / "VERSION").write_text(info["version"])
         metadata = source / "release-info.json"
         packer.write_json(metadata, info)
-        zip_path = root / f'mindplus-agent-skill-{info["version"]}-workbuddy.zip'
+        zip_path = root / f'mindplus-extension-skills-{info["version"]}-workbuddy.zip'
         zip_path.write_bytes(b"fixture-archive")
         report = root / "report.json"
         packer.write_json(report, {"metadata": info, "source_files": {n: packer.sha(d) for n, d in packer.collect(source).items()}})

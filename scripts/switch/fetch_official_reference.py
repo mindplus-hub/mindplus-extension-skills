@@ -22,7 +22,7 @@ from typing import Any
 ORG = "mind-plus"
 API_BASE = "https://gitee.com/api/v5"
 RAW_BASE = "https://gitee.com"
-USER_AGENT = "mindplus-agent-skill/official-corpus-fallback"
+USER_AGENT = "mindplus-extension-skills/official-corpus-fallback"
 REQUEST_TIMEOUT = 20
 
 

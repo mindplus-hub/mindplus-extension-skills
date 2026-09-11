@@ -35,3 +35,5 @@ The wizard `scripts/mpa.py handoff` assembles this file from flags and enforces 
 ## Secret boundary
 
 Handoffs may record whether an authorization or credential is present, but never its value. Do not include tokens, passwords, cookies, authorization headers, or URLs containing credentials.
+
+Apply [issue-levels.md](issue-levels.md) to classify development findings. Check `priority` is optional for backward compatibility. `P0` requires `required: true`; `P1`/`P2` require `required: false`. Keep actual FAIL results and evidence for unresolved advisory findings; do not relabel them PASS. Unperformed verification remains NOT_RUN without a defect priority.

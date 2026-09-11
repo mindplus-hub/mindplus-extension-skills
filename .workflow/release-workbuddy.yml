@@ -32,7 +32,7 @@ stages:
             trap 'code=$?; if [ "$code" -ne 0 ]; then echo "[FAIL] stage=$stage exit=$code (124 means timeout)"; fi' EXIT
             checkout_found=false
             # The plugin logs WORKSPACE but may not export it to COMMAND.sh.
-            for candidate in "${MP_CHECKOUT_DIR:-}" "${WORKSPACE:-}" "$(pwd -P 2>/dev/null || true)" /root/workspace/mind-plus/mindplus-agent-skill; do
+            for candidate in "${MP_CHECKOUT_DIR:-}" "${WORKSPACE:-}" "$(pwd -P 2>/dev/null || true)" /root/workspace/mind-plus/mindplus-extension-skills; do
               if [ -n "$candidate" ] && [ -f "$candidate/VERSION" ] && [ -f "$candidate/tools/pack_workbuddy.py" ] && [ -f "$candidate/SKILL.md" ]; then
                 cd "$candidate"
                 checkout_found=true

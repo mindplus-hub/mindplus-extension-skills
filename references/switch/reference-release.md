@@ -7,7 +7,7 @@
 
 - `references/switch/generated/` 是随 Skill 发布的已验证基线。
 - 当前 HIR Release 同时覆盖 `UPLOAD` 与 `PYTHON_BLOCK`。
-- reference bundle 已随 `mindplus-agent-skill` 内置；稳定公开清单地址尚未确定前，
+- reference bundle 已随 `mindplus-extension-skills` 内置；稳定公开清单地址尚未确定前，
   `references/switch/release-channel.json` 保持禁用且不配置独立 switch 仓库回退。
 - 若旧缓存缺少当前 bundled 已提供的模式，检查器优先使用 bundled，避免旧的仅上传资料阻断
   Python 路由；覆盖模式不减少的已验证缓存仍可使用。

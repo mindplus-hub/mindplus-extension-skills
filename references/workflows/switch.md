@@ -4,7 +4,7 @@ Load this leaf only for `CONVERT_FRESH`.
 
 ## Embedded component boundary
 
-The complete conversion workflow is packaged inside `mindplus-agent-skill`: executable helpers live in `scripts/switch/`, curated guidance and the verified reference bundle live in `references/switch/`. Never resolve a sibling checkout, a separately installed `mindplus-switch` Skill, or a caller-supplied switch root. The name `mindplus-switch` in existing logs and handoffs is only the internal producer identifier.
+The complete conversion workflow is packaged inside `mindplus-extension-skills`: executable helpers live in `scripts/switch/`, curated guidance and the verified reference bundle live in `references/switch/`. Never resolve a sibling checkout, a separately installed `mindplus-switch` Skill, or a caller-supplied switch root. The name `mindplus-switch` in existing logs and handoffs is only the internal producer identifier.
 
 Convert exactly one V1 library and one registered mode per run. Keep the V1 source read-only. Prepare the pinned Git-free Builder Release directly as the final project root, convert into its root `extension/`, update the root `README.md`, and attempt one Builder build when the package stage passes. Build success is not independent review, Mind+ import, runtime, upload, or device acceptance.
 
@@ -56,3 +56,5 @@ Keep the detailed internal `.ms` run log as evidence, then create and validate a
 | `HANDED_OFF` or `CONVERTED_HANDOFF` with passing static checks and an unavailable optional build | `TERMINAL/PASS` with build optional/NOT_RUN | `CONVERTED` |
 
 Set `review_status` to `NOT_RUN`. Completed producer/static checks may proceed directly to requested publication. Run independent REVIEW_EXISTING only when requested. Keep install/build environment limitations explicit; they do not turn static success into HOST_READY. If the user explicitly required a build or full acceptance, an unavailable build remains blocking for that requested scope.
+
+Before parent handoff, apply [issue-levels.md](../issue-levels.md). P0 blocks; P1/P2 remain evidenced advisory findings. Preserve raw checker results and separate presentation findings from required functional gates.

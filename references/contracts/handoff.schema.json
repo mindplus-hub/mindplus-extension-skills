@@ -51,6 +51,7 @@
           "id": {"type": "string", "minLength": 1},
           "layer": {"enum": ["STATIC", "HOST_BUILD", "RUNTIME", "EXTERNAL_DEVICE"]},
           "claim": {"type": "string"},
+          "priority": {"enum": ["P0", "P1", "P2"]},
           "required": {"type": "boolean"},
           "result": {"enum": ["PASS", "FAIL", "NOT_RUN", "ACCEPTED_LIMITATION", "CARRIED_RISK"]},
           "evidence": {"type": "array", "items": {"type": "string"}},

@@ -14,3 +14,5 @@ Use STATIC for source checks, HOST_BUILD for build/host observations, RUNTIME fo
 Do not repeat checks when their source hash, scope, artifacts and relevant environment remain valid. After a change, rerun affected checks. A missing optional build/GUI observation is NOT_RUN, not a BASIC blocker. Explicit HOST_READY retains all its requirements and cannot be silently downgraded.
 
 Review stays read-only. Report actual defects and essential missing evidence; do not replace verification with editing a handoff.
+
+Apply [issue-levels.md](issue-levels.md) to classify development findings. Check `priority` is optional for backward compatibility. `P0` requires `required: true`; `P1`/`P2` require `required: false`. Keep actual FAIL results and evidence for unresolved advisory findings; do not relabel them PASS. Unperformed verification remains NOT_RUN without a defect priority.

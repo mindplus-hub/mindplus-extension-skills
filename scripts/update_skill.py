@@ -23,21 +23,21 @@ from pathlib import Path, PurePosixPath
 from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parent.parent
-RELEASES = "https://gitee.com/api/v5/repos/mind-plus/mindplus-agent-skill/releases"
-RELEASE_PAGE = "https://gitee.com/mind-plus/mindplus-agent-skill/releases/"
+RELEASES = "https://gitee.com/api/v5/repos/mind-plus/mindplus-extension-skills/releases"
+RELEASE_PAGE = "https://gitee.com/mind-plus/mindplus-extension-skills/releases/"
 IGNORED = {".git", "__pycache__", ".mindplus-agent", ".ms", "node_modules", "dist", "tests"}
 LIMIT = 64 * 1024 * 1024
 DOWNLOAD_HOST = "gitee.com"
-CACHE_FILE = "mindplus-agent-skill-check-cache.json"
+CACHE_FILE = "mindplus-extension-skills-check-cache.json"
 CACHE_TTL_SECONDS = 3600
 # Release-managed directories are synced exactly to the release content and
 # pruned of superseded files; everything else in the installation (e.g.
 # _user_meta.json, .git, local notes) belongs to the host and is preserved.
 DISTRIBUTED = ("scripts", "references", "assets", "agents")
-STAGE_PREFIX = "mindplus-agent-skill-update-"
+STAGE_PREFIX = "mindplus-extension-skills-update-"
 # tempfile.mkdtemp suffixes use [a-z0-9_]; keep the match tight so only
 # staging dirs created by this script are ever swept.
-STAGE_NAME = re.compile(r"mindplus-agent-skill-update-[a-z0-9_]{8}")
+STAGE_NAME = re.compile(r"mindplus-extension-skills-update-[a-z0-9_]{8}")
 copy_file = shutil.copy2
 
 
@@ -67,7 +67,7 @@ def download(url: str) -> bytes:
     host = (urlparse(url).hostname or "").lower()
     if host != DOWNLOAD_HOST and not host.endswith("." + DOWNLOAD_HOST):
         raise ValueError("Release downloads must come from " + DOWNLOAD_HOST)
-    req = urllib.request.Request(url, headers={"User-Agent": "mindplus-agent-skill-updater/0.1.0"})
+    req = urllib.request.Request(url, headers={"User-Agent": "mindplus-extension-skills-updater/0.1.0"})
     with urllib.request.urlopen(req, timeout=20) as response:
         if not response.url.startswith("https://"):
             raise ValueError("Insecure download redirect")
@@ -90,7 +90,7 @@ def choose(releases: list, current: tuple, kind: str):
             continue
         label = ".".join(map(str, number))
         suffix = "(?:wb|workbuddy)" if kind == "wb" else "(?:universal|others)"
-        pattern = rf"mindplus-agent-skill-v?{re.escape(label)}-{suffix}\.zip"
+        pattern = rf"mindplus-extension-skills-v?{re.escape(label)}-{suffix}\.zip"
         matches = [a for a in release.get("assets", []) if re.fullmatch(pattern, a.get("name", ""), re.I)]
         if kind == "universal" and not matches:
             # Gitee exposes its source ZIP as a Release asset named <tag>.zip.

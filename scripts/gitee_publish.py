@@ -22,7 +22,7 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlencode
+from urllib.parse import urlencode, quote
 
 from check_gitee_token import resolve_token
 from validate_handoff import validate as validate_handoff
@@ -30,7 +30,7 @@ from hash_project import IGNORED_DIRECTORIES, HashError, compute_project_hash
 
 SKILL_ROOT = Path(__file__).resolve().parent.parent
 API_BASE = "https://gitee.com/api/v5"
-USER_AGENT = "mindplus-agent-skill/publication"
+USER_AGENT = "mindplus-extension-skills/publication"
 TIMEOUT = 30
 PUBLISH_IGNORED_DIRECTORIES = IGNORED_DIRECTORIES | {".vscode", ".idea", "dist"}
 BINARY_SUFFIXES = {".png", ".jpg", ".jpeg", ".gif", ".ico", ".webp", ".zip", ".7z", ".rar", ".mp3", ".wav", ".mp4", ".ttf", ".woff", ".woff2", ".eot", ".pdf", ".mpext", ".exe", ".dll"}
@@ -174,7 +174,7 @@ def git(project: Path, *arguments: str, env_extra: dict[str, str] | None = None)
     )
 
 
-def gitee_api(method: str, path: str, token: str, params: dict[str, str] | None = None, body: dict[str, Any] | None = None) -> tuple[int, Any]:
+def gitee_api(method: str, path: str, token: str, params: dict[str, str] | None = None, body: dict[str, Any] | list[str] | None = None) -> tuple[int, Any]:
     url = f"{API_BASE}{path}"
     if params:
         url += "?" + urlencode(params)
@@ -622,6 +622,50 @@ def cmd_remote(args: argparse.Namespace) -> int:
 # --------------------------------------------------------------------------- push
 
 
+PUBLICATION_TOPIC = "MindPlus-Ext2"
+
+
+def topic_names(payload: Any) -> set[str] | None:
+    if not isinstance(payload, list):
+        return None
+    names = set()
+    for item in payload:
+        name = item if isinstance(item, str) else item.get("name") if isinstance(item, dict) else None
+        if not isinstance(name, str) or not name:
+            return None
+        names.add(name)
+    return names
+
+
+def ensure_publication_topic(owner: str, repo: str, token: str) -> dict[str, Any]:
+    """Add only the missing Topic and verify with GET; never replace labels."""
+    path = f"/repos/{quote(owner, safe='')}/{quote(repo, safe='')}/project_labels"
+    result = {"topic": PUBLICATION_TOPIC, "status": "FAILED", "write_attempted": False}
+    try:
+        status, payload = gitee_api("GET", path, token)
+        before = topic_names(payload) if status == 200 else None
+        if before is None:
+            return {**result, "http_status": status, "error": "Cannot read repository Topics; no label write attempted"}
+        if PUBLICATION_TOPIC in before:
+            return {**result, "status": "ALREADY_PRESENT"}
+        result["write_attempted"] = True
+        # A timeout may still have applied the write. Re-read once, never
+        # blindly repeat POST or fall back to replacing all existing labels.
+        post_status = None
+        try:
+            post_status, _ = gitee_api("POST", path, token, body=[PUBLICATION_TOPIC])
+        except StageBlocked:
+            pass
+        status, payload = gitee_api("GET", path, token)
+        after = topic_names(payload) if status == 200 else None
+        if after is not None and PUBLICATION_TOPIC in after and before <= after:
+            return {**result, "status": "VERIFIED", "post_http_status": post_status}
+        return {**result, "http_status": status, "post_http_status": post_status,
+                "error": "Topic addition or preservation of existing Topics could not be verified"}
+    except StageBlocked:
+        return {**result, "error": "Topic request failed; check permissions/network and resume publication"}
+
+
 def cmd_push(args: argparse.Namespace) -> int:
     try:
         ctx = context(args, need_authorizations=("push",))
@@ -720,12 +764,14 @@ def cmd_push(args: argparse.Namespace) -> int:
             }
 
     visibility_failed = bool(visibility_promotion and visibility_promotion["status"] == "FAILED")
+    topic_result = None if visibility_failed else ensure_publication_topic(owner, repo_name, token)
+    topic_failed = bool(topic_result and topic_result["status"] == "FAILED")
     record = {
         "schema_version": 1,
         "stage": "push",
-        "status": "BLOCKED" if visibility_failed else "PASS",
-        "outcome": "PUSHED_VISIBILITY_PENDING" if visibility_failed else "PUSHED",
-        "reason_code": "GITEE.VISIBILITY_UPDATE_FAILED" if visibility_failed else None,
+        "status": "BLOCKED" if visibility_failed or topic_failed else "PASS",
+        "outcome": "PUSHED_VISIBILITY_PENDING" if visibility_failed else "PUSHED_TOPIC_PENDING" if topic_failed else "PUSHED",
+        "reason_code": "GITEE.VISIBILITY_UPDATE_FAILED" if visibility_failed else "GITEE.TOPIC_UPDATE_FAILED" if topic_failed else None,
         "already_current": already_current,
         "branch": branch,
         "verified_remote_sha": remote_sha,
@@ -733,10 +779,11 @@ def cmd_push(args: argparse.Namespace) -> int:
         "clone_url": remote_record["clone_url"],
         "transport": remote_record.get("transport", "https"),
         "visibility_promotion": visibility_promotion,
+        "repository_topic": topic_result,
         "generated_at": datetime.now(timezone.utc).isoformat(),
     }
     path = write_state(ctx["state_dir"], "publish-push.json", record)
-    if visibility_failed:
+    if visibility_failed or topic_failed:
         return emit({**record, "push_file": str(path), "next_command": None}, 2)
     mpa = SKILL_ROOT / "scripts" / "mpa.py"
     evidence = ctx["state_dir"]
@@ -747,13 +794,15 @@ def cmd_push(args: argparse.Namespace) -> int:
         f'--check publication_set_reviewed=PASS --evidence publication_set_reviewed="{evidence / "publish-plan.json"}" '
         f'--check git_commit=PASS --evidence git_commit="{evidence / "publish-commit.json"}" '
         f'--check gitee_repository=PASS --evidence gitee_repository="{evidence / "publish-remote.json"}" '
-        f'--check remote_ref_verified=PASS --evidence remote_ref_verified="{evidence / "publish-push.json"}"'
+        f'--check remote_ref_verified=PASS --evidence remote_ref_verified="{evidence / "publish-push.json"}" '
+        f'--check repository_topic_verified=PASS --evidence repository_topic_verified="{evidence / "publish-push.json"}"'
     )
     return emit(
         {
             "status": "PASS", "outcome": "PUSHED", "already_current": already_current,
             "branch": branch, "verified_remote_sha": remote_sha, "push_file": str(path),
             "visibility_promotion": visibility_promotion,
+            "repository_topic": topic_result,
             "next_command": next_command,
         },
         0,

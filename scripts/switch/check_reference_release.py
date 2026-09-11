@@ -143,13 +143,13 @@ def default_cache_root() -> Path:
     if os.name == "nt":
         base = os.environ.get("LOCALAPPDATA")
         if base:
-            return (Path(base) / "MindPlus-Agent-Skill" / "switch-reference-cache").resolve()
+            return (Path(base) / "MindPlus-Extension-Skills" / "switch-reference-cache").resolve()
     if sys.platform == "darwin":
-        return (Path.home() / "Library" / "Caches" / "MindPlus-Agent-Skill" / "switch-reference-cache").resolve()
+        return (Path.home() / "Library" / "Caches" / "MindPlus-Extension-Skills" / "switch-reference-cache").resolve()
     base = os.environ.get("XDG_CACHE_HOME")
     if base:
-        return (Path(base) / "mindplus-agent-skill" / "switch-reference-cache").resolve()
-    return (Path.home() / ".cache" / "mindplus-agent-skill" / "switch-reference-cache").resolve()
+        return (Path(base) / "mindplus-extension-skills" / "switch-reference-cache").resolve()
+    return (Path.home() / ".cache" / "mindplus-extension-skills" / "switch-reference-cache").resolve()
 
 
 def read_location(location: str, max_bytes: int) -> tuple[bytes, str, bool]:

@@ -672,7 +672,7 @@ class EmbeddedSwitchTests(unittest.TestCase):
     def test_isolated_package_copy_needs_no_sibling_switch(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
-            package = base / "installed" / "mindplus-agent-skill"
+            package = base / "installed" / "mindplus-extension-skills"
             package.parent.mkdir()
             shutil.copytree(
                 ROOT,

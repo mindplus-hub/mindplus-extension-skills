@@ -77,7 +77,7 @@ def collect(source: Path) -> dict[str, bytes]:
                 continue
             files[relative.as_posix()] = path.read_bytes()
     if "SKILL.md" not in files or "scripts/mpa.py" not in files:
-        raise PackageError("Source is not the expected mindplus-agent-skill package")
+        raise PackageError("Source is not the expected mindplus-extension-skills package")
     mapping = {old: mapped_path(old) for old in files}
     names = [name.casefold() for name in mapping.values()]
     if len(names) != len(set(names)):
@@ -114,8 +114,8 @@ def load_metadata(path: Path, preview: bool) -> dict:
     for key in ("name", "description", "description_zh", "version", "repository"):
         if not isinstance(info.get(key), str) or not info[key].strip():
             raise PackageError(f"release-info.json needs a non-empty {key}")
-    if info["name"] != "mindplus-agent-skill":
-        raise PackageError("Keep name=mindplus-agent-skill; this adapter targets that skill")
+    if info["name"] != "mindplus-extension-skills":
+        raise PackageError("Keep name=mindplus-extension-skills; this adapter targets that skill")
     if not re.fullmatch(r"\d+\.\d+\.\d+", info["version"]):
         raise PackageError("version must be a stable release version such as 0.1.1")
     for field in ("description", "description_zh", "description_en"):
@@ -185,8 +185,8 @@ class Adapter:
                 'bundled_root = switch_reference_root / "generated"': 'bundled_root = skill_root / "assets"',
                 'switch_reference_root / "release-channel.json"': 'switch_reference_root / "switch__release-channel.json"',
                 '"MINDPLUS_AGENT_SWITCH_CACHE"': '"MINDPLUS_AGENT_WORKBUDDY_CACHE"',
-                '"MindPlus-Agent-Skill"': '"MindPlus-Agent-Skill-WorkBuddy"',
-                '"mindplus-agent-skill"': '"mindplus-agent-skill-workbuddy"',
+                '"MindPlus-Extension-Skills"': '"MindPlus-Extension-Skills-WorkBuddy"',
+                '"mindplus-extension-skills"': '"mindplus-extension-skills-workbuddy"',
             }
             for before, after in replacements.items():
                 if before not in text:
@@ -332,7 +332,7 @@ def smoke(zip_path: Path) -> list[dict]:
     records = []
     with tempfile.TemporaryDirectory(prefix="ma2wb-check-") as directory:
         base = Path(directory).resolve()
-        package = base / "installed" / "mindplus-agent-skill"
+        package = base / "installed" / "mindplus-extension-skills"
         package.mkdir(parents=True)
         with zipfile.ZipFile(zip_path) as archive:
             for item in archive.infolist():

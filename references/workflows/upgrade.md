@@ -36,3 +36,5 @@ Use `mpa.py handoff --workflow UPGRADE_EXISTING --status PASS --outcome UPGRADED
 The wizard binds `input_provenance.sha256` to the frozen original hash and `project_sha256` to final content. Include actual evidence files via `--evidence <check_id>=<path>` and any deliverable artifacts. Missing required evidence blocks success. Only a passing upgrade may advance to requested review/publication. For `UPGRADE,PUBLISH`, publish through [gitee-publish.md](gitee-publish.md), verifying the personal fork target again immediately before push. No automatic release/tag/PR creation.
 
 Report implemented features, old/new extension versions, affected files, verification results, limitations, and any fork or authorized publication URL.
+
+Before parent handoff, apply [issue-levels.md](../issue-levels.md). P0 blocks; P1/P2 remain evidenced advisory findings. Preserve raw checker results and separate presentation findings from required functional gates.

@@ -153,7 +153,7 @@ class RouteTests(unittest.TestCase):
                 input_path,
                 request(
                     ["CONVERT", "PUBLISH"],
-                    base / "v2",
+                    base / "ext2-v2",
                     auth={"commit": True, "push": True},
                     v1_source=str(v1),
                 ),
@@ -184,7 +184,7 @@ class RouteTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
             v1 = base / "v1"
-            project = base / "v2"
+            project = base / "ext2-v2"
             v1.mkdir()
             project.mkdir()
             (project / "owned.txt").write_text("user", encoding="utf-8")
@@ -199,7 +199,7 @@ class RouteTests(unittest.TestCase):
     def test_direct_publish_with_handoff_routes_only_publish(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
-            project = base / "v2"
+            project = base / "ext2-v2"
             project.mkdir()
             (project / "package.json").write_text("{}", encoding="utf-8")
             handoff = base / "handoff.json"
@@ -221,7 +221,7 @@ class RouteTests(unittest.TestCase):
     def test_publish_without_push_authorization_waits(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
-            project = base / "v2"
+            project = base / "ext2-v2"
             project.mkdir()
             (project / "package.json").write_text("{}", encoding="utf-8")
             handoff = base / "handoff.json"
@@ -243,7 +243,7 @@ class RouteTests(unittest.TestCase):
             input_path = base / "request.json"
             write_json(
                 input_path,
-                request(["CONVERT"], base / "v2", auth={"local_write": False}, v1_source=str(v1)),
+                request(["CONVERT"], base / "ext2-v2", auth={"local_write": False}, v1_source=str(v1)),
             )
             completed = run_script("route_workflow.py", "--input", str(input_path))
             self.assertEqual(completed.returncode, 3)
@@ -256,7 +256,7 @@ class RouteTests(unittest.TestCase):
             base = Path(directory)
             v1 = base / "v1"
             v1.mkdir()
-            value = request(["CONVERT"], base / "v2", v1_source=str(v1))
+            value = request(["CONVERT"], base / "ext2-v2", v1_source=str(v1))
             value["paths"]["mindplus_switch_root"] = str(base / "external-switch")
             input_path = base / "request.json"
             write_json(input_path, value)
@@ -364,7 +364,7 @@ class TokenTests(unittest.TestCase):
     def test_publish_preflight_allows_uninitialized_project_after_host_ready(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
-            project = base / "project"
+            project = base / "ext2-project"
             project.mkdir()
             (project / "package.json").write_text("{}", encoding="utf-8")
             handoff = base / "handoff.json"
@@ -388,7 +388,7 @@ class TokenTests(unittest.TestCase):
     def test_publish_preflight_rejects_stale_host_ready_hash(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
-            project = base / "project"
+            project = base / "ext2-project"
             project.mkdir()
             source = project / "extension.js"
             source.write_text("before", encoding="utf-8")
@@ -412,7 +412,7 @@ class TokenTests(unittest.TestCase):
     def test_publish_preflight_rejects_unauthorized_push(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
-            project = base / "project"
+            project = base / "ext2-project"
             project.mkdir()
             (project / "package.json").write_text("{}", encoding="utf-8")
             handoff = base / "handoff.json"
@@ -436,7 +436,7 @@ class TokenTests(unittest.TestCase):
     def test_publish_preflight_create_repo_flag_requires_authorization(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
-            project = base / "project"
+            project = base / "ext2-project"
             project.mkdir()
             (project / "package.json").write_text("{}", encoding="utf-8")
             handoff = base / "handoff.json"
@@ -538,7 +538,7 @@ class RunAndContractTests(unittest.TestCase):
     def test_parent_run_initializes_after_passing_route(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
-            project = base / "project"
+            project = base / "ext2-project"
             spec = base / "spec.json"
             spec.write_text("{}", encoding="utf-8")
             request_path = base / "request.json"
@@ -566,7 +566,7 @@ class RunAndContractTests(unittest.TestCase):
     def test_parent_run_rejects_token_fields(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
-            project = base / "project"
+            project = base / "ext2-project"
             request_value = request(["CREATE"], project)
             request_value["GITEE_TOKEN"] = "must-not-be-recorded"
             request_path = base / "request.json"
@@ -745,7 +745,7 @@ class EmbeddedSwitchTests(unittest.TestCase):
             )
 
             request_path = base / "request.json"
-            write_json(request_path, request(["CONVERT"], base / "v2", v1_source=str(v1)))
+            write_json(request_path, request(["CONVERT"], base / "ext2-v2", v1_source=str(v1)))
             routed = subprocess.run(
                 [
                     sys.executable,
@@ -780,7 +780,7 @@ class MpaTests(unittest.TestCase):
             completed = self.run_mpa(
                 "start",
                 "--goals", "CREATE",
-                "--project-root", str(base / "project"),
+                "--project-root", str(base / "ext2-project"),
                 "--extension-spec", str(spec),
                 "--work-root", str(base),
                 "--run-id", "t1",
@@ -798,7 +798,7 @@ class MpaTests(unittest.TestCase):
     def test_mpa_start_blocked_without_push_auth_lists_fix(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
-            project = base / "v2"
+            project = base / "ext2-v2"
             project.mkdir()
             (project / "package.json").write_text("{}", encoding="utf-8")
             completed = self.run_mpa(
@@ -821,7 +821,7 @@ class MpaTests(unittest.TestCase):
             arguments = (
                 "start",
                 "--goals", "CREATE",
-                "--project-root", str(base / "project"),
+                "--project-root", str(base / "ext2-project"),
                 "--extension-spec", str(spec),
                 "--work-root", str(base),
                 "--run-id", "t3",
@@ -843,7 +843,7 @@ class MpaTests(unittest.TestCase):
         started = self.run_mpa(
             "start",
             "--goals", "CONVERT,REVIEW,PUBLISH",
-            "--project-root", str(base / "v2"),
+            "--project-root", str(base / "ext2-v2"),
             "--v1-source", str(v1),
             "--work-root", str(base),
             "--run-id", "conv",
@@ -856,7 +856,7 @@ class MpaTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
             evidence = self._convert_run(base)
-            project = base / "v2"
+            project = base / "ext2-v2"
             (project / "extension").mkdir(parents=True)
             (project / "extension" / "config.json").write_text("{}", encoding="utf-8")
             completed = self.run_mpa(
@@ -882,7 +882,7 @@ class MpaTests(unittest.TestCase):
     def test_mpa_handoff_refuses_gui_pass_without_confirmation(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
-            project = base / "v2"
+            project = base / "ext2-v2"
             project.mkdir()
             (project / "package.json").write_text("{}", encoding="utf-8")
             evidence = base / "ev.json"
@@ -917,7 +917,7 @@ class MpaTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
             evidence = self._convert_run(base)
-            project = base / "v2"
+            project = base / "ext2-v2"
             (project / "extension").mkdir(parents=True)
             (project / "extension" / "config.json").write_text("{}", encoding="utf-8")
             completed = self.run_mpa(
@@ -937,7 +937,7 @@ class MpaTests(unittest.TestCase):
     def test_mpa_transition_advances_to_publish_after_host_ready(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
-            project = base / "v2"
+            project = base / "ext2-v2"
             project.mkdir()
             (project / "package.json").write_text("{}", encoding="utf-8")
             evidence = base / "ev.json"
@@ -980,7 +980,7 @@ class MpaTests(unittest.TestCase):
     def test_mpa_transition_rejects_stale_review_hash(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
-            project = base / "v2"
+            project = base / "ext2-v2"
             project.mkdir()
             (project / "package.json").write_text("{}", encoding="utf-8")
             evidence = base / "ev.json"
@@ -1023,7 +1023,7 @@ class MpaTests(unittest.TestCase):
             self.run_mpa(
                 "start",
                 "--goals", "CREATE",
-                "--project-root", str(base / "project"),
+                "--project-root", str(base / "ext2-project"),
                 "--extension-spec", str(spec),
                 "--work-root", str(base),
                 "--run-id", "r1",
@@ -1043,7 +1043,7 @@ class MpaTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
             evidence = self._convert_run(base)
-            project = base / "v2"
+            project = base / "ext2-v2"
             (project / "extension").mkdir(parents=True)
             (project / "extension" / "config.json").write_text("{}", encoding="utf-8")
 
@@ -1226,7 +1226,7 @@ class SpecToInventoryTests(unittest.TestCase):
 
 class DeviceDictionaryTests(unittest.TestCase):
     def mini_project(self, base: Path, support_devices: dict) -> tuple[Path, Path]:
-        project = base / "project"
+        project = base / "ext2-project"
         extension = project / "extension"
         (extension / "public").mkdir(parents=True)
         (extension / "locales").mkdir(parents=True)
@@ -1351,7 +1351,7 @@ def make_preflight(project: Path, handoff_path: Path, out_path: Path) -> subproc
 
 
 def publish_fixture(base: Path, authorized: bool = True) -> tuple[Path, Path, Path]:
-    project = base / "project"
+    project = base / "ext2-project"
     extension = project / "extension"
     (extension / "public").mkdir(parents=True)
     (project / "node_modules" / "somepkg").mkdir(parents=True)
@@ -1379,7 +1379,7 @@ class MpaEvidenceTests(unittest.TestCase):
             spec.write_text("{}", encoding="utf-8")
             completed = run_script("mpa.py", 
                 "start", "--goals", "CREATE",
-                "--project-root", str(base / "project"),
+                "--project-root", str(base / "ext2-project"),
                 "--extension-spec", str(spec),
                 "--work-root", str(base), "--run-id", "hidden1",
                 "--auth", "local_write",
@@ -1392,7 +1392,7 @@ class MpaEvidenceTests(unittest.TestCase):
     def test_mpa_keep_evidence_retains_completed_run_and_clean_removes_it(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
-            project = base / "v2"
+            project = base / "ext2-v2"
             project.mkdir()
             (project / "package.json").write_text("{}", encoding="utf-8")
             evidence = base / "ev.json"
@@ -1435,7 +1435,7 @@ class MpaEvidenceTests(unittest.TestCase):
         started = run_script("mpa.py", 
             "start",
             "--goals", "CONVERT,REVIEW,PUBLISH",
-            "--project-root", str(base / "v2"),
+            "--project-root", str(base / "ext2-v2"),
             "--v1-source", str(v1),
             "--work-root", str(base),
             "--run-id", "conv",

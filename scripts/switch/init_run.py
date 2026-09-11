@@ -158,6 +158,8 @@ def main() -> int:
     if inside(ms_root, source):
         return error(".ms would be created inside v1_source; choose a separate work_root")
     if project_root is not None:
+        if not project_root.name.startswith("ext2-") or not project_root.name[5:].strip():
+            return error("fresh project_root must be named ext2-<name>")
         if inside(project_root, source) or inside(source, project_root):
             return error("project_root and v1_source must be separate directory trees")
         if inside(project_root, ms_root) or inside(ms_root, project_root):

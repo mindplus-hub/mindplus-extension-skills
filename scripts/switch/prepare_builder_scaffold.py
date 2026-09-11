@@ -58,6 +58,8 @@ def validate_target(project: Path) -> None:
         raise ScaffoldError("project_root must be absolute")
     if project.exists() and (not project.is_dir() or any(project.iterdir())):
         raise ScaffoldError("project_root must be absent or an empty directory")
+    if not project.name.startswith("ext2-") or not project.name[5:].strip():
+        raise ScaffoldError("fresh project_root must be named ext2-<name>")
     if not project.parent.is_dir():
         raise ScaffoldError("project_root parent must already exist")
 

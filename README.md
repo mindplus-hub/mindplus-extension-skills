@@ -161,6 +161,10 @@ $mindplus-extension-skills 检查 extensions/v2-demo 的配置和资源引用，
 
 ## 版本更新
 
+- V0.2.2
+   - 新建和 V1 转换项目目录统一校验 `ext2-` 前缀
+   - 增加 cover/banner 规范，区分实物与非实物扩展的构图和文字要求
+
 - V0.2.1
    - 发布扩展时自动添加并核验仓库 Topic `MindPlus-Ext2`
    - 审核使用P0/P1/P2三级分类处理

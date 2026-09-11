@@ -5,6 +5,10 @@
 设备 ID、sku、supportArch 的机器可读字典见 [device-ids.json](device-ids.json)，
 由 `scripts/switch/check_converted_extension.py` 强制校验。
 
+## cover（扩展卡片封面）
+
+制作或修改封面时按需读取 [cover-design.md](cover-design.md)。它是用户指定的展示约定，不改变 config 字段契约或发布门槛。
+
 ## sku（产品型号）
 
 | 场景 | 写法 | 证据 |

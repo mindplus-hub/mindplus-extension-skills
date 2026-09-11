@@ -24,7 +24,7 @@ Request facts, matching [contracts/route-request.schema.json](contracts/route-re
 
 - `goals`: one or more of `CONVERT`, `CREATE`, `UPGRADE`, `REVIEW`, `PUBLISH`, `SYNC`.
 - `paths.v1_source`: required for fresh conversion.
-- `paths.project_root`: required for all workflows; for conversion/creation it must be absent or empty.
+- `paths.project_root`: required for all workflows; for conversion/creation it must be absent or empty and named `ext2-<name>`; apply [project-naming.md](project-naming.md) before freezing the request.
 - `paths.extension_spec`: optional at route time. Without it, creation freezes `<parent_run_root>/extension-spec.json` before writing the project.
 - `paths.review_handoff`: optional current producer/review evidence for direct publication. It does not remove a requested review or override this run's new handoff.
 - `review_profile`: BASIC by default. Explicit HOST_READY inserts full acceptance; ordinary publication never inserts review.
@@ -50,6 +50,7 @@ Blocked or waiting results carry one of these codes; the wizard prints the recov
 | `INPUT.GOALS_REQUIRED` / `INPUT.PROJECT_ROOT_REQUIRED` / `INPUT.V1_SOURCE_REQUIRED` | missing material input |
 | `INPUT.V1_SOURCE_NOT_FOUND` / `INPUT.REVIEW_HANDOFF_NOT_FOUND` | supplied path does not exist |
 | `WORKSPACE.PROJECT_ROOT_NOT_DIRECTORY` / `WORKSPACE.TARGET_NOT_EMPTY` / `WORKSPACE.PROJECT_PARENT_NOT_FOUND` / `WORKSPACE.EXISTING_PROJECT_REQUIRED` | unusable project_root facts |
+| `WORKSPACE.PROJECT_NAME_PREFIX_REQUIRED` | fresh project directory lacks lowercase `ext2-` or a nonempty suffix; correct the target before starting |
 | `INPUT.INVALID_ROUTE_REQUEST` | malformed request (wrong types or unknown fields) |
 
 ## Route result

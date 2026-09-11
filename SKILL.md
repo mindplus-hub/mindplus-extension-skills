@@ -1,7 +1,7 @@
 ---
 name: mindplus-extension-skills
 metadata:
-  version: "0.2.1"
+  version: "0.2.2"
 description: Create, upgrade existing, or freshly convert Mind+ V2 extensions with basic checks, review existing extensions, and publish authorized projects to Gitee. Use HOST_READY acceptance only when explicitly requested. Does not synchronize V1 into an existing V2 project or perform device acceptance.
 ---
 
@@ -13,10 +13,10 @@ This directory is self-contained. Internal producer names (`mindplus-switch`, `m
 
 ## Route and execute
 
-0. Before routing each new task, run `python <absolute path of this skill directory>/scripts/update_skill.py` from any working directory (always pass the absolute script path; the working directory does not matter and the script never renames the skill directory). Compare installed `VERSION` (see root `VERSION`) with stable releases at `https://gitee.com/mind-plus/mindplus-extension-skills/releases/`. Runtime files at root/one child directory select the WB ZIP; deeper runtime directories select the universal ZIP. Install only a newer matching Release package, retaining one compressed rollback ZIP outside skill discovery directories. Never run the updater from `.mindplus-skill-backups`, a staging directory, or a packaged preview. Use the active skill path reported by the client, not a directory found by broad search. Do not automatically delete historical backups or staging directories. If the user reports a known newer release, add `--refresh` to bypass the one-hour check cache. On success verify the returned `installation_root` is the active skill and `installed_version` matches that directory's `VERSION`; updating another copy is not success. On `UPDATED`, reload this directory's `SKILL.md` before continuing. On `SKIPPED`, briefly report the reason and continue with the installed version; never force overwrite local Git changes. Do not repeat the check within the same task or an active run. If the user explicitly requests offline use or a pinned version, skip the check.
+0. Before each new task, follow [skill-update.md](references/skill-update.md) to check the active installation and reload this skill after an update. Skip for explicit offline or pinned-version use; do not repeat within an active run.
 1. Immediately after the version check, follow [official-repository-discovery.md](references/official-repository-discovery.md): check the official `https://gitee.com/mind-plus` organization for repositories mentioned in the active conversation. For a matching development base, show verified candidates and ask whether to fork an existing repository before source-dependent writes; reuse an explicit choice already supplied. Public discovery does not require a token; actual fork development follows the upgrade leaf token/ownership gates.
 2. Read [routing.md](references/routing.md).
-3. Run `python scripts/mpa.py start --goals <CONVERT,CREATE,UPGRADE,REVIEW,PUBLISH> --project-root <abs> --work-root <abs>` with known source/spec paths and authorizations already supplied by the user's request. Ordinary review uses `BASIC`. Pass `--review-profile HOST_READY` only for explicit full acceptance; it inserts a review even when REVIEW is not listed.
+3. Before CREATE/CONVERT routing, choose an absent or empty outer project directory named `ext2-<name>` per [project-naming.md](references/project-naming.md). Freeze this path only after applying the naming rule. Run `python scripts/mpa.py start --goals <CONVERT,CREATE,UPGRADE,REVIEW,PUBLISH> --project-root <abs> --work-root <abs>` with known source/spec paths and authorizations already supplied by the user's request. Ordinary review uses `BASIC`. Pass `--review-profile HOST_READY` only for explicit full acceptance; it inserts a review even when REVIEW is not listed.
 4. Follow `next_command` and load only the selected leaf. Record results with `mpa.py handoff`, advance with `mpa.py transition`, and recover interruptions with `mpa.py resume`. Reusing a run ID must not change its request.
 
 | Workflow | Reference |

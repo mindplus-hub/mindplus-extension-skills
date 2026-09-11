@@ -65,7 +65,7 @@ V1 注解中 `.defl="..."` 外层引号是注解语法，不是默认值本身�
 - `compatibilityId` 保留全小写旧加载身份，优先从 V1 根目录实际 `.mpext` 文件名去掉 `-V<版本>.mpext` 后取得；没有包时按 Wiki 的 `author-id-thirdex` 规则从原始 V1 `author`/`id` 转小写派生。多个包身份不一致或 config 与包身份冲突时暂停。不得用清理后的 V2 `id` 反推兼容 ID。
 - 示例：V1 `id: Maxbot_driver` 生成 V2 `id: maxbotdriver`；旧包 `winster-maxbot_driver-thirdex-V0.0.2.mpext` 对应 `compatibilityId: winster-maxbot_driver-thirdex`。
 - 不照抄样例的业务 id、author、版本、颜色、设备、引脚、opcode、菜单值或依赖。
-- 优先复用 V1 封面和图标；`config.cover` 必须指向目标 `public/` 中实际存在的文件。缺失视觉资源时不重画。
+- 优先复用 V1 封面和图标；`config.cover` 必须指向目标 `public/` 中实际存在的文件。未要求制作时不自行重画；新建或已授权制作／替换的封面按 [cover-design.md](cover-design.md)，其余图标和截图仍遵循原有来源规则。
 - 复制文件后记录源/目标相对路径、大小和 SHA-256。
 
 ## `config.json` 字段契约

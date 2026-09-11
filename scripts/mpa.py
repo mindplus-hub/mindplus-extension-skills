@@ -55,6 +55,7 @@ USER_EVIDENCE_CHECKLIST = [
     "4. Only after the user confirms these observations, rerun with --confirmed <check_id>.",
 ]
 ROUTE_FIX = {
+    "WORKSPACE.PROJECT_NAME_PREFIX_REQUIRED": "Correct --project-root to an absent or empty ext2-<name> directory before starting. Do not rename an existing project or change a frozen run path.",
     "AUTH.PUSH_NOT_AUTHORIZED": "Ask the user for commit and push authorization, then rerun the same command with --auth commit --auth push.",
     "AUTH.LOCAL_WRITE_REQUIRED": "Ask the user for permission to write the project, then rerun with --auth local_write.",
     "INPUT.PROJECT_ROOT_REQUIRED": "Rerun with --project-root <absolute path>.",

@@ -368,7 +368,7 @@ def smoke(zip_path: Path) -> list[dict]:
             selection = run("scripts/switch__select_reference_topics.py", "--inventory", inventory, "--active-root", package / "assets", "--mode", mode)
             if not selection["topics"] or any(not Path(x["path"]).is_file() for x in selection["topics"]):
                 raise PackageError("Selected reference topics do not resolve")
-        project = base / "project"
+        project = base / "ext2-project"
         project.mkdir()
         (project / "config.json").write_text("{}")
         for goals in ("REVIEW", "PUBLISH"):

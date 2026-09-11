@@ -245,6 +245,16 @@ def route(request: dict[str, Any], registry: dict[str, Any]) -> dict[str, Any]:
                           message="Upgrade requires an existing V2 project; inspect its format in the upgrade leaf.", facts=facts)
         producer = "UPGRADE_EXISTING"
 
+    if producer in {"CREATE_FRESH", "CONVERT_FRESH"} and (
+        not project.name.startswith("ext2-") or not project.name[5:].strip()
+    ):
+        return result(
+            state="WAITING_USER", status="BLOCKED",
+            reason_code="WORKSPACE.PROJECT_NAME_PREFIX_REQUIRED",
+            message="Fresh project_root must be named ext2-<name>. Correct the path before starting; do not rename an existing project.",
+            facts=facts,
+        )
+
     if producer and not project.parent.is_dir():
         return result(
             state="TERMINAL",

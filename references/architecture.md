@@ -4,6 +4,18 @@ One self-contained skill contains five progressively loaded leaves. The router s
 
 Entry sequence: skill version check -> [official repository discovery and user source choice](official-repository-discovery.md) -> deterministic routing -> selected leaf. Public discovery reuses the corpus lookup helper but runs before routing, independently of technical-reference fallback.
 
+## Instruction placement and maintenance
+
+Keep instructions ordered by scope, not by when a feature was added:
+
+- `SKILL.md`: capability selection, entry sequence, workflow links and cross-workflow boundaries. Keep feature-specific procedures in references.
+- Workflow leaves: state applicability first, then inputs, execution and handoff. Link a shared rule at the step that needs it; do not prepend each new feature above applicability.
+- Shared references: keep one authoritative description per subject. Directory naming applies before fresh routing; cover design applies during image work; issue levels govern findings. None implicitly expands another subject's scope.
+- Scripts and schemas: enforce machine-checkable contracts. Keep prose aligned with them; do not describe a script gate as merely advisory or use presentation guidance to override authorization, source integrity or config requirements.
+- README: summarize supported behavior and releases for users; link details instead of duplicating operational instructions. Preserve its architecture, installation and history sections.
+
+For each addition, identify its scope and authoritative file, link it from the relevant step, and check existing exclusions and shared gates for contradictions. Check reference links and packaged paths after moves. User instructions remain authoritative; newer placement or repeated wording does not increase a rule's authority. Do not edit the verified generated corpus to introduce local policy.
+
 ## Default lifecycle
 
 ```text

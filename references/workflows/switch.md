@@ -60,3 +60,5 @@ Keep the detailed child conversion log as evidence, then create and validate a p
 Set `review_status` to `NOT_RUN`. Completed producer/static checks may proceed directly to requested publication. Run independent REVIEW_EXISTING only when requested. Keep install/build environment limitations explicit; they do not turn static success into HOST_READY. If the user explicitly required a build or full acceptance, an unavailable build remains blocking for that requested scope.
 
 Before parent handoff, apply [issue-levels.md](../issue-levels.md). P0 blocks; P1/P2 remain evidenced advisory findings. Preserve raw checker results and separate presentation findings from required functional gates.
+
+遇到 V1 `blockType="tag"` 二级标签文字时，按 [标签到二级菜单映射](../switch/v1-secondary-labels.md) 转换；空标签函数不生成真实功能积木。

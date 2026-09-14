@@ -84,3 +84,5 @@ V1 注解中 `.defl="..."` 外层引号是注解语法，不是默认值本身�
 ## 硬边界
 
 `boardConfig` 不是 V2 扩展 `public/config.json` 顶层字段；不要因为旧说明或模型知识添加未在当前资料/Builder 中出现的字段。完整审核、目标代码编译、Mind+ 导入、上传和设备观察不属于本 Skill。
+
+遇到 V1 `blockType="tag"` 二级标签文字时，按 [标签到二级菜单映射](v1-secondary-labels.md) 转换；空标签函数不生成真实功能积木。

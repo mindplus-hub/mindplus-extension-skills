@@ -240,6 +240,21 @@ def localization_inventory(source: Path, relative_files: list[Path]) -> dict:
     }
 
 
+def secondary_labels(text: str) -> list[dict]:
+    """Extract explicitly annotated V1 tag declarations; do not infer members."""
+    labels = []
+    pattern = r"(?P<annotations>(?:^[ \t]*//%[^\r\n]*[\r\n]+)+)[ \t]*export\s+function\s+(?P<function>[A-Za-z_$][\w$]*)\s*\([^)]*\)\s*\{(?P<body>[^{}]*)\}"
+    for match in re.finditer(pattern, text, re.MULTILINE):
+        annotations = match["annotations"]
+        if not re.search(r"\bblockType\s*=\s*['\"]tag['\"]", annotations):
+            continue
+        title = re.search(r"\bblock\s*=\s*([\"'])(.*?)\1", annotations)
+        labels.append({"function": match["function"], "text": title.group(2) if title else None,
+                       "line": text.count("\n", 0, match.start()) + 1,
+                       "empty_body": not match["body"].strip(), "target_kind": "SUBMENU"})
+    return labels
+
+
 def entry_inventory(signatures: dict[str, Path]) -> dict[str, dict]:
     """Capture V1 function names, source namespace hints, and declared color."""
     result: dict[str, dict] = {}
@@ -251,11 +266,15 @@ def entry_inventory(signatures: dict[str, Path]) -> dict[str, dict]:
             set(re.findall(r"\bexport\s+function\s+([A-Za-z_$][\w$]*)\s*\(", text))
             | set(re.findall(r"\bexport\s+(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(", text))
         )
+        labels = secondary_labels(text)
+        layout_functions = {item["function"] for item in labels if item["empty_body"] and item["text"]}
+        functions = [name for name in functions if name not in layout_functions]
         namespaces = sorted(set(re.findall(r"\bnamespace\s+([A-Za-z_$][\w$]*)\s*\{", text)))
         color_match = re.search(r"//%[^\r\n]*\bcolor\s*=\s*[\"'](#?[0-9A-Fa-f]{6})[\"']", text)
         result[mode] = {
             "entry": str(entry),
             "block_functions": functions,
+            "secondary_labels": labels,
             "source_namespaces": namespaces,
             "declared_color1": color_match.group(1).lower() if color_match else None,
         }

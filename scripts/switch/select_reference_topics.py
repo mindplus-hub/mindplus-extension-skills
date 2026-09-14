@@ -145,6 +145,8 @@ def select(inventory_path: Path, active_root: Path, explicit_mode: str | None) -
         )
 
     requested: list[tuple[str, str]] = [(str(topic_id), "always") for topic_id in always]
+    if inventory.get("v1_entry_inventory", {}).get(mode, {}).get("secondary_labels"):
+        requested.append(("shared.block.special", "v1-secondary-label:submenu"))
     if "field-string" in features:
         requested.append(("shared.block.special", "field-string:shadow-symbol"))
     for feature in features:

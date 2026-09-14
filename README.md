@@ -169,6 +169,9 @@ $mindplus-extension-skills 检查 extensions/v2-demo 的配置和资源引用，
 
 ## 版本更新
 
+- V0.3.4
+   - 补充 V1 二级标签文字到 V2 SUBMENU 的转换规则，空标签函数不计作功能积木
+
 - V0.3.3
    - 尝试 Gitee 发布流程优化
 

@@ -36,3 +36,13 @@ Treat endpoint schemas and token permissions as version-sensitive. Recheck the c
 Interface reference checked 2026-09-10: [LabelsApi SDK contract](https://github.com/gitee-php/gitee-sdk/blob/main/docs/Api/LabelsApi.md#postv5reposownerrepoprojectlabels). This documents POST string-array input and ProjectLabel-array output. Reuse the existing in-memory token header transport; a denied request blocks Topic completion and must never trigger a credential-bearing URL fallback. Live token permissions and server acceptance require integration verification; no token value belongs in evidence.
 
 Repository visibility update uses `PATCH /repos/{owner}/{repo}` with the existing display `name` and `private: false`. Read back the same repository via GET; PATCH success alone is insufficient.
+
+## Creation-time visibility (0.3.3)
+
+Verified 2026-09-14 against live Gitee responses, so these are observations rather than SDK-schema claims:
+
+- `POST /orgs/{org}/repos` with `{"private": false, "auto_init": false}` **succeeds**: HTTP 201 and the created repository reports `"private": false`. An empty repository can therefore be created directly as public; the older "Gitee refuses empty public repositories (HTTP 422)" assumption does not hold on this path, so a requested-public repository should not be created private first.
+- The same body against `POST /user/repos` returned HTTP 201 with `"private": true` — a **silent downgrade with no error**. A creation-time public request is therefore never evidence of public visibility: always read `private` back from the created repository.
+- `auto_init: true` makes the repository non-empty, but it also creates a remote initial commit whose history is unrelated to the local root commit, so the push stops being a fast-forward. Do not use it as a visibility workaround.
+- Changing visibility **after** creation is a different permission than creating: an organization admin holding `permission.admin: true` on the repository still receives `401 修改仓库公开属性失败，您没有此项权限`. Only the repository/namespace owner can change it. Creation-time visibility avoids this rule entirely.
+- `DELETE /repos/{owner}/{repo}` succeeded (HTTP 204) for a repository created by the same credential, so throwaway probes created during verification can be removed.

@@ -94,6 +94,43 @@ class PublicationRegressions(unittest.TestCase):
             self.assertEqual(pub.ensure_public_visibility("owner", "repo", "fake")["status"], "PROMOTED_TO_PUBLIC")
             self.assertEqual(api.call_count, 1)
 
+    def test_create_public_asks_for_public_in_the_creation_call(self):
+        # A requested-public repository must be created public directly. Creating it
+        # private and promoting it afterwards is what reaches Gitee's owner-only
+        # visibility rule, and an empty repository can be created public.
+        for reported_private in (False, True):
+            with self.subTest(reported_private=reported_private), tempfile.TemporaryDirectory() as directory:
+                base = Path(directory)
+                state = base / "state"
+                state.mkdir()
+                context = {"project": base, "token": "fake", "state_dir": state, "project_sha256": "hash"}
+                args = argparse.Namespace(
+                    preflight=base / "preflight.json", state_dir=state,
+                    owner="mind-plus", repo_name="demo", org="mind-plus",
+                    create=True, private=False, public=True, description="d",
+                    remote_name="origin", transport="https",
+                )
+                # A creation-time public request can be silently downgraded, so the
+                # record must carry what Gitee actually reported back.
+                created = {"full_name": "mind-plus/demo", "name": "demo", "private": reported_private}
+                with patch.object(pub, "context", return_value=context), \
+                     patch.object(pub, "load_stage", side_effect=[{}, {"branch": "main"}]), \
+                     patch.object(pub, "gitee_api", side_effect=[(200, {"login": "u"}), (201, created)]) as api, \
+                     patch.object(pub, "git", side_effect=[
+                         argparse.Namespace(returncode=1, stdout="", stderr="no such remote"),
+                         argparse.Namespace(returncode=0, stdout="", stderr=""),
+                     ]), \
+                     contextlib.redirect_stdout(io.StringIO()):
+                    self.assertEqual(pub.cmd_remote(args), 0)
+                body = api.call_args_list[1].kwargs["body"]
+                self.assertIs(body["private"], False, "creation must request the requested visibility")
+                self.assertIs(body["auto_init"], False, "auto_init would seed unreviewed remote history")
+                record = json.loads((state / "publish-remote.json").read_text(encoding="utf-8"))
+                self.assertEqual(record["requested_visibility"], "public")
+                self.assertIs(record["private"], reported_private, "read-back is the authoritative visibility")
+                self.assertIs(record["pending_visibility_promotion"], True, "a downgrade must still be reconciled")
+                self.assertTrue((state / "publish-visibility-intent.json").is_file())
+
     def test_visibility_intent_survives_cleared_remote_flag(self):
         with tempfile.TemporaryDirectory() as tmp:
             state = Path(tmp)

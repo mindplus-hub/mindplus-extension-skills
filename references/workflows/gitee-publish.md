@@ -126,8 +126,9 @@ For a new repository:
 
 - Require `--create-repo`, `create_repository: true`, and explicit owner/org, name, description, and visibility.
 - Check for a collision before creation. A collision is not permission to reuse or recreate it.
-- Gitee refuses empty public repositories (HTTP 422), so a requested-public repository is created private and promoted to public with a PATCH only after the push is verified; a failed publish then never leaves a public repository behind.
-- Create exactly one repository through the current Gitee API and verify returned owner/name/visibility. Record the sanitized result even if a later push fails.
+- Create the repository with the requested visibility in one call (`private` set from `--public`/`--private`, `auto_init: false`). An empty repository can be created directly as public; do not create it private first merely to promote it later, because promoting an existing repository reaches the owner-only visibility rule below. Never use `auto_init` as a workaround: it adds an unreviewed initial commit whose history is unrelated to the local root commit, so the push stops being a fast-forward.
+- Read the created repository's `private` field back before trusting the request: a creation-time public request can be silently downgraded to private with HTTP 201 and no error. Record the observed value; if it is still private the push stage reconciles it.
+- Verify returned owner/name/visibility, and record the sanitized result even if a later push fails.
 - Add the explicit local `remote_name` only after the created repository identity and sanitized clone URL have been verified.
 - Do not create a README, license, or `.gitignore` remotely because that introduces unreviewed history/content.
 
@@ -175,6 +176,10 @@ Before publication, preserve producer/review findings under [issue-levels.md](..
 
 ## Visibility recovery
 
+A requested-public repository is created public in one call, so this section applies to what is left: an existing repository that is still private, or a creation that was silently downgraded.
+
 An explicit `remote --public` also applies to an existing repository. Public intent is persisted independently in `publish-visibility-intent.json`; rerunning remote without visibility flags preserves it. A prior `PUSHED_VISIBILITY_PENDING` record for the same target also restores lost intent. Do not edit records to bypass a failed visibility step or reuse visibility evidence for a different target.
 
 After branch SHA verification, GET repository metadata. If already public, skip PATCH; otherwise PATCH with the existing repository display `name` and `private: false`, then GET again even if PATCH failed or timed out. Only verified target identity and `private: false` allow Topic completion. Git `ls-remote` may use a credential helper, so accessible refs do not prove public visibility; the authenticated repository API's explicit private field is the visibility evidence.
+
+Changing an existing repository's visibility is **owner-only** and is not a token-scope problem: an organization administrator with `permission.admin: true` on the repository still gets `401 修改仓库公开属性失败，您没有此项权限`. When that happens, report `GITEE.VISIBILITY_UPDATE_FAILED` with the HTTP status and tell the user the namespace owner must make the change (or that the repository must be recreated public from the start) — do not retry with broader credentials, and do not treat an empty public creation as impossible.

@@ -169,6 +169,9 @@ $mindplus-extension-skills 检查 extensions/v2-demo 的配置和资源引用，
 
 ## 版本更新
 
+- V0.3.3
+   - 尝试 Gitee 发布流程优化
+
 - V0.3.2
    - 修复 Gitee 转公开请求，支持已有仓库显式转公开及中断恢复，保留公开要求并回读核验
    - 增强入口自更新检查

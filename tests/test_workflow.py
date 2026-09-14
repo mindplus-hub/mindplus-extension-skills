@@ -1588,10 +1588,12 @@ class GiteePublishTests(unittest.TestCase):
             self.assertIn("GIT_ASKPASS", https_env)
             self.assertNotIn("GIT_SSH_COMMAND", https_env)
 
-    def test_create_public_defers_promotion(self) -> None:
+    def test_create_public_as_public_and_keep_promotion_as_reconciliation(self) -> None:
         sys.path.insert(0, str(SCRIPTS))
         from gitee_publish import decide_create_privacy
-        self.assertEqual(decide_create_privacy(True, True), (True, True))
+        # A requested-public repository is created public in one call: promoting an
+        # existing repository later would hit the owner-only visibility rule.
+        self.assertEqual(decide_create_privacy(True, True), (False, True))
         self.assertEqual(decide_create_privacy(True, False), (True, False))
         self.assertEqual(decide_create_privacy(False, True), (False, True))
 

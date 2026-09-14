@@ -138,13 +138,22 @@ def auth_environment(remote_record: dict[str, Any], token: str, state_dir: Path)
 def decide_create_privacy(create: bool, public: bool) -> tuple[bool, bool]:
     """Return (initial_private, promote_public_after_push).
 
-    Gitee refuses to create an empty public repository (HTTP 422), so a
-    requested-public repository is created private and promoted after the
-    push is verified — a failed publish then never leaves a public repo.
+    Creation asks for the visibility the caller requested. An empty repository
+    can be created directly as public (re-verified against Gitee on 2026-09-14
+    from an organization namespace: HTTP 201 with `private: false`), so the
+    earlier private-then-promote dance is unnecessary and — more importantly —
+    it is what forced a PATCH on an existing repository, where Gitee allows only
+    the repository/namespace owner to change visibility.
+
+    `promote_public_after_push` stays True for a requested-public repository
+    because a creation-time public request can be silently downgraded to
+    private (observed on a personal namespace: HTTP 201 with `private: true`
+    and no error). The push stage therefore reconciles by reading the
+    repository's `private` field back and only PATCHes when it is still private.
     """
     if not create:
         return False, public
-    return True, public
+    return (not public), public
 
 
 def select_transport(mode: str, ssh_ok: bool) -> tuple[str, str | None]:

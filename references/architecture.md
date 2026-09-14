@@ -30,6 +30,8 @@ Explicit `review_profile: HOST_READY` inserts REVIEW_EXISTING after any producer
 
 Routing decisions live in `scripts/route_workflow.py`; allowed edges live in `references/workflow-registry.json` and are enforced during transition. `mpa.py` composes route/start/handoff/transition/resume. Default profiles and optional detail live in the relevant leaf references.
 
+记录布局、父子关联与分析顺序见 [run-records.md](run-records.md)。
+
 ## Evidence and request identity
 
 - Each run owns one immutable request. Identical start is idempotent; a different request needs a new run ID.

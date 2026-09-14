@@ -20,12 +20,12 @@ class ProjectNamingTests(unittest.TestCase):
             source = base / "source"
             source.mkdir()
             for goal in ("CREATE", "CONVERT"):
-                for name in ("sensor", "ext-sensor", "EXT2-sensor", "ext2-", "ext2-sensor"):
+                for name in ("sensor", "ext-sensor", "EXT2-sensor", "ext2-", "ext2-sensor", "ext2-ul-", "ext2-xx-sensor", "ext2-ul-sensor", "ext2-rt-sensor", "ext2-py-sensor", "ext2-mpy-sensor"):
                     with self.subTest(goal=goal, name=name):
                         project = base / name
                         request = {"goals": [goal], "paths": {"project_root": str(project), "v1_source": str(source)}, "authorizations": {"local_write": True}}
                         result = route(request, registry)
-                        if name == "ext2-sensor":
+                        if name in {"ext2-ul-sensor", "ext2-rt-sensor", "ext2-py-sensor", "ext2-mpy-sensor"}:
                             self.assertEqual(result["status"], "PASS")
                             validate_target(project)
                         else:

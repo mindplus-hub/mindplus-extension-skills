@@ -55,7 +55,7 @@ USER_EVIDENCE_CHECKLIST = [
     "4. Only after the user confirms these observations, rerun with --confirmed <check_id>.",
 ]
 ROUTE_FIX = {
-    "WORKSPACE.PROJECT_NAME_PREFIX_REQUIRED": "Correct --project-root to an absent or empty ext2-<name> directory before starting. Do not rename an existing project or change a frozen run path.",
+    "WORKSPACE.PROJECT_NAME_PREFIX_REQUIRED": "Correct --project-root to an absent or empty ext2-<rt|ul|py|mpy>-<name> directory before starting. Do not rename an existing project or change a frozen run path.",
     "AUTH.PUSH_NOT_AUTHORIZED": "Ask the user for commit and push authorization, then rerun the same command with --auth commit --auth push.",
     "AUTH.LOCAL_WRITE_REQUIRED": "Ask the user for permission to write the project, then rerun with --auth local_write.",
     "INPUT.PROJECT_ROOT_REQUIRED": "Rerun with --project-root <absolute path>.",
@@ -111,6 +111,7 @@ def build_context(work_root: Path, request: dict[str, Any], run: dict[str, Any])
         upstream = paths.get("review_handoff")
     return {
         "work_root": work_root.as_posix(),
+        "parent_run_id": run.get("run_id"),
         "v1_source": paths.get("v1_source"),
         "project_root": paths.get("project_root"),
         "review_handoff": upstream,
@@ -128,6 +129,8 @@ def next_command_for(workflow: str, ctx: dict[str, Any]) -> str:
         header = f"Use review profile {ctx.get('review_profile', 'BASIC')}. " + header
     if workflow == "CONVERT_FRESH":
         command = f"python {quote(skill + '/scripts/switch/init_run.py')} --work-root {quote(ctx['work_root'])} --v1-source {quote(ctx['v1_source'])}"
+        if ctx.get("parent_run_id"):
+            command += f" --parent-run-id {quote(ctx['parent_run_id'])}"
         if ctx.get("project_root"):
             command += f" --project-root {quote(ctx['project_root'])}"
     elif workflow == "CREATE_FRESH":
@@ -480,6 +483,13 @@ def cmd_handoff(args: argparse.Namespace) -> int:
     artifacts = []
     for kind, path_text in parse_pairs(args.artifact, "artifact", errors):
         artifacts.append({"kind": kind, "path": str(Path(path_text).expanduser().resolve(strict=False)), "sha256": None})
+    if workflow == "CONVERT_FRESH":
+        child = run_root / "children" / "CONVERT_FRESH"
+        for name in ("record.json", "log.md"):
+            path = child / name
+            if path.is_file():
+                artifacts.append({"kind": "conversion_record", "path": str(path),
+                                  "sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
     if errors:
         return emit({"status": "FAIL", "errors": errors}, 1)
 
@@ -725,26 +735,25 @@ def cmd_clean(args: argparse.Namespace) -> int:
         cleanup_run_dir(run_root)
         report.append({"run_id": run_id, "removed": True, "note": f"state was {state}"})
 
-    ms_root = work_root / ".ms"
-    if args.all and ms_root.is_dir():
-        for run_dir in sorted(ms_root.iterdir()):
-            if not run_dir.is_dir():
-                continue
-            log = run_dir / "log.md"
-            status_text = ""
-            if log.is_file():
-                for line in log.read_text(encoding="utf-8", errors="replace").splitlines():
-                    if line.startswith("- status:"):
-                        status_text = line.split(":", 1)[1].strip()
-                        break
-            if "RUNNING" in status_text and not args.force:
-                report.append({"run_id": f".ms/{run_dir.name}", "removed": False, "note": f"switch log is {status_text}; use --force"})
-                continue
-            cleanup_run_dir(run_dir)
-            report.append({"run_id": f".ms/{run_dir.name}", "removed": True, "note": f"switch log was {status_text or 'unknown'}"})
-    elif args.run_id and not run_ids and ms_root.is_dir():
-        report.append({"run_id": args.run_id, "removed": False, "note": "use resume to list parent runs; .ms run ids differ"})
-
+    for ms_root in (work_root / ".mindplus-agent" / "conversions", work_root / ".ms"):
+        if args.all and ms_root.is_dir():
+            for run_dir in sorted(ms_root.iterdir()):
+                if not run_dir.is_dir():
+                    continue
+                log = run_dir / "log.md"
+                status_text = ""
+                if log.is_file():
+                    for line in log.read_text(encoding="utf-8", errors="replace").splitlines():
+                        if line.startswith("- status:"):
+                            status_text = line.split(":", 1)[1].strip()
+                            break
+                if "RUNNING" in status_text and not args.force:
+                    report.append({"run_id": f"{ms_root.relative_to(work_root).as_posix()}/{run_dir.name}", "removed": False, "note": f"switch log is {status_text}; use --force"})
+                    continue
+                cleanup_run_dir(run_dir)
+                report.append({"run_id": f"{ms_root.relative_to(work_root).as_posix()}/{run_dir.name}", "removed": True, "note": f"switch log was {status_text or 'unknown'}"})
+        elif args.run_id and not run_ids and ms_root.is_dir():
+            report.append({"run_id": args.run_id, "removed": False, "note": "use resume to list parent runs; .ms run ids differ"})
     removed = sum(1 for item in report if item["removed"])
     skipped = len(report) - removed
     return emit(
@@ -872,7 +881,7 @@ def main() -> int:
     clean = subparsers.add_parser("clean", help="remove finished run records (skips RUNNING unless --force)")
     clean.add_argument("--work-root", required=True, type=Path)
     clean.add_argument("--run-id", help="remove this parent run only")
-    clean.add_argument("--all", action="store_true", help="remove all finished parent runs and .ms conversion records")
+    clean.add_argument("--all", action="store_true", help="remove finished parent runs, standalone conversion records and legacy .ms records")
     clean.add_argument("--force", action="store_true", help="also remove runs that are not TERMINAL")
     clean.set_defaults(handler=cmd_clean)
 

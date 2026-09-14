@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 import hashlib
 import json
 import os
@@ -56,8 +57,8 @@ def validate_target(project: Path) -> None:
         raise ScaffoldError("project_root must be absolute")
     if project.exists() and (not project.is_dir() or any(project.iterdir())):
         raise ScaffoldError("project_root must be absent or an empty directory")
-    if not project.name.startswith("ext2-") or not project.name[5:].strip():
-        raise ScaffoldError("fresh project_root must be named ext2-<name>")
+    if not re.fullmatch(r"ext2-(?:rt|ul|py|mpy)-[A-Za-z0-9][A-Za-z0-9_-]*", project.name):
+        raise ScaffoldError("fresh project_root must be named ext2-<rt|ul|py|mpy>-<name>")
     if not project.parent.is_dir():
         raise ScaffoldError("project_root parent must already exist")
 
@@ -84,7 +85,6 @@ def select_release(releases: list) -> dict:
         raise ScaffoldError("Duplicate scaffold checksum attachments")
     result = {"release_tag": release["tag_name"], "archive_url": matches[0]["browser_download_url"], "expected_sha256": None}
     if checksums:
-        import re
         text = download(checksums[0]["browser_download_url"], limit=4096).decode("ascii").strip()
         match = re.fullmatch(r"([0-9a-fA-F]{64}) [ *]" + re.escape(ARCHIVE_NAME), text)
         if not match:
@@ -197,7 +197,6 @@ def main() -> int:
     try:
         validate_target(project)
         if args.archive:
-            import re
             if not args.sha256 or not re.fullmatch(r"[0-9a-fA-F]{64}", args.sha256):
                 raise ScaffoldError("Local --archive requires --sha256")
             release = {"expected_sha256": args.sha256.lower(), "release_tag": None, "archive_url": None}

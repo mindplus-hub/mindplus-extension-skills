@@ -26,10 +26,10 @@ class ScaffoldReleaseTests(unittest.TestCase):
                         directory = name in {"extension", "scripts", "utils"}
                         z.writestr(wrapper + name + ("/" if directory else ""), b"" if directory else b"new-template")
                 digest = hashlib.sha256(archive.read_bytes()).hexdigest()
-                project = root / "ext2-test"
+                project = root / "ext2-ul-test"
                 result = scaffold.extract_checked(archive, project, {"expected_sha256": digest, "release_tag": "v0.0.2"})
                 self.assertTrue(result["checksum_verified"])
                 self.assertEqual((project / ".gitignore").read_bytes(), b"new-template")
                 with self.assertRaises(scaffold.ScaffoldError):
-                    scaffold.extract_checked(archive, root / "ext2-bad", {"expected_sha256": "0" * 64})
-                self.assertFalse((root / "ext2-bad").exists())
+                    scaffold.extract_checked(archive, root / "ext2-ul-bad", {"expected_sha256": "0" * 64})
+                self.assertFalse((root / "ext2-ul-bad").exists())

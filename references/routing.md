@@ -24,7 +24,7 @@ Request facts, matching [contracts/route-request.schema.json](contracts/route-re
 
 - `goals`: one or more of `CONVERT`, `CREATE`, `UPGRADE`, `REVIEW`, `PUBLISH`, `SYNC`.
 - `paths.v1_source`: required for fresh conversion.
-- `paths.project_root`: required for all workflows; for conversion/creation it must be absent or empty and named `ext2-<name>`; apply [project-naming.md](project-naming.md) before freezing the request.
+- `paths.project_root`: required for all workflows; for conversion/creation it must be absent or empty and named `ext2-<mode>-<name>`; apply [project-naming.md](project-naming.md) before freezing the request.
 - `paths.extension_spec`: optional at route time. Without it, creation freezes `<parent_run_root>/extension-spec.json` before writing the project.
 - `paths.review_handoff`: optional current producer/review evidence for direct publication. It does not remove a requested review or override this run's new handoff.
 - `review_profile`: BASIC by default. Explicit HOST_READY inserts full acceptance; ordinary publication never inserts review.

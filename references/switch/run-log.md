@@ -1,6 +1,6 @@
 # 运行日志约定
 
-默认位置：`<work_root>/.ms/<run_id>/log.md`。`.ms` 只是收纳目录，不是权限边界；
+默认位置：`<work_root>/.mindplus-agent/runs/<parent_run_id>/children/CONVERT_FRESH/log.md`。独立调用时位于 `.mindplus-agent/conversions/<run_id>/log.md`。目录只是收纳位置，不是权限边界；
 不要写入凭据、令牌、私有 Wiki 内容或用户源码正文。
 
 ## 初始模板

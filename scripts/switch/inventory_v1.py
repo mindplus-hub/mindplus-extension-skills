@@ -11,7 +11,7 @@ import sys
 from pathlib import Path
 
 
-SKIP_DIRS = {".git", ".ms", "node_modules", "build", "dist", "__pycache__", ".idea"}
+SKIP_DIRS = {".git", ".mindplus-agent", ".ms", "node_modules", "build", "dist", "__pycache__", ".idea"}
 GENERATOR_CALLS = {
     "addImport": "add-import",
     "addDeclaration": "add-variable",

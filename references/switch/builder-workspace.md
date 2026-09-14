@@ -4,11 +4,12 @@
 
 ```text
 <work_root>/
-├── .ms/
-│   └── <run_id>/
+├── .mindplus-agent/
+│   └── runs/<parent_run_id>/children/CONVERT_FRESH/
+│       ├── record.json
 │       ├── log.md
 │       └── record/
-└── ext2-<safe-id>/             # Git-free Builder scaffold，也是最终项目根目录
+└── ext2-<mode>-<safe-id>/             # Git-free Builder scaffold，也是最终项目根目录
     ├── extension/              # 唯一 V2 扩展源码目录
     ├── README.md               # 必须根据当前扩展改写
     ├── package.json
@@ -19,15 +20,15 @@
     └── build/
 ```
 
-`.ms` 只保存运行记录，不保存最终 Builder。不得再创建
+`.mindplus-agent` 只保存运行记录，不保存最终 Builder。不得再创建
 `<run_root>/builder` 或额外的“成品副本”。
 
 ## 项目根目录门禁
 
-1. 先按 [项目目录命名](../project-naming.md) 确定以 `ext2-` 开头的外层目录，再使用用户明确指定的 `project_root`。如果用户给出的是父目录（本身不是目标项目、且已存在其他内容）时，不得直接在其下沿用 V1 目录名；必须派生 ext2-<safe-id> 作为 project_root。
+1. 先按 [项目目录命名](../project-naming.md) 确定以 `ext2-` 开头的外层目录，再使用用户明确指定的 `project_root`。如果用户给出的是父目录（本身不是目标项目、且已存在其他内容）时，不得直接在其下沿用 V1 目录名；必须派生 ext2-<mode>-<safe-id> 作为 project_root。
 2. 未指定时，只有 V1 `id` 已经是无歧义安全目录名，才可派生
-   `<work_root>/ext2-<id>`；否则询问。
-3. `project_root` 不得位于 V1 源目录或 `.ms` 内，也不得包含 V1 源目录。
+   `<work_root>/ext2-<mode>-<id>`；否则询问。
+3. `project_root` 不得位于 V1 源目录或 `.mindplus-agent` 内，也不得包含 V1 源目录。
 4. 目标必须不存在或为空。非空目录、已有 Git 项目或同名成品都必须停止，不能覆盖。
 5. 执行：
 

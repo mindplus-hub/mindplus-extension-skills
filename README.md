@@ -169,6 +169,10 @@ $mindplus-extension-skills 检查 extensions/v2-demo 的配置和资源引用，
 
 ## 版本更新
 
+- V0.3.1
+   - 新建库按模式命名为 `ext2-rt-`、`ext2-ul-`、`ext2-py-`、`ext2-mpy-` 加库名称
+   - 统一过程文件
+
 - V0.3.0
    - 脚手架默认选择最新稳定 Release，兼容 ZIP 根目录与单层包装目录
    - 完善全局规范并提升至V3稳定版

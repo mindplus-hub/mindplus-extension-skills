@@ -1,7 +1,7 @@
 ---
 name: mindplus-extension-skills
 metadata:
-  version: "0.3.0"
+  version: "0.3.1"
 description: Create, upgrade existing, or freshly convert Mind+ V2 extensions with basic checks, review existing extensions, and publish authorized projects to Gitee. Use HOST_READY acceptance only when explicitly requested. Does not synchronize V1 into an existing V2 project or perform device acceptance.
 ---
 
@@ -16,7 +16,7 @@ This directory is self-contained. Internal producer names (`mindplus-switch`, `m
 0. Before each new task, follow [skill-update.md](references/skill-update.md) to check the active installation and reload this skill after an update. Skip for explicit offline or pinned-version use; do not repeat within an active run.
 1. Immediately after the version check, follow [official-repository-discovery.md](references/official-repository-discovery.md): check the official `https://gitee.com/mind-plus` organization for repositories mentioned in the active conversation. For a matching development base, show verified candidates and ask whether to fork an existing repository before source-dependent writes; reuse an explicit choice already supplied. Public discovery does not require a token; actual fork development follows the upgrade leaf token/ownership gates.
 2. Read [routing.md](references/routing.md).
-3. Before CREATE/CONVERT routing, choose an absent or empty outer project directory named `ext2-<name>` per [project-naming.md](references/project-naming.md). Freeze this path only after applying the naming rule. Run `python scripts/mpa.py start --goals <CONVERT,CREATE,UPGRADE,REVIEW,PUBLISH> --project-root <abs> --work-root <abs>` with known source/spec paths and authorizations already supplied by the user's request. Ordinary review uses `BASIC`. Pass `--review-profile HOST_READY` only for explicit full acceptance; it inserts a review even when REVIEW is not listed.
+3. Before CREATE/CONVERT routing, choose an absent or empty outer project directory named `ext2-<mode>-<name>` per [project-naming.md](references/project-naming.md). Freeze this path only after applying the naming rule. Run `python scripts/mpa.py start --goals <CONVERT,CREATE,UPGRADE,REVIEW,PUBLISH> --project-root <abs> --work-root <abs>` with known source/spec paths and authorizations already supplied by the user's request. Ordinary review uses `BASIC`. Pass `--review-profile HOST_READY` only for explicit full acceptance; it inserts a review even when REVIEW is not listed.
 4. Follow `next_command` and load only the selected leaf. Record results with `mpa.py handoff`, advance with `mpa.py transition`, and recover interruptions with `mpa.py resume`. Reusing a run ID must not change its request.
 
 | Workflow | Reference |

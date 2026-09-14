@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import re
 import json
 import sys
 from pathlib import Path
@@ -246,12 +247,12 @@ def route(request: dict[str, Any], registry: dict[str, Any]) -> dict[str, Any]:
         producer = "UPGRADE_EXISTING"
 
     if producer in {"CREATE_FRESH", "CONVERT_FRESH"} and (
-        not project.name.startswith("ext2-") or not project.name[5:].strip()
+        not re.fullmatch(r"ext2-(?:rt|ul|py|mpy)-[A-Za-z0-9][A-Za-z0-9_-]*", project.name)
     ):
         return result(
             state="WAITING_USER", status="BLOCKED",
             reason_code="WORKSPACE.PROJECT_NAME_PREFIX_REQUIRED",
-            message="Fresh project_root must be named ext2-<name>. Correct the path before starting; do not rename an existing project.",
+            message="Fresh project_root must be named ext2-<rt|ul|py|mpy>-<name>. Correct the path before starting; do not rename an existing project.",
             facts=facts,
         )
 

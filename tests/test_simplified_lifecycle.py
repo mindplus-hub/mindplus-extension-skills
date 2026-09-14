@@ -27,7 +27,7 @@ class SimplifiedLifecycleTests(unittest.TestCase):
                     continue
                 with self.subTest(goals=goals, profile=profile, external=old):
                     request = {"goals": goals, "review_profile": profile,
-                               "paths": {"project_root": str(base / "ext2-new" if producer else existing), "v1_source": str(source), "review_handoff": str(external) if old else None},
+                               "paths": {"project_root": str(base / "ext2-ul-new" if producer else existing), "v1_source": str(source), "review_handoff": str(external) if old else None},
                                "authorizations": {"local_write": True, "commit": True, "push": True}}
                     result = route(request, read_json(REGISTRY_PATH))
                     expected = ([producer + "_FRESH"] if producer else []) + (["REVIEW_EXISTING"] if review or profile == "HOST_READY" else []) + (["PUBLISH_GITEE"] if publish else [])
@@ -36,7 +36,7 @@ class SimplifiedLifecycleTests(unittest.TestCase):
     def test_direct_publish_without_review_keeps_authorization_and_snapshot_gates(self):
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
-            project = base / "ext2-project"
+            project = base / "ext2-ul-project"
             project.mkdir()
             (project / "config.json").write_text("{}")
             pub.git(project, "init")
@@ -92,7 +92,7 @@ class SimplifiedLifecycleTests(unittest.TestCase):
     def test_created_project_goes_directly_to_publication_and_binds_late_spec(self):
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
-            project = base / "ext2-new"
+            project = base / "ext2-ul-new"
             start = run_script("mpa.py", "start", "--goals", "CREATE,PUBLISH", "--project-root", str(project), "--work-root", str(base), "--run-id", "new", "--auth", "local_write", "--auth", "commit", "--auth", "push")
             self.assertEqual(start.returncode, 0, start.stdout)
             run_root = base / ".mindplus-agent/runs/new"
@@ -140,7 +140,7 @@ class SimplifiedLifecycleTests(unittest.TestCase):
     def test_direct_publication_can_record_result_without_review(self):
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
-            project = base / "ext2-project"
+            project = base / "ext2-ul-project"
             project.mkdir()
             (project / "file").write_text("data")
             result = run_script("mpa.py", "start", "--goals", "PUBLISH", "--project-root", str(project), "--work-root", str(base), "--run-id", "p", "--auth", "commit", "--auth", "push")

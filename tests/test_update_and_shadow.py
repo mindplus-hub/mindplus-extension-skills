@@ -32,10 +32,10 @@ def archive(kind="wb", number="0.2.0", wrapper="", extra=None):
 class UpdateTests(unittest.TestCase):
     def test_release_selection(self):
         releases = [{"tag_name": "0.2.0", "assets": [
-            {"name": "mindplus-extension-skills-0.2.0-workbuddy.zip"}, {"name": "0.2.0.zip"}]},
+            {"name": "mindplus-extension-skills-0.2.0-workbuddy.zip"}, {"name": "mindplus-extension-skills-0.2.0-universal.zip"}, {"name": "mindplus-extension-skills-0.2.0-workbuddy.zip.sha256"}, {"name": "mindplus-extension-skills-0.2.0-universal.zip.sha256"}]},
             {"tag_name": "0.3.0-rc1", "assets": []}]
         self.assertTrue(updater.choose(releases, (0, 1, 0), "wb")[1]["name"].endswith("workbuddy.zip"))
-        self.assertEqual(updater.choose(releases, (0, 1, 0), "universal")[1]["name"], "0.2.0.zip")
+        self.assertEqual(updater.choose(releases, (0, 1, 0), "universal")[1]["name"], "mindplus-extension-skills-0.2.0-universal.zip")
         self.assertIsNone(updater.choose(releases, (0, 2, 0), "wb"))
 
     def test_layout_ignores_cache(self):
@@ -216,8 +216,10 @@ class UpdateTests(unittest.TestCase):
             root.mkdir()
             updater.unpack(archive(number="0.1.3"), root, (0, 1, 3), "wb")
             asset = {"name": "mindplus-extension-skills-0.1.4-workbuddy.zip", "browser_download_url": "https://gitee.com/test.zip"}
-            releases = json.dumps([{"tag_name": "v0.1.4", "assets": [asset]}]).encode()
-            with patch.object(updater, "cache_path", lambda: Path(tmp) / "cache.json"), patch.object(updater, "download", side_effect=[releases, archive(number="0.1.4")]), patch.object(Path, "unlink", side_effect=AssertionError("same-layout update must not delete")):
+            checksum = {"name": asset["name"] + ".sha256", "browser_download_url": "https://gitee.com/test.sha256"}
+            digest = (packer.sha(archive(number="0.1.4")) + "  " + asset["name"]).encode()
+            releases = json.dumps([{"tag_name": "v0.1.4", "assets": [asset, checksum]}]).encode()
+            with patch.object(updater, "cache_path", lambda: Path(tmp) / "cache.json"), patch.object(updater, "download", side_effect=[releases, digest, archive(number="0.1.4")]), patch.object(Path, "unlink", side_effect=AssertionError("same-layout update must not delete")):
                 result = updater.update(root, refresh=True)
             self.assertEqual(result["status"], "UPDATED")
             self.assertEqual(result["installed_version"], "0.1.4")
@@ -295,7 +297,7 @@ command = f"python {root}/scripts/switch/init_run.py"
         self.assertNotIn("marketplace_prompts:", output["SKILL.md"].decode())
 
     def test_body_preserves_human_notes_and_is_idempotent(self):
-        info = {"repository": "https://gitee.com/mind-plus/mindplus-extension-skills", "version": "0.1.2"}
+        info = {"name": "mindplus-extension-skills", "repository": "https://gitee.com/mind-plus/mindplus-extension-skills", "version": "0.1.2"}
         body = packer.release_body("团队更新说明\n", info, "v0.1.2", "a" * 64, "package.zip")
         self.assertTrue(body.startswith("团队更新说明\n"))
         self.assertEqual(packer.release_body(body, info, "v0.1.2", "a" * 64, "package.zip"), body)
@@ -337,9 +339,13 @@ command = f"python {root}/scripts/switch/init_run.py"
         packer.write_json(metadata, info)
         zip_path = root / f'mindplus-extension-skills-{info["version"]}-workbuddy.zip'
         zip_path.write_bytes(b"fixture-archive")
+        universal = root / zip_path.name.replace("workbuddy", "universal")
+        universal.write_bytes(b"source-archive")
+        artifacts = [zip_path, universal, packer.checksum_file(zip_path), packer.checksum_file(universal)]
         report = root / "report.json"
-        packer.write_json(report, {"metadata": info, "source_files": {n: packer.sha(d) for n, d in packer.collect(source).items()}})
+        packer.write_json(report, {"metadata": info, "artifact_hashes": {p.name: packer.sha(p.read_bytes()) for p in artifacts}, "universal_source_files": {n: packer.sha(d) for n, d in packer.collect_source(source).items()}, "source_files": {n: packer.sha(d) for n, d in packer.collect(source).items()}})
         result = {"status": "PASS", "preview": False, "zip": str(zip_path), "report": str(report), "zip_sha256": packer.sha(zip_path.read_bytes())}
+        result["artifacts"] = [str(p) for p in artifacts]
         return source, metadata, info, result
 
     def test_reuse_attachment_preserves_release_name(self):
@@ -348,7 +354,7 @@ command = f"python {root}/scripts/switch/init_run.py"
             tag = "v" + info["version"]
             release = {"id": 1, "tag_name": tag, "name": "团队标题", "body": "团队说明", "prerelease": False}
             api = Mock()
-            api.attachments.return_value = [{"name": Path(result["zip"]).name}]
+            api.attachments.return_value = [{"name": Path(p).name} for p in result["artifacts"]]
             def request(method, path, payload=None, **kwargs):
                 if method == "PATCH":
                     release.update(payload)
@@ -385,7 +391,7 @@ command = f"python {root}/scripts/switch/init_run.py"
                 published = packer.publish(result, source, metadata, tag)
             self.assertFalse(published["reused_attachment"])
             self.assertIn("mindplus-pack:start", state["body"])
-            api.verify_attachment.assert_called_once()
+            self.assertEqual(api.verify_attachment.call_count, 4)
 
     def test_mismatched_attachment_does_not_edit_release(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -393,7 +399,7 @@ command = f"python {root}/scripts/switch/init_run.py"
             tag = "v" + info["version"]
             api = Mock()
             api.request.return_value = {"id": 1, "tag_name": tag, "prerelease": False}
-            api.attachments.return_value = [{"name": Path(result["zip"]).name}]
+            api.attachments.return_value = [{"name": Path(p).name} for p in result["artifacts"]]
             api.verify_attachment.side_effect = packer.PackageError("different bytes")
             with patch.dict(os.environ, {"MP_RELEASE_TOKEN": "test-secret"}), patch.object(packer, "ReleaseAPI", return_value=api), patch.object(packer, "release_commit", return_value="a" * 40):
                 with self.assertRaises(packer.PackageError):

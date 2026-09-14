@@ -61,24 +61,70 @@ def variant(root: Path) -> str:
     return "wb" if all(len(p.relative_to(root).parts) <= 2 for p in files) else "universal"
 
 
-def download(url: str) -> bytes:
-    if not url.startswith("https://"):
-        raise ValueError("Release downloads must use HTTPS")
-    host = (urlparse(url).hostname or "").lower()
-    if host != DOWNLOAD_HOST and not host.endswith("." + DOWNLOAD_HOST):
-        raise ValueError("Release downloads must come from " + DOWNLOAD_HOST)
-    req = urllib.request.Request(url, headers={"User-Agent": "mindplus-extension-skills-updater/0.1.0"})
-    with urllib.request.urlopen(req, timeout=20) as response:
-        if not response.url.startswith("https://"):
-            raise ValueError("Insecure download redirect")
-        data = response.read(LIMIT + 1)
-    if len(data) > LIMIT:
-        raise ValueError("Release response exceeds size limit")
-    return data
+class IntegrityError(ValueError):
+    pass
+
+
+def validate_download_url(url: str) -> None:
+    parsed = urlparse(url)
+    host = (parsed.hostname or "").lower()
+    if (parsed.scheme != "https" or parsed.username or parsed.password
+            or parsed.port not in (None, 443)
+            or (host != DOWNLOAD_HOST and not host.endswith("." + DOWNLOAD_HOST))):
+        raise IntegrityError("Release downloads and redirects require HTTPS on Gitee hosts")
+
+
+class ReleaseRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        validate_download_url(newurl)
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+def download(url: str, limit: int = LIMIT) -> bytes:
+    validate_download_url(url)
+    req = urllib.request.Request(url, headers={"User-Agent": "mindplus-extension-skills-updater/0.2.3", "Accept-Encoding": "identity"})
+    started = time.monotonic()
+    with urllib.request.build_opener(ReleaseRedirect()).open(req, timeout=20) as response:
+        validate_download_url(response.url)
+        length = response.headers.get("Content-Length")
+        expected = int(length) if length is not None else None
+        if expected is not None and not 0 <= expected <= limit:
+            raise IntegrityError("Release response exceeds size limit")
+        data = bytearray()
+        while True:
+            chunk = response.read(min(65536, limit + 1 - len(data)))
+            if time.monotonic() - started > 120:
+                raise IntegrityError("Release download exceeded 120 seconds")
+            if not chunk:
+                break
+            data.extend(chunk)
+            if len(data) > limit:
+                raise IntegrityError("Release response exceeds size limit")
+        if expected is not None and len(data) != expected:
+            raise IntegrityError("Incomplete Release download")
+    return bytes(data)
+
+
+def verified_download(asset: dict) -> tuple[bytes, str]:
+    checksum = asset.get("checksum")
+    if not isinstance(checksum, dict) or checksum.get("name") != asset["name"] + ".sha256":
+        raise IntegrityError("Matching Release SHA-256 attachment is required")
+    try:
+        text = download(checksum["browser_download_url"], limit=4096).decode("ascii").strip()
+    except UnicodeDecodeError as exc:
+        raise IntegrityError("SHA-256 attachment must be ASCII") from exc
+    match = re.fullmatch(r"([0-9a-fA-F]{64}) [ *](.+)", text)
+    if not match or match[2] != asset["name"]:
+        raise IntegrityError("Invalid SHA-256 file or package filename mismatch")
+    data = download(asset["browser_download_url"])
+    digest = hashlib.sha256(data).hexdigest()
+    if digest != match[1].lower():
+        raise IntegrityError("Release ZIP SHA-256 mismatch; installation was not changed")
+    return data, digest
 
 
 def choose(releases: list, current: tuple, kind: str):
-    candidates = []
+    stable = []
     for release in releases:
         if release.get("prerelease") or release.get("draft"):
             continue
@@ -88,19 +134,22 @@ def choose(releases: list, current: tuple, kind: str):
             continue
         if number <= current:
             continue
-        label = ".".join(map(str, number))
-        suffix = "(?:wb|workbuddy)" if kind == "wb" else "(?:universal|others)"
-        pattern = rf"mindplus-extension-skills-v?{re.escape(label)}-{suffix}\.zip"
-        matches = [a for a in release.get("assets", []) if re.fullmatch(pattern, a.get("name", ""), re.I)]
-        if kind == "universal" and not matches:
-            # Gitee exposes its source ZIP as a Release asset named <tag>.zip.
-            matches = [a for a in release.get("assets", [])
-                       if a.get("name") == release["tag_name"] + ".zip"]
-        if len(matches) > 1:
-            raise ValueError("Ambiguous Release packages for one version")
-        if matches:
-            candidates.append((number, matches[0]))
-    return max(candidates, key=lambda x: x[0]) if candidates else None
+        stable.append((number, release))
+    if not stable:
+        return None
+    number, release = max(stable, key=lambda item: item[0])
+    label = ".".join(map(str, number))
+    suffix = "(?:wb|workbuddy)" if kind == "wb" else "(?:universal|others)"
+    pattern = rf"mindplus-extension-skills-v?{re.escape(label)}-{suffix}\.zip"
+    matches = [a for a in release.get("assets", []) if re.fullmatch(pattern, a.get("name", ""), re.I)]
+    if len(matches) != 1:
+        raise IntegrityError("Latest stable Release requires exactly one matching package")
+    asset = dict(matches[0])
+    checksums = [a for a in release.get("assets", []) if a.get("name") == asset["name"] + ".sha256"]
+    if len(checksums) != 1:
+        raise IntegrityError("Release requires exactly one matching SHA-256 attachment")
+    asset["checksum"] = checksums[0]
+    return number, asset
 
 
 def version_digest(root: Path) -> str:
@@ -126,7 +175,7 @@ def load_cache(root: Path, current: tuple, kind: str) -> dict | None:
             return None
         if not 0 <= time.time() - checked <= CACHE_TTL_SECONDS:
             return None
-        if (data.get("installation_root") != str(root.resolve()) or data["version"] != ".".join(map(str, current))
+        if (data.get("cache_schema") != 2 or data.get("installation_root") != str(root.resolve()) or data["version"] != ".".join(map(str, current))
                 or data["version_sha256"] != version_digest(root)
                 or data["variant"] != kind):
             return None
@@ -149,6 +198,7 @@ def store_cache(root: Path, current: tuple, kind: str, selected) -> None:
     """
     try:
         payload = {
+            "cache_schema": 2,
             "checked_at": time.time(),
             "installation_root": str(root.resolve()),
             "ttl_seconds": CACHE_TTL_SECONDS,
@@ -157,7 +207,8 @@ def store_cache(root: Path, current: tuple, kind: str, selected) -> None:
             "variant": kind,
             "remote_version": None if selected is None else ".".join(map(str, selected[0])),
             "asset": None if selected is None else {"name": selected[1]["name"],
-                                                    "browser_download_url": selected[1]["browser_download_url"]},
+                                                    "browser_download_url": selected[1]["browser_download_url"],
+                                                    "checksum": selected[1].get("checksum")},
         }
         cache_path().write_text(json.dumps(payload), encoding="utf-8")
     except (OSError, ValueError, TypeError, KeyError):
@@ -349,7 +400,9 @@ def update(root: Path, check_only: bool = False, refresh: bool = False) -> dict:
     result.update(remote_version=".".join(map(str, number)), asset=asset["name"])
     if check_only:
         return {**result, "status": "UPDATE_AVAILABLE"}
-    info = install(root, download(asset["browser_download_url"]), number, kind)
+    data, digest = verified_download(asset)
+    info = install(root, data, number, kind)
+    result.update(sha256_verified=True, package_sha256=digest)
     return {**result, "status": "UPDATED", "backup": info["backup"],
             "installed_version": ".".join(map(str, version(root))),
             "pruned_release_files": info["pruned"],
@@ -365,6 +418,9 @@ def main() -> int:
     args = parser.parse_args()
     try:
         result = update(ROOT, args.check_only, args.refresh)
+    except IntegrityError as exc:
+        result = {"status": "BLOCKED", "reason": "UPDATE_INTEGRITY_FAILED", "detail": str(exc),
+                  "next_action": "Keep the current installation; do not bypass verification. Check the Release attachments before retrying."}
     except (OSError, ValueError, KeyError, TypeError, SyntaxError, zipfile.BadZipFile, subprocess.TimeoutExpired) as exc:
         result = {"status": "SKIPPED", "reason": "UPDATE_UNAVAILABLE", "detail": str(exc),
                   "next_action": "Briefly report the skipped update and continue with the installed "

@@ -395,12 +395,34 @@ def marketplace_copy(info: dict) -> str:
             ("\n".join("- " + line for line in prompts) if prompts else "请在 release-info.json 中填写 marketplace_prompts，每行一条示例提问。") + "\n")
 
 
+def collect_source(source: Path) -> dict[str, bytes]:
+    files = collect(source)
+    for path in sorted(source.rglob("*")):
+        relative = path.relative_to(source)
+        if any(part in IGNORED for part in relative.parts):
+            continue
+        if relative.parts[0] not in {"tools", "tests", ".workflow", "assets"} and relative.as_posix() not in {"README.md", "release-info.json", "struct.jpg", ".gitignore"}:
+            continue
+        if path.is_symlink() or (getattr(path.lstat(), "st_file_attributes", 0) & 0x400):
+            raise PackageError(f"Source contains a link/reparse point: {relative}")
+        if path.is_file() and path.suffix not in {".pyc", ".pyo"}:
+            files[relative.as_posix()] = path.read_bytes()
+    return files
+
+
+def checksum_file(archive: Path) -> Path:
+    path = archive.with_name(archive.name + ".sha256")
+    path.write_text(f"{sha(archive.read_bytes())}  {archive.name}\n", encoding="ascii")
+    return path
+
+
 def build(source: Path, metadata: Path, output: Path, preview: bool) -> dict:
     source, output = source.resolve(), output.resolve()
     if output == source or (output.is_relative_to(source) and not output.is_relative_to(source / "dist")):
         raise PackageError("Output must be outside the source skill or inside its ignored dist directory")
     info = load_metadata(metadata, preview)
     originals = collect(source)
+    source_files = collect_source(source)
     source_version = originals.get("VERSION", b"").decode("utf-8-sig").strip().lstrip("v")
     if source_version != info["version"]:
         raise PackageError("release-info.json version must match the source VERSION file")
@@ -426,13 +448,30 @@ def build(source: Path, metadata: Path, output: Path, preview: bool) -> dict:
             entry.compress_type = zipfile.ZIP_DEFLATED
             entry.external_attr = 0o100644 << 16
             archive.writestr(entry, data)
+    source_zip = folder / (info["name"] + "-" + info["version"] + ("-preview" if preview else "") + "-universal.zip")
+    with zipfile.ZipFile(source_zip, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        for name, data in sorted(source_files.items()):
+            entry = zipfile.ZipInfo(name, date_time=(2020, 1, 1, 0, 0, 0))
+            entry.compress_type = zipfile.ZIP_DEFLATED
+            entry.external_attr = 0o100644 << 16
+            archive.writestr(entry, data)
+    with zipfile.ZipFile(source_zip) as archive:
+        if archive.testzip() is not None or {name: archive.read(name) for name in archive.namelist()} != source_files:
+            raise PackageError("Universal source ZIP verification failed")
+    checksum_paths = [checksum_file(zip_path), checksum_file(source_zip)]
+    artifacts = [zip_path, source_zip, *checksum_paths]
+    artifact_hashes = {path.name: sha(path.read_bytes()) for path in artifacts}
     report = {"status": "PENDING", "preview": preview, "source": str(source), "zip": str(zip_path), "file_count": len(files),
               "max_directory_depth": max(len(PurePosixPath(x).parts) - 1 for x in files), "metadata": info, **audit,
               "source_files": {name: sha(data) for name, data in originals.items()},
+              "universal_source_files": {name: sha(data) for name, data in source_files.items()},
+              "artifact_hashes": artifact_hashes,
               "package_files": {name: sha(data) for name, data in files.items()}}
     report_path = folder / "build-report.json"
     try:
         report["checks"] = smoke(zip_path)
+        if {name: sha(data) for name, data in collect_source(source).items()} != report["universal_source_files"]:
+            raise PackageError("Source changed during packaging; rerun from a stable source")
         after = collect(source)
         if {name: sha(data) for name, data in after.items()} != report["source_files"]:
             raise PackageError("Source changed during packaging; rerun from a stable source")
@@ -442,7 +481,7 @@ def build(source: Path, metadata: Path, output: Path, preview: bool) -> dict:
         write_json(report_path, report)
         raise PackageError(f"Package checks failed; do not upload. Report: {report_path}\n{exc}") from exc
     write_json(report_path, report)
-    return {"status": "PASS", "preview": preview, "zip": str(zip_path), "unpacked": str(package), "report": str(report_path), "marketplace_info": str(marketplace_path),
+    return {"status": "PASS", "preview": preview, "artifacts": [str(path) for path in artifacts], "artifact_hashes": artifact_hashes, "source_zip": str(source_zip), "zip": str(zip_path), "unpacked": str(package), "report": str(report_path), "marketplace_info": str(marketplace_path),
             "file_count": len(files), "checks": len(report["checks"]), "zip_sha256": report["zip_sha256"], "certification": "NOT_SUBMITTED"}
 
 
@@ -512,7 +551,8 @@ def release_body(existing: str, info: dict, tag: str, digest: str, filename: str
     repo = info["repository"].rstrip("/")
     block = (f"{start}\n"
              f"- WorkBuddy：[下载兼容 ZIP]({repo}/releases/download/{tag}/{filename})\n"
-             f"- 其他 Agent：[下载通用源码 ZIP]({repo}/archive/refs/tags/{tag}.zip)\n"
+             f"- 其他 Agent：[下载通用源码 ZIP]({repo}/releases/download/{tag}/{info['name']}-{info['version']}-universal.zip)\n"
+             f"- SHA-256：[WorkBuddy 校验文件]({repo}/releases/download/{tag}/{filename}.sha256) / [通用源码校验文件]({repo}/releases/download/{tag}/{info['name']}-{info['version']}-universal.zip.sha256)\n"
              f"- 版本：`{info['version']}`\n- WB SHA-256：`{digest}`\n{end}")
     if start in existing or end in existing:
         if existing.count(start) != 1 or existing.count(end) != 1 or existing.index(start) > existing.index(end):
@@ -573,6 +613,15 @@ def publish(result: dict, source: Path, metadata: Path, tag: str) -> dict:
     report = read_json(Path(result["report"]))
     if {name: sha(data) for name, data in collect(source).items()} != report["source_files"] or info != report["metadata"]:
         raise PackageError("Source or metadata changed after building")
+    if {name: sha(data) for name, data in collect_source(source).items()} != report["universal_source_files"]:
+        raise PackageError("Universal source changed after building")
+    expected_names = {f"{info['name']}-{info['version']}-{kind}.zip{suffix}" for kind in ("workbuddy", "universal") for suffix in ("", ".sha256")}
+    artifacts = [Path(item) for item in result["artifacts"]]
+    if len(artifacts) != 4 or {item.name for item in artifacts} != expected_names:
+        raise PackageError("Release requires two ZIPs and two SHA-256 files")
+    for item in artifacts:
+        if sha(item.read_bytes()) != report["artifact_hashes"].get(item.name):
+            raise PackageError("Release artifact changed before publication")
     commit = release_commit(source, info, tag)
     path = "/releases/tags/" + urllib.parse.quote(tag, safe="")
     release = api.request("GET", path)
@@ -582,11 +631,17 @@ def publish(result: dict, source: Path, metadata: Path, tag: str) -> dict:
     if release.get("tag_name") != tag or release.get("prerelease"):
         raise PackageError("Existing Release tag or prerelease status is incompatible")
     release_id = release["id"]
-    matches = [item for item in api.attachments(release_id) if item.get("name") == archive.name]
-    if len(matches) > 1:
-        raise PackageError("Duplicate same-name Release attachments; resolve manually")
-    asset = matches[0] if matches else api.request("POST", f"/releases/{release_id}/attach_files", attachment=archive)
-    api.verify_attachment(asset, result["zip_sha256"])
+    existing = api.attachments(release_id)
+    uploaded = []
+    reused_all = True
+    for item in artifacts:
+        matches = [asset for asset in existing if asset.get("name") == item.name]
+        if len(matches) > 1:
+            raise PackageError("Duplicate same-name Release attachments; resolve manually")
+        reused_all = reused_all and bool(matches)
+        asset = matches[0] if matches else api.request("POST", f"/releases/{release_id}/attach_files", attachment=item)
+        api.verify_attachment(asset, report["artifact_hashes"][item.name])
+        uploaded.append(item.name)
     # Re-read after upload so intervening human edits are preserved where possible.
     release = api.request("GET", path)
     body = release_body(release.get("body") or "", info, tag, result["zip_sha256"], archive.name)
@@ -597,7 +652,7 @@ def publish(result: dict, source: Path, metadata: Path, tag: str) -> dict:
     if verified.get("body") != body:
         raise PackageError("Release body verification failed; inspect concurrent edits before retrying")
     return {"status": "PASS", "release": info["repository"].rstrip("/") + "/releases/" + tag,
-            "attachment": archive.name, "reused_attachment": bool(matches), "commit": commit}
+            "attachments": uploaded, "reused_attachment": reused_all, "commit": commit}
 
 
 def main() -> int:

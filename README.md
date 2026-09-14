@@ -159,20 +159,22 @@ $mindplus-extension-skills 检查 extensions/v2-demo 的配置和资源引用，
 
 进一步了解实现约定，可阅读 [架构说明](references/architecture.md)、[证据与审核等级](references/evidence.md) 和 [结果交接协议](references/handoff.md)。
 
+自更新会按安装布局选择 ZIP，并核对同名 `.zip.sha256` 文件；下载或校验失败不会安装。Release 的通用源码包保留原目录结构。
+
 ## 版本更新
 
+- V0.2.3
+   - Release 提供 WorkBuddy、通用源码两个 ZIP 及各自 SHA-256 校验文件
+   - 自更新下载后先校验摘要，再解压安装；校验缺失或失败时保留原版本
 - V0.2.2
    - 新建和 V1 转换项目目录统一校验 `ext2-` 前缀
    - 增加 cover/banner 规范，区分实物与非实物扩展的构图和文字要求
-
 - V0.2.1
    - 发布扩展时自动添加并核验仓库 Topic `MindPlus-Ext2`
    - 审核使用P0/P1/P2三级分类处理
    - 修改名称为 MindPlus-Extension-Skills
-
 - V0.2.0
    - 推送正式版
-
 - V0.1.4
    - 新增已有 V2 升级、扩展版本提升及个人令牌 fork 开发流程。
    - 版本检查后发现官方相关仓库，询问是否基于已有仓库开发。

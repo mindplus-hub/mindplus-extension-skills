@@ -1,6 +1,6 @@
 version: '1.0'
 name: release-workbuddy
-displayName: MindPlus WB Release
+displayName: MindPlus Skills Release
 # Reference the encrypted common variable by name; its value stays in Gitee Go.
 variables:
   global:
@@ -19,7 +19,7 @@ stages:
     steps:
       - step: build@python
         name: package_workbuddy
-        displayName: 构建并发布 WB ZIP
+        displayName: 构建并发布双 ZIP 和 SHA-256
         pythonVersion: '3.9'
         # Configure MP_RELEASE_TOKEN as a secret variable injected into this build task.
         # Never put the actual Token value in this YAML or print it.
@@ -63,10 +63,10 @@ stages:
             echo "[2/3] Fetching version tags (maximum 120 seconds)"
             timeout 120s git fetch --tags origin
             stage=publish
-            echo "[3/3] Building WB ZIP and publishing Release (maximum 600 seconds)"
+            echo "[3/3] Building WB/source ZIPs and SHA-256 files, then publishing Release (maximum 600 seconds)"
             timeout 600s python3 -B tools/pack_workbuddy.py --publish --tag "v$(tr -d '\r\n' < VERSION)"
-            echo "[DONE] WB Release completed"
+            echo "[DONE] Release completed: two ZIPs and two verified SHA-256 attachments"
         artifacts:
-          - name: WB_RELEASE
+          - name: SKILL_RELEASE
             path:
               - ./dist

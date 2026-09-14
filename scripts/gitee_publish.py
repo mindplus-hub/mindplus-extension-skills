@@ -143,7 +143,7 @@ def decide_create_privacy(create: bool, public: bool) -> tuple[bool, bool]:
     push is verified — a failed publish then never leaves a public repo.
     """
     if not create:
-        return False, False
+        return False, public
     return True, public
 
 
@@ -499,6 +499,50 @@ def cmd_commit(args: argparse.Namespace) -> int:
 # --------------------------------------------------------------------------- remote
 
 
+def public_intent(state_dir: Path, owner: str, repo: str, explicit: bool = False) -> bool:
+    """Public intent survives remote-stage retries and legacy pending push records."""
+    required = explicit
+    for name in ("publish-visibility-intent.json", "publish-remote.json", "publish-push.json"):
+        path = state_dir / name
+        if not path.is_file():
+            continue
+        saved = read_json(path)
+        target_matches = (saved.get("owner_or_org") == owner and saved.get("repo_name") == repo)
+        target_matches = target_matches or saved.get("clone_url") in (f"https://gitee.com/{owner}/{repo}.git", f"git@gitee.com:{owner}/{repo}.git")
+        pending = (saved.get("requested_visibility") == "public" or saved.get("pending_visibility_promotion") is True
+                   or saved.get("outcome") == "PUSHED_VISIBILITY_PENDING")
+        if pending and not target_matches:
+            raise StageBlocked({"status": "BLOCKED", "reason_code": "GITEE.VISIBILITY_TARGET_MISMATCH", "error": "Visibility evidence belongs to another target; use a separate publication run"})
+        required = required or (target_matches and pending)
+    return required
+
+
+def ensure_public_visibility(owner: str, repo: str, token: str) -> dict:
+    path = f"/repos/{owner}/{repo}"
+    def lookup():
+        try:
+            status, payload = gitee_api("GET", path, token)
+        except StageBlocked:
+            return None
+        if status != 200 or not isinstance(payload, dict) or payload.get("full_name") != f"{owner}/{repo}":
+            return None
+        return payload
+    current = lookup()
+    if current is not None and current.get("private") is False:
+        return {"status": "PROMOTED_TO_PUBLIC", "verified_by": "GET /repos/{owner}/{repo}", "already_public": True}
+    if current is None or not isinstance(current.get("name"), str) or not current["name"]:
+        return {"status": "FAILED", "error": "Cannot verify repository identity and display name before visibility update"}
+    try:
+        # name is the existing display name, not necessarily the repository URL path.
+        gitee_api("PATCH", path, token, body={"name": current["name"], "private": False})
+    except StageBlocked:
+        pass  # A timeout may have applied the update; reconcile using GET once.
+    verified = lookup()
+    if verified is not None and verified.get("private") is False:
+        return {"status": "PROMOTED_TO_PUBLIC", "verified_by": "GET /repos/{owner}/{repo}"}
+    return {"status": "FAILED", "error": "Public visibility not confirmed by repository API; retain pending intent"}
+
+
 def cmd_remote(args: argparse.Namespace) -> int:
     try:
         ctx = context(args, need_authorizations=("push",) + (("create_repository",) if args.create else ()))
@@ -516,6 +560,14 @@ def cmd_remote(args: argparse.Namespace) -> int:
     project = ctx["project"]
     token = ctx["token"]
     owner = args.org or args.owner
+    try:
+        requested_public = public_intent(ctx["state_dir"], owner, args.repo_name, bool(args.public))
+        if requested_public and args.private:
+            raise StageBlocked({"status": "BLOCKED", "reason_code": "GITEE.VISIBILITY_INTENT_CONFLICT", "error": "This run requires public visibility; do not clear it by rerunning remote"})
+        if requested_public:
+            write_state(ctx["state_dir"], "publish-visibility-intent.json", {"owner_or_org": owner, "repo_name": args.repo_name, "requested_visibility": "public"})
+    except StageBlocked as blocked:
+        return emit(blocked.payload, blocked.code)
     status, payload = gitee_api("GET", "/user", token)
     if status != 200 or not isinstance(payload, dict) or not payload.get("login"):
         return emit(
@@ -544,7 +596,7 @@ def cmd_remote(args: argparse.Namespace) -> int:
     transport, fallback_reason = select_transport(mode, ssh_ok)
 
     created = False
-    initial_private, promote_after_push = decide_create_privacy(args.create, bool(args.public))
+    initial_private, promote_after_push = decide_create_privacy(args.create, requested_public)
     if args.create:
         body = {"name": args.repo_name, "private": initial_private, "description": args.description or "", "auto_init": False}
         path = f"/orgs/{args.org}/repos" if args.org else "/user/repos"
@@ -604,7 +656,7 @@ def cmd_remote(args: argparse.Namespace) -> int:
         "remote_name": remote_name,
         "branch": commit_record["branch"],
         "auth_user": auth_user,
-        "requested_visibility": ("public" if args.public else "private") if args.create else None,
+        "requested_visibility": "public" if requested_public else "private" if args.create else None,
         "pending_visibility_promotion": promote_after_push,
         "generated_at": datetime.now(timezone.utc).isoformat(),
     }
@@ -748,20 +800,13 @@ def cmd_push(args: argparse.Namespace) -> int:
         return emit({"status": "BLOCKED", "reason_code": "REVIEW.STALE_HOST_READY_HANDOFF", "error": "project hash changed during publication"}, 2)
 
     visibility_promotion = None
-    if remote_record.get("pending_visibility_promotion"):
-        try:
-            status, payload = gitee_api("PATCH", f"/repos/{owner}/{repo_name}", token, body={"private": False})
-        except StageBlocked:
-            status, payload = None, {"message": "visibility request failed; verify repository visibility before resuming"}
-        if status == 200 and isinstance(payload, dict) and payload.get("private") is False:
-            visibility_promotion = {"status": "PROMOTED_TO_PUBLIC"}
-        else:
-            message = str(payload.get("message") or payload) if isinstance(payload, dict) else str(payload)
-            visibility_promotion = {
-                "status": "FAILED",
-                "http_status": status,
-                "error": f"public visibility was not confirmed; check it in the Gitee web UI ({message[:200]})",
-            }
+    try:
+        needs_public = public_intent(ctx["state_dir"], owner, repo_name,
+                                     remote_record.get("pending_visibility_promotion") is True or remote_record.get("requested_visibility") == "public")
+        if needs_public:
+            visibility_promotion = ensure_public_visibility(owner, repo_name, token)
+    except StageBlocked:
+        visibility_promotion = {"status": "FAILED", "error": "Cannot reconcile requested visibility with saved evidence"}
 
     visibility_failed = bool(visibility_promotion and visibility_promotion["status"] == "FAILED")
     topic_result = None if visibility_failed else ensure_publication_topic(owner, repo_name, token)
@@ -779,6 +824,8 @@ def cmd_push(args: argparse.Namespace) -> int:
         "clone_url": remote_record["clone_url"],
         "transport": remote_record.get("transport", "https"),
         "visibility_promotion": visibility_promotion,
+        "owner_or_org": owner, "repo_name": repo_name,
+        "requested_visibility": "public" if visibility_promotion else remote_record.get("requested_visibility"),
         "repository_topic": topic_result,
         "generated_at": datetime.now(timezone.utc).isoformat(),
     }

@@ -172,3 +172,9 @@ Finalize through `scripts/mpa.py handoff`. On `PASS`, attach the sanitized publi
 Git version tags, Release objects, attachments, repository deletion/recreation, force push, automatic merge/rebase, and hardware/device operations remain outside this leaf.
 
 Before publication, preserve producer/review findings under [issue-levels.md](../issue-levels.md): unresolved P0 blocks; P1/P2 do not require repeated user approval or automatic fixes. These levels do not relax credential, authorization, target, secret, snapshot or remote-ref gates. Do not repeat a full audit just to reassign priorities.
+
+## Visibility recovery
+
+An explicit `remote --public` also applies to an existing repository. Public intent is persisted independently in `publish-visibility-intent.json`; rerunning remote without visibility flags preserves it. A prior `PUSHED_VISIBILITY_PENDING` record for the same target also restores lost intent. Do not edit records to bypass a failed visibility step or reuse visibility evidence for a different target.
+
+After branch SHA verification, GET repository metadata. If already public, skip PATCH; otherwise PATCH with the existing repository display `name` and `private: false`, then GET again even if PATCH failed or timed out. Only verified target identity and `private: false` allow Topic completion. Git `ls-remote` may use a credential helper, so accessible refs do not prove public visibility; the authenticated repository API's explicit private field is the visibility evidence.

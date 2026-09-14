@@ -1593,7 +1593,7 @@ class GiteePublishTests(unittest.TestCase):
         from gitee_publish import decide_create_privacy
         self.assertEqual(decide_create_privacy(True, True), (True, True))
         self.assertEqual(decide_create_privacy(True, False), (True, False))
-        self.assertEqual(decide_create_privacy(False, True), (False, False))
+        self.assertEqual(decide_create_privacy(False, True), (False, True))
 
     def test_commit_whitespace_is_advisory(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

@@ -1,7 +1,7 @@
 ---
 name: mindplus-extension-skills
 metadata:
-  version: "0.3.1"
+  version: "0.3.2"
 description: Create, upgrade existing, or freshly convert Mind+ V2 extensions with basic checks, review existing extensions, and publish authorized projects to Gitee. Use HOST_READY acceptance only when explicitly requested. Does not synchronize V1 into an existing V2 project or perform device acceptance.
 ---
 
@@ -10,6 +10,10 @@ description: Create, upgrade existing, or freshly convert Mind+ V2 extensions wi
 Use the smallest workflow matching the request. Default: create/convert/upgrade with basic checks, then publish only if requested. Do not insert a separate review or Mind+ GUI acceptance into ordinary development or publication.
 
 This directory is self-contained. Internal producer names (`mindplus-switch`, `mindplus-create`, `mindplus-upgrade`, `mindplus-review`, `mindplus-gitee-publish`) are not separately installed skills. For maintenance read [architecture.md](references/architecture.md).
+
+## Entry check (including questions)
+
+Every new invocation of this skill starts with [skill-update.md](references/skill-update.md), including short questions, explanations and usage advice. Perform the update check before answering or running the next step; do not require a development or publication goal to trigger it. Reuse the completed check within the same active task. Explicit offline or pinned-version requests retain their exceptions. After this entry check, answer a question directly using relevant references; do not create a project/run or ask for source/fork selection merely to answer a question. Development tasks continue below.
 
 ## Route and execute
 

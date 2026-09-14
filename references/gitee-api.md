@@ -34,3 +34,5 @@ Treat endpoint schemas and token permissions as version-sensitive. Recheck the c
 `GET /repos/{owner}/{repo}/project_labels` lists repository Topics; POST on the same path adds a JSON string array. Use `["MindPlus-Ext2"]`, not issue `/labels` or Git `/tags`. Never replace all Topics with PUT. Read back to verify.
 
 Interface reference checked 2026-09-10: [LabelsApi SDK contract](https://github.com/gitee-php/gitee-sdk/blob/main/docs/Api/LabelsApi.md#postv5reposownerrepoprojectlabels). This documents POST string-array input and ProjectLabel-array output. Reuse the existing in-memory token header transport; a denied request blocks Topic completion and must never trigger a credential-bearing URL fallback. Live token permissions and server acceptance require integration verification; no token value belongs in evidence.
+
+Repository visibility update uses `PATCH /repos/{owner}/{repo}` with the existing display `name` and `private: false`. Read back the same repository via GET; PATCH success alone is insufficient.

@@ -64,7 +64,7 @@ class PublicationRegressions(unittest.TestCase):
                 base = Path(directory)
                 context = {"project": base, "token": "fake", "state_dir": base, "project_sha256": "hash", "preflight_path": base / "preflight.json"}
                 records = [{}, {"branch": "main", "commit_sha": "sha"}, {"remote_name": "origin", "owner_or_org": "owner", "repo_name": "repo", "clone_url": "https://gitee.com/owner/repo.git", "pending_visibility_promotion": True}]
-                with patch.object(pub, "context", return_value=context), patch.object(pub, "load_stage", side_effect=records), patch.object(pub, "read_json", return_value={}), patch.object(pub, "drift_check"), patch.object(pub, "auth_environment", return_value={}), patch.object(pub, "git") as git, patch.object(pub, "compute_project_hash", return_value=("hash", 1)), patch.object(pub, "ensure_publication_topic", return_value={"status": "VERIFIED"}), patch.object(pub, "gitee_api", side_effect=[(200, {"commit": {"sha": "sha"}}), (200, {"commit": {"sha": "sha"}}), response]), contextlib.redirect_stdout(io.StringIO()) as output:
+                with patch.object(pub, "context", return_value=context), patch.object(pub, "load_stage", side_effect=records), patch.object(pub, "read_json", return_value={}), patch.object(pub, "drift_check"), patch.object(pub, "auth_environment", return_value={}), patch.object(pub, "git") as git, patch.object(pub, "compute_project_hash", return_value=("hash", 1)), patch.object(pub, "ensure_publication_topic", return_value={"status": "VERIFIED"}), patch.object(pub, "gitee_api", side_effect=[(200, {"commit": {"sha": "sha"}}), (200, {"commit": {"sha": "sha"}}), (200, {"full_name": "owner/repo", "name": "Display name", "private": True}), response, (200, {"full_name": "owner/repo", "private": response != (200, {"private": False})})]), contextlib.redirect_stdout(io.StringIO()) as output:
                     git.return_value.stdout = "sha"
                     code = pub.cmd_push(argparse.Namespace())
                 result = json.loads(output.getvalue())
@@ -76,3 +76,30 @@ class PublicationRegressions(unittest.TestCase):
                     self.assertIsNone(result["next_command"])
                     saved = json.loads((base / "publish-push.json").read_text(encoding="utf-8"))
                     self.assertEqual(saved["outcome"], "PUSHED_VISIBILITY_PENDING")
+
+    def test_visibility_request_preserves_name_and_requires_get(self):
+        private = {"full_name": "owner/repo", "name": "Existing Display Name", "private": True}
+        for patch_response in ((400, {"messages": ["error"]}), (200, {"private": False}), pub.StageBlocked({"reason_code": "NETWORK"})):
+            with self.subTest(patch_response=patch_response):
+                with patch.object(pub, "gitee_api", side_effect=[(200, private), patch_response, (200, {**private, "private": False})]) as api:
+                    result = pub.ensure_public_visibility("owner", "repo", "fake")
+                self.assertEqual(result["status"], "PROMOTED_TO_PUBLIC")
+                self.assertEqual(api.call_args_list[1].kwargs["body"], {"name": "Existing Display Name", "private": False})
+                self.assertEqual(api.call_args_list[-1].args[:2], ("GET", "/repos/owner/repo"))
+        with patch.object(pub, "gitee_api", side_effect=[(200, private), (200, {"private": False}), (200, private)]):
+            self.assertEqual(pub.ensure_public_visibility("owner", "repo", "fake")["status"], "FAILED")
+
+    def test_already_public_does_not_patch(self):
+        with patch.object(pub, "gitee_api", return_value=(200, {"full_name": "owner/repo", "private": False})) as api:
+            self.assertEqual(pub.ensure_public_visibility("owner", "repo", "fake")["status"], "PROMOTED_TO_PUBLIC")
+            self.assertEqual(api.call_count, 1)
+
+    def test_visibility_intent_survives_cleared_remote_flag(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            state = Path(tmp)
+            write_json(state / "publish-remote.json", {"owner_or_org": "owner", "repo_name": "repo", "pending_visibility_promotion": False})
+            write_json(state / "publish-push.json", {"clone_url": "https://gitee.com/owner/repo.git", "outcome": "PUSHED_VISIBILITY_PENDING"})
+            self.assertTrue(pub.public_intent(state, "owner", "repo"))
+            with self.assertRaises(pub.StageBlocked):
+                pub.public_intent(state, "owner", "another")
+            self.assertEqual(pub.decide_create_privacy(False, True), (False, True))

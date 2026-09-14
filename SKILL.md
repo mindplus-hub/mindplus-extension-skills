@@ -1,7 +1,7 @@
 ---
 name: mindplus-extension-skills
 metadata:
-  version: "0.2.3"
+  version: "0.3.0"
 description: Create, upgrade existing, or freshly convert Mind+ V2 extensions with basic checks, review existing extensions, and publish authorized projects to Gitee. Use HOST_READY acceptance only when explicitly requested. Does not synchronize V1 into an existing V2 project or perform device acceptance.
 ---
 
@@ -36,7 +36,7 @@ For producer checks and BASIC review, read [issue-levels.md](references/issue-le
 ## Boundaries and evidence
 
 - Fresh conversion/creation requires an absent or empty target. Use UPGRADE for feature changes to existing V2 repositories; V1-to-existing-V2 synchronization remains unsupported. For non-owned repositories, authenticate with a personal token and verify a personal fork before modifying extension files; see the upgrade leaf.
-- Keep the pinned Scaffold Release and bounded install/build attempts. Build when the environment is available; report skipped or unavailable build separately from static success. Never call skipped work PASS.
+- Keep the latest stable Scaffold Release selected for this run and bounded install/build attempts. Build when the environment is available; report skipped or unavailable build separately from static success. Never call skipped work PASS.
 - Review is read-only. Rerun affected checks after correction; changing a handoff is not verification.
 - Only explicit HOST_READY acceptance requires build, Mind+ import, block visibility and representative compilation. Host observations need user confirmation. Build or publication success never proves hardware behavior.
 - Publication checks authorization, exact staged content, secrets, target repository, fast-forward push and remote-ref equality. It does not repeat semantic review. Missing token returns WAITING_USER before Git/remote activity. Never record credentials.

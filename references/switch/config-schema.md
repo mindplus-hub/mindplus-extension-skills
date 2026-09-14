@@ -12,7 +12,7 @@
 3. V1 的 `email`、`license`、`isBoard`、`platform`、`asset` 是旧格式字段，不属于 V2 `config.json`。
 4. 字符串字段没有可验证描述时写 `""`，不得用模型知识、样例值或最新版补全。`meta.runtimeVersion` 没有实际 Runtime API 证据时为 `""`，但 `meta` 和 `runtimeVersion` 仍保留。
 5. 结构型可选字段不能机械写空值：`supportDevices`、`supportArch` 只有对应 V1 板卡证据与当前模式文档支持时才出现；没有证据就省略。空的 `supportArch` 可能覆盖设备范围，不能把它当作普通空字符串。
-6. `compatibilityId` 是 V1 项目兼容所需的迁移字段。能从 `.mpext` 或 V1 `author`/原始 `id` 证明时必须填写预期的小写旧身份；身份无法证明时停止，不猜值。
+6. `compatibilityId` 仅在确认需要兼容已有 V1 库时填写；普通新建保留 `""`，不从新作者或新 ID 自动生成。V1 转 V2 的兼容迁移中，能从 `.mpext` 或 V1 `author`/原始 `id` 证明时必须填写预期的小写旧身份；身份无法证明时停止，不猜值。
 
 ## 当前精确字段集
 
@@ -51,6 +51,8 @@ isDevice, sku, main, mode, meta
 `libraryConfig`、`supportDevices`、`supportArch` 都不能添加。
 
 ## 值的来源顺序
+
+以下旧身份来源规则适用于 CONVERT；CREATE 使用已冻结规格，作者按 [author-identity.md](author-identity.md) 选定和规范化。UPGRADE 保留已有作者，除非本次明确要求修改署名。
 
 `id` 使用规范化后的 V2 小写字母数字 ID；`compatibilityId` 使用旧包身份；`author`、`version`、
 `name`、`description` 和 `sku` 只使用 V1 文件或已记录的用户证据；`cover` 指向目标 `public/`

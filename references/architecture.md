@@ -41,6 +41,6 @@ Routing decisions live in `scripts/route_workflow.py`; allowed edges live in `re
 
 ## Packaging
 
-`scripts/switch/` and `references/switch/` hold the shared producer mechanics and verified corpus. Creation enters through `spec_to_inventory.py`; conversion through `inventory_v1.py`. Both reuse topic selection and static checks. Preserve the pinned scaffold, source semantics and mode-specific contracts.
+`scripts/switch/` and `references/switch/` hold the shared producer mechanics and verified corpus. Creation enters through `spec_to_inventory.py`; conversion through `inventory_v1.py`. Both reuse topic selection and static checks. Preserve the selected scaffold, source semantics and mode-specific contracts.
 
 HOST_READY detail is in `references/workflows/review-host-ready.md`, loaded only on request. The package remains standalone; future plugin packaging does not change the workflow contract.

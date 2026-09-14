@@ -155,8 +155,14 @@ def build_inventory(spec: dict[str, Any], spec_path: Path, explicit_mode: str | 
     if not isinstance(spec_id, str) or not re.fullmatch(r"[a-z0-9]+", spec_id):
         raise SpecError(f"SPEC_FIELD_INVALID: identity.id must be lowercase alphanumeric, got {spec_id!r}")
     author = require(identity, "author", "identity")
-    if not isinstance(author, str):
-        raise SpecError("SPEC_FIELD_INVALID: identity.author must be a string")
+    if not isinstance(author, str) or not re.fullmatch(r"[A-Za-z]+", author):
+        raise SpecError("SPEC_FIELD_INVALID: normalize new identity.author to nonempty ASCII letters before freezing the spec")
+
+    compatibility = identity.get("compatibility_id")
+    if compatibility is None:
+        compatibility = ""
+    if not isinstance(compatibility, str):
+        raise SpecError("SPEC_FIELD_INVALID: identity.compatibility_id must be a string or null")
 
     anomalies: list[dict[str, Any]] = []
     opcodes = []
@@ -179,7 +185,7 @@ def build_inventory(spec: dict[str, Any], spec_path: Path, explicit_mode: str | 
         "identity": {
             "id": spec_id,
             "canonical_v2_id": spec_id,
-            "expected_compatibility_id": identity.get("compatibility_id"),
+            "expected_compatibility_id": compatibility,
         },
         "v1_entry_inventory": {mode: entry_facts},
         "reference_features_by_mode": {mode: derive_features(spec, mode, anomalies)},

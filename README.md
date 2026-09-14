@@ -6,7 +6,7 @@ Mind+扩展库用着不顺手？需要新的功能？试试这个skill也能体�
 
 | 功能 | 内容 |
 | --- | --- |
-| 创建 V2 扩展 | 从需求整理规格，准备固定版本的 Builder 脚手架，生成配置、积木、代码生成器、资源和说明 |
+| 创建 V2 扩展 | 从需求整理规格，准备最新稳定版 Builder 脚手架，生成配置、积木、代码生成器、资源和说明 |
 | V1 → V2 转换 | 分析一个 V1 扩展及所选模式，保留有依据的身份、参数、依赖和行为，转换到新的 V2 目录 |
 | 官方仓库发现 | 检查 mind-plus 官方组织中与当前对话相关的仓库，确认开发来源 |
 | 已有 V2 升级 | 实现功能并提升扩展版本；非本人仓库使用个人令牌 fork 并核验后修改 |
@@ -50,6 +50,8 @@ skill 通过 Git Credential Manager 执行 `git credential fill` 读取该凭据
 
 **不要将 token 放进聊天、仓库、URL 或命令参数，创建扩展本身不要求 Gitee token。**
 
+新建库作者优先使用用户指定名，否则从当前登录账号、Git 或电脑用户名选取并转换为英文署名；无特别要求不使用 DFRobot、MindPlus；已有库保留原作者。
+
 ## 安装方法
 
 ### Codex
@@ -58,14 +60,14 @@ skill 通过 Git Credential Manager 执行 `git credential fill` 读取该凭据
 
 | 范围 | 相对安装目录 |
 | --- | --- |
-| 用户级，跨项目使用 | `.agents/skills/mindplus-extension-skills/` |
-| 项目级，随项目共享 | `.agents/skills/mindplus-extension-skills/` |
+| 用户级，跨项目使用 | `.codex/skills/mindplus-extension-skills/` |
+| 项目级，随项目共享 | `.codex/skills/mindplus-extension-skills/` |
 
 在选定的安装基目录中执行：
 
 ```powershell
-New-Item -ItemType Directory -Force ".agents/skills" | Out-Null
-git clone https://gitee.com/mind-plus/mindplus-extension-skills.git ".agents/skills/mindplus-extension-skills"
+New-Item -ItemType Directory -Force ".codex/skills" | Out-Null
+git clone https://gitee.com/mind-plus/mindplus-extension-skills.git ".codex/skills/mindplus-extension-skills"
 ```
 
 如果目标已存在，不必再次 clone。安装后查看技能列表；CLI / IDE 可用 `/skills`，并通过 `$` 选择技能：
@@ -97,7 +99,11 @@ git clone https://gitee.com/mind-plus/mindplus-extension-skills.git ".claude/ski
 
 ### WorkBuddy
 
-推荐使用官方的本地技能包导入入口：
+可在以下方法二选一：
+
+- （推荐）直接在技能市场搜索 `Mind+ 扩展开发助手`即可下载使用
+
+- 使用本地技能包导入入口：
 
 1. 从 [发行版](https://gitee.com/mind-plus/mindplus-extension-skills/releases/) 下载名称含 `workbuddy` 的 ZIP，保留完整包内容。
 2. 打开 **技能 → 添加技能 → 上传技能**，选择本地技能包并导入。
@@ -163,29 +169,44 @@ $mindplus-extension-skills 检查 extensions/v2-demo 的配置和资源引用，
 
 ## 版本更新
 
+- V0.3.0
+   - 脚手架默认选择最新稳定 Release，兼容 ZIP 根目录与单层包装目录
+   - 完善全局规范并提升至V3稳定版
+
+- V0.2.4
+   - 补充积木设计与下拉合并规范
+
 - V0.2.3
    - Release 提供 WorkBuddy、通用源码两个 ZIP 及各自 SHA-256 校验文件
    - 自更新下载后先校验摘要，再解压安装；校验缺失或失败时保留原版本
+
 - V0.2.2
    - 新建和 V1 转换项目目录统一校验 `ext2-` 前缀
    - 增加 cover/banner 规范，区分实物与非实物扩展的构图和文字要求
+
 - V0.2.1
    - 发布扩展时自动添加并核验仓库 Topic `MindPlus-Ext2`
    - 审核使用P0/P1/P2三级分类处理
    - 修改名称为 MindPlus-Extension-Skills
+
 - V0.2.0
    - 推送正式版
+
 - V0.1.4
    - 新增已有 V2 升级、扩展版本提升及个人令牌 fork 开发流程。
    - 版本检查后发现官方相关仓库，询问是否基于已有仓库开发。
    - 纳入版本检查与更新修复，补充官方仓库检索完整性检查。
+
 - V0.1.3
    - 更改推荐个人令牌读取方式
+
 - V0.1.2
    - 内置 WB 打包工具与发布配置，添加 Gitee Go 标签发布工作流
    - 自动生成 WB ZIP、核对附件内容并维护发行版下载说明
+
 - V0.1.1
    - 添加自动更新逻辑
    - 修复 V1 转 V2 中关于 string 的处理
+
 - V0.1.0
    - 初始化第一个版本

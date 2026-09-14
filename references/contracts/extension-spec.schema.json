@@ -9,12 +9,12 @@
     "identity": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "author", "version", "compatibility_id"],
+      "required": ["id", "author", "version"],
       "properties": {
         "id": {"type": "string", "pattern": "^[a-z0-9]+$"},
-        "author": {"type": "string", "minLength": 1},
+        "author": {"type": "string", "minLength": 1, "pattern": "^[A-Za-z]+$"},
         "version": {"type": "string", "minLength": 1},
-        "compatibility_id": {"type": ["string", "null"]}
+        "compatibility_id": {"type": ["string", "null"], "default": "", "description": "Empty unless an existing V1 compatibility target has been confirmed; never derive from the new author/id alone."}
       }
     },
     "mode": {"enum": ["UPLOAD", "PYTHON_BLOCK"]},

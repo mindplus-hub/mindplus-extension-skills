@@ -35,8 +35,8 @@
 python scripts/switch/prepare_builder_scaffold.py --project-root <project_root> --output <run_root>/record/builder-scaffold.json
 ```
 
-脚本固定使用 Gitee Release `v0.0.1` 的附件
-`mindplus-ext2-builder-Scaffold.zip`，校验已登记 SHA-256，去掉 ZIP 的单层根目录后直接形成
+脚本按语义版本选择 Gitee 的最新稳定 Release 附件
+`mindplus-ext2-builder-Scaffold.zip`，兼容文件直接在 ZIP 根部或单层包装目录，解压后直接形成
 `project_root`。不得改用标签的 Source code ZIP/TAR 或 `git clone`；它们会重新带入 Builder
 仓库历史或 `examples/`。
 
@@ -129,3 +129,11 @@ user_action_required: NONE | RUN_NPM_INSTALL_AND_BUILD | RUN_NPM_BUILD
 事件中出现 `S4 PASS`、`S9 PASS` 或 `S10 BLOCKED` 后，必须同步更新对应摘要字段；
 不能只追加事件而保留 `NOT_RUN`。`BLOCKED` 表示该步骤已得到终态，不表示成功；日志脚本
 会将 `PASS`、`FAIL`、`BLOCKED` 都标记为已处理，只有 `RUNNING` 保持未完成。
+
+## 版本选择与模板文件
+
+每个新项目在准备时解析一次最新稳定版，记录 Release tag、附件 URL 和下载 SHA-256；运行中不因远端出现新版而替换已展开的脚手架。跳过草稿和预发布，按版本号比较，不依赖 API 返回顺序。最新稳定版缺少专用 Scaffold 附件或网络失败时明确报告，不退回旧版本、自动源码 ZIP 或 Git 克隆。
+
+沿用所选附件的 `.gitignore` 和工具文件，不用旧模板覆盖。运行日志写在既定工作记录目录，不能仅依靠 `.gitignore` 判断文件是否适合发布；发布仍检查实际文件集合和敏感信息。已有 V2 升级不自动替换 Builder。
+
+若 Release 提供同名 `.zip.sha256`，下载后必须比对；没有时记录 `checksum_status: RECORDED_ONLY`，不得声称发布方摘要已验证。脚手架与 Skill 自升级是独立下载流程：Skill 自升级仍强制要求摘要文件。显式本地 `--archive` 必须同时提供 `--sha256`，不为本地包声称“最新版本”。

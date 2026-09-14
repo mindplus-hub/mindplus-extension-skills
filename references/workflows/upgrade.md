@@ -22,6 +22,8 @@ Load only for `UPGRADE_EXISTING` when the user asks to upgrade, fix, or add feat
 
 When the requested changes include cover creation or replacement, apply [cover-design.md](../switch/cover-design.md); otherwise preserve the existing cover.
 
+When adding blocks or explicitly reorganizing the palette, use [block-organization.md](../switch/block-organization.md); preserve existing public block interfaces outside the requested change.
+
 ## Verify and hand off
 
 Run the relevant config, entry/resource, locale and generator checks against the final source, reusing the BASIC scope described in [review.md](review.md) without inserting a separate review workflow. Use project tests or focused regression examples to verify each changed behavior and representative existing behavior, including parameter order, defaults and generated source. Do not invent a V1 inventory to run the conversion checker. Validate README changes with the existing README checker where applicable.

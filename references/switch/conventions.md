@@ -36,17 +36,18 @@
   不要求用户知道设备 ID。目标板不在字典里时按 device-ids.json 的
   `unknown_device_recovery` 三条路径处理，绝不拼造 ID。
 
+## author（作者）
+
+CREATE 的作者来源与英文规范化见 [author-identity.md](author-identity.md)，在冻结规格前处理。CONVERT／UPGRADE 保留来源作者；不默认沿用模板的 DFRobot 或 MindPlus 作为新库作者。
+
 ## compatibilityId（旧包身份）
 
-格式：`<author>-<v2-id>-thirdex`，全小写。v2-id 是规范化后的小写字母数字 ID。
+`config.compatibilityId` 只有确认需要兼容已有 V1 库时才填写，否则保留空字符串 `""`。字段名是 `compatibilityId`（大写 I），不是 `compatibilityld`。
 
-- `dfrobot-sen0237-thirdex`（ext2-sen0237）
-- `hinar-dfbmp58x-thirdex`（ext2-BMP58X）
-- `liliang-ds1302-thirdex`（ext2-ds1302）
-
-CREATE 时 spec 必须显式给出 `identity.compatibility_id`（空值会被校验器判
-`LEGACY_COMPATIBILITY_ID_UNPROVEN`）；CONVERT 时按 V1 身份推导，规则见
-generated 的 `shared.v1-compatibility` 主题。
+- CREATE：`identity.compatibility_id` 默认空；省略或 null 也映射为空字符串。不要根据新建库的 author/id 自动拼接，也不要照抄模板值。确有旧库兼容需求时，记录用户要求及旧包身份来源后填写。
+- CONVERT：一般需要兼容被转换的 V1 库，从旧 `.mpext` 文件名或 V1 author／原始 id 取得小写身份；通常形如 `<old-author>-<old-id>-thirdex`。不能用清理后的 V2 ID 替代原始 ID；按 generated 的 `shared.v1-compatibility` 主题处理。
+- UPGRADE：保留已有兼容关系，不因新署名或版本更新生成、替换或清空；只有本次明确要求变更兼容范围时才调整。
+- 已确认兼容需求但旧身份无法证明时，继续核实来源，不编造值，也不以空字符串冒充完成兼容。
 
 ## meta.runtimeVersion（Runtime 最低版本）
 

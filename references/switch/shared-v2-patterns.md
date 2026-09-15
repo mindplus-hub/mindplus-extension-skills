@@ -21,6 +21,9 @@
 - V1 自带源码库与外部依赖分开：源码库复制到模式规定的 `public/libraries/`。Python 外部依赖只从
   V1 根 `config.json` 的 `asset.python.dependencies` 和 `python/libraries/requirements.txt` 读取；
   源码 import、README、截图和模型知识不能补充、删除或改写依赖。
+- V1 与 V2 的 Generator 调用形态不同，不能照抄实参：最典型的是 `addInclude`——V1 第二个参数是
+  整条 `#include ...` 指令，V2 要的是**裸头文件名**（详见 [upload-mode.md](upload-mode.md)）。
+  与之同类，V1 的 `addObject`、`PROGMEM` 写法也不机械迁移。
 - 缺失封面、图标、库或必要 API 的源证据时停止，不生成占位内容、不选最新版。依赖版本为空时保留
   这个源事实，不自行判断为平台内置或替换成最新版。
 
@@ -62,8 +65,8 @@ V1 注解中 `.defl="..."` 外层引号是注解语法，不是默认值本身�
 ## 标识与资源
 
 - V2 `id` 只允许字母数字。本转换默认生成小写字母数字 ID：删除 V1 `id` 中的符号并转小写；用户明确指定另一个小写字母数字 ID 时记录决定并传给扫描器。结果为空或与已存在目标冲突时暂停。该规范化只改变 V2 身份，不得改 opcode/function。
-- `compatibilityId` 保留全小写旧加载身份，优先从 V1 根目录实际 `.mpext` 文件名去掉 `-V<版本>.mpext` 后取得；没有包时按 Wiki 的 `author-id-thirdex` 规则从原始 V1 `author`/`id` 转小写派生。多个包身份不一致或 config 与包身份冲突时暂停。不得用清理后的 V2 `id` 反推兼容 ID。
-- 示例：V1 `id: Maxbot_driver` 生成 V2 `id: maxbotdriver`；旧包 `winster-maxbot_driver-thirdex-V0.0.2.mpext` 对应 `compatibilityId: winster-maxbot_driver-thirdex`。
+- `compatibilityId` 保留全小写旧加载身份，优先从 V1 根目录实际 `.mpext` 文件名去掉 `-V<版本>.mpext` 后取得；**包也可能与源目录并列**（`x-thirdex-V0.0.1/` 与 `x-thirdex-V0.0.1.mpext` 同级），这种情况按源目录名去掉版本号认领同级包，不要把解压目录名当证据、也不要漏看。没有包时才按 Wiki 的 `author-id-thirdex` 规则从原始 V1 `author`/`id` 派生：**先小写、再把空白写成 `-`**（旧身份不含空白，`id: ESP8266 IOT` 对应 `esp8266-iot`；下划线、中文、括号等原始字符保留）。多个包身份不一致或 config 与包身份冲突时暂停。不得用清理后的 V2 `id` 反推兼容 ID。
+- 示例：V1 `id: Maxbot_driver` 生成 V2 `id: maxbotdriver`；旧包 `winster-maxbot_driver-thirdex-V0.0.2.mpext` 对应 `compatibilityId: winster-maxbot_driver-thirdex`；author `DJKJ` + `id: ESP8266 IOT` 的旧包名是 `djkj-esp8266-iot-thirdex-V0.0.1.mpext`（连字符，不是空格）。
 - 不照抄样例的业务 id、author、版本、颜色、设备、引脚、opcode、菜单值或依赖。
 - 优先复用 V1 封面和图标；`config.cover` 必须指向目标 `public/` 中实际存在的文件。未要求制作时不自行重画；新建或已授权制作／替换的封面按 [cover-design.md](cover-design.md)，其余图标和截图仍遵循原有来源规则。
 - 复制文件后记录源/目标相对路径、大小和 SHA-256。
@@ -78,6 +81,7 @@ V1 注解中 `.defl="..."` 外层引号是注解语法，不是默认值本身�
 
 - 扫描 V1 `_locales/`、`_menus/`、入口文件和双语 config；“V1 没有完整 locales”不等于“没有可迁移翻译证据”。
 - 扩展名、所有积木 `text`、静态和动态菜单显示文字都必须使用 `formatMessage`；菜单实际 `value` 与顺序保持不变。
+- **`formatMessage` 必须在 `getInfo()` 调用期间解析**：把结果存进模块顶层常量（或任何在 `import` 时就求值的结构）会在 locale 仍为默认值时被冻结，之后切换语言只更新积木文字，**下拉菜单文字保持默认语言**。菜单项要写成函数、在 `getInfo()` 里调用（`menus: { xMenu: menu(xItems()) }`），或把 `{id, default}` 消息对象作为 `text` 交给运行时解析。该缺陷用静态检查看不出来（message ID 齐全、`FORMAT_MESSAGE_ID_MISSING` 也不会报），只能在目标语言下实际读取 `getInfo()` 的输出验证。
 - 翻译 ID 使用稳定的 V2 命名空间，不沿用包含旧非法字符或旧大小写的 V1 `id`。`en.json` 与 `zh-cn.json` 的 key 集必须一致，并覆盖 index.js 中的所有静态 message ID。
 - V1 英文默认文本与中文 locale 可组合成两套目标资源；确实缺少某语言且无法从 config/默认文本证明时进入敏感节点，不直接留下裸字符串，也不编造翻译。
 

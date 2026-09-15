@@ -15,6 +15,137 @@ CONFIG_SCHEMA_PATH = SKILL_ROOT / "references" / "switch" / "config-schema.json"
 DEVICE_IDS_PATH = SKILL_ROOT / "references" / "switch" / "device-ids.json"
 SKU_PATTERN = re.compile(r"^[A-Z0-9]+(\|[A-Z0-9]+)*$")
 DEVICE_VERSION_SPEC_PATTERN = re.compile(r"^[~^]?=?\d+(\.\d+){0,3}$")
+SUBMENU_DECLARATION_RE = re.compile(r"blockType\s*:\s*BlockType\.SUBMENU\b")
+SUBMENU_REFERENCE_RE = re.compile(r"\bsubmenuId\s*:\s*['\"]([^'\"]+)['\"]")
+OBJECT_ID_RE = re.compile(r"\bid\s*:\s*['\"]([^'\"]+)['\"]")
+CAMEL_CASE_RE = re.compile(r"^[a-z][A-Za-z0-9]*$")
+ADD_INCLUDE_CALL_RE = re.compile(r"addInclude\s*\(")
+
+
+def _literal_arguments(text: str, open_paren: int) -> list[tuple[str, str | None]]:
+    """Split one call's arguments, returning ``(kind, value)`` pairs.
+
+    ``kind`` is ``"literal"`` (value is the string content) or ``"expression"``.
+    Scanning is quote-aware so an argument may contain the other quote character,
+    e.g. ``'#include "oled.h"'``.
+    """
+    arguments: list[tuple[str, str | None]] = []
+    depth = 0
+    quote: str | None = None
+    start = open_paren + 1
+    index = start
+    while index < len(text):
+        character = text[index]
+        if quote:
+            if character == "\\":
+                index += 2
+                continue
+            if character == quote:
+                quote = None
+        elif character in "\"'`":
+            quote = character
+        elif character in "([{":
+            depth += 1
+        elif character in ")]}":
+            if character == ")" and depth == 0:
+                chunk = text[start:index]
+                if chunk.strip():
+                    arguments.append(_classify_argument(chunk))
+                return arguments
+            depth -= 1
+        elif character == "," and depth == 0:
+            arguments.append(_classify_argument(text[start:index]))
+            start = index + 1
+        index += 1
+    return arguments
+
+
+def _classify_argument(chunk: str) -> tuple[str, str | None]:
+    stripped = chunk.strip()
+    if len(stripped) >= 2 and stripped[0] in "\"'" and stripped[-1] == stripped[0]:
+        return ("literal", stripped[1:-1])
+    return ("expression", None)
+
+
+def check_add_include_calls(func_text: str) -> list[dict]:
+    """Flag `addInclude` calls whose arguments are not bare header names.
+
+    Runtime behaviour (upload-gui generator, verified 2026-09-15 from the installed
+    Mind+ runtime):
+
+        addInclude(id)        -> #include <id>
+        addInclude(id, code)  -> #include "code"
+
+    so both arguments are inserted verbatim and must be bare header names.
+    Copying the V1 shape `Generator.addInclude(id, '#include <X.h>')` would emit
+    `#include "#include <X.h>"`. Only string literals are judged; a computed
+    argument is left alone.
+    """
+    findings = []
+    for match in ADD_INCLUDE_CALL_RE.finditer(func_text):
+        arguments = _literal_arguments(func_text, match.end() - 1)
+        if not arguments:
+            continue
+        id_kind, id_value = arguments[0]
+        code_kind, code_value = arguments[1] if len(arguments) > 1 else ("expression", None)
+        if id_kind != "literal":
+            continue
+        if code_kind == "literal":
+            if any(marker in code_value for marker in ("#", "<", ">", '"')):
+                findings.append(
+                    {
+                        "code": "ADD_INCLUDE_CODE_IS_INCLUDE_DIRECTIVE",
+                        "call": match.group(0) + "...",
+                        "id": id_value,
+                        "code_argument": code_value,
+                        "expected": "a bare header name, e.g. addInclude('THS', 'DFRobot_DHT.h') -> #include \"DFRobot_DHT.h\"",
+                    }
+                )
+        elif len(arguments) == 1 and any(marker in id_value for marker in ("#", "<", ">")):
+            findings.append(
+                {
+                    "code": "ADD_INCLUDE_ID_NOT_BARE_HEADER",
+                    "call": match.group(0) + "...",
+                    "id": id_value,
+                    "expected": "a bare header name, e.g. 'DFRobot_DHT.h' -> #include <DFRobot_DHT.h>",
+                }
+            )
+    return findings
+
+
+def enclosing_object(text: str, position: int) -> str:
+    """Return the brace-delimited object around ``position`` (best effort)."""
+    start = text.rfind("{", 0, position)
+    if start < 0:
+        return ""
+    depth = 0
+    for index in range(start, len(text)):
+        character = text[index]
+        if character == "{":
+            depth += 1
+        elif character == "}":
+            depth -= 1
+            if depth == 0:
+                return text[start : index + 1]
+    return text[start:]
+
+
+def collect_submenus(index_text: str) -> tuple[dict[str, str], set[str]]:
+    """Split V2 two-level menus from translation message ids.
+
+    A ``BlockType.SUBMENU`` entry carries an entity ``id`` used by its members'
+    ``submenuId``; that id is not a translation id and must not be required in
+    the locale files. Returns ``(declared entity id -> object text, referenced
+    submenuId values)``.
+    """
+    declared: dict[str, str] = {}
+    for match in SUBMENU_DECLARATION_RE.finditer(index_text):
+        body = enclosing_object(index_text, match.start())
+        id_match = OBJECT_ID_RE.search(body)
+        if id_match:
+            declared.setdefault(id_match.group(1), body)
+    referenced = set(SUBMENU_REFERENCE_RE.findall(index_text))
+    return declared, referenced
 
 
 def load_object(path: Path, label: str, findings: list[dict]) -> dict:
@@ -433,6 +564,7 @@ def main() -> int:
         missing_methods = sorted(expected_opcodes - method_names)
         if missing_methods:
             findings.append({"code": "FUNC_METHOD_MISSING", "missing": missing_methods, "methods": sorted(method_names)})
+    findings.extend(check_add_include_calls(func_text))
     if args.mode == "PYTHON_BLOCK":
         check_python_requirements(extension, inventory, findings)
         if re.search(r"\bgenerator\s*\.\s*addCode\s*\(", func_text):
@@ -491,9 +623,25 @@ def main() -> int:
             {"code": "LOCALE_KEY_MISMATCH", "only_en": sorted(en_keys - zh_keys), "only_zh_cn": sorted(zh_keys - en_keys)}
         )
 
+    # 二级菜单的实体 id 不是翻译 message ID：翻译由 SUBMENU 的 text 提供，
+    # 实体 id 不得被当成翻译键要求出现在 locales 中。
+    submenu_ids, submenu_references = collect_submenus(index_text)
+    undeclared_submenus = sorted(submenu_references - set(submenu_ids))
+    if undeclared_submenus:
+        findings.append(
+            {
+                "code": "SUBMENU_ID_NOT_DECLARED",
+                "submenu_ids": undeclared_submenus,
+                "declared": sorted(submenu_ids),
+            }
+        )
+    for entity_id, body in sorted(submenu_ids.items()):
+        if not CAMEL_CASE_RE.fullmatch(entity_id):
+            findings.append({"code": "SUBMENU_ENTITY_ID_NOT_CAMEL", "id": entity_id, "object": body.strip()[:180]})
+
     literal_ids = set(
         re.findall(r"\bid\s*:\s*['\"]([^'\"]+)['\"]", index_text)
-    )
+    ) - set(submenu_ids)
     for message_id in sorted(literal_ids):
         missing = [locale for locale, values in locale_objects.items() if message_id not in values]
         if missing:

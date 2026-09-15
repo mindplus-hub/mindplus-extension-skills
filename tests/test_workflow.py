@@ -1330,6 +1330,13 @@ def run_gitee(script_args: list[str], env_extra: dict[str, str] | None = None) -
     env.pop("GITEE_ACCESS_TOKEN", None)
     # Neutralize a real ~/.gitee-token on the test machine; tests opt in explicitly.
     env["GITEE_TOKEN_FILE"] = str(Path(tempfile.gettempdir()) / "no-such-gitee-token-file")
+    # Clearing env vars and redirecting the token file is not enough on Windows:
+    # resolve_token() then falls back to Windows Credential Manager, so a machine that
+    # has a stored Gitee credential would let the gate legitimately pass. Reset only the
+    # credential-helper list (keeping user.name/user.email available for commit tests).
+    env["GIT_CONFIG_COUNT"] = "1"
+    env["GIT_CONFIG_KEY_0"] = "credential.helper"
+    env["GIT_CONFIG_VALUE_0"] = ""
     if env_extra:
         env.update(env_extra)
     return subprocess.run(

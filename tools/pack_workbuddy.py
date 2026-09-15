@@ -344,6 +344,18 @@ def smoke(zip_path: Path) -> list[dict]:
         environment = dict(os.environ, PYTHONUTF8="1", PYTHONDONTWRITEBYTECODE="1", GITEE_TOKEN_FILE=str(base / "missing-token"))
         for key in ("GITEE_TOKEN", "GITEE_ACCESS_TOKEN", "MP_RELEASE_TOKEN", "PYTHONPATH"):
             environment.pop(key, None)
+        # The token gate must be probed with no credential source left, otherwise a
+        # developer machine that has a Gitee credential stored in Windows Credential
+        # Manager makes the gate legitimately pass and this check misreports a defect.
+        # Reset only the credential-helper list: replacing the whole Git config would
+        # also remove user.name/user.email and break the commit checks below.
+        environment.update(
+            GIT_CONFIG_COUNT="1",
+            GIT_CONFIG_KEY_0="credential.helper",
+            GIT_CONFIG_VALUE_0="",
+            GIT_TERMINAL_PROMPT="0",
+            GCM_INTERACTIVE="never",
+        )
 
         def run(script: str, *args: str, codes=(0,)):
             completed = subprocess.run([sys.executable, "-B", str(package / script), *map(str, args)], cwd=base,

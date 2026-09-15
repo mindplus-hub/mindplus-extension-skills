@@ -1,7 +1,7 @@
 ---
 name: mindplus-extension-skills
 metadata:
-  version: "0.3.4"
+  version: "0.3.5"
 description: Create, upgrade existing, or freshly convert Mind+ V2 extensions with basic checks, review existing extensions, and publish authorized projects to Gitee. Use HOST_READY acceptance only when explicitly requested. Does not synchronize V1 into an existing V2 project or perform device acceptance.
 ---
 
@@ -52,4 +52,4 @@ Publication includes adding and verifying the repository Topic `MindPlus-Ext2` a
 
 ## Completion
 
-Report the project, achieved checks, limitations and any performed external actions. Successful runs clean hidden run records unless the user requested `--keep-evidence`. Failed or waiting runs retain recovery evidence. A verified push is repository publication, not Mind+ or device acceptance.
+Report the project, achieved checks, limitations and any performed external actions. Successful runs clean hidden run records unless the user requested `--keep-evidence`; the removal is verified, and a run whose records could not be deleted is reported as `RECORDS.CLEANUP_INCOMPLETE` instead of being counted as cleaned. Failed or waiting runs retain recovery evidence. A verified push is repository publication, not Mind+ or device acceptance.

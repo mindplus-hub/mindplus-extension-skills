@@ -552,6 +552,25 @@ def ensure_public_visibility(owner: str, repo: str, token: str) -> dict:
     return {"status": "FAILED", "error": "Public visibility not confirmed by repository API; retain pending intent"}
 
 
+def validate_new_repository_name(project: Path, repo_name: str) -> None:
+    pattern = r"ext2-(rt|ul|py|mpy)-[A-Za-z0-9][A-Za-z0-9_-]*"
+    match = re.fullmatch(pattern, repo_name)
+    if not match:
+        raise StageBlocked({"status": "BLOCKED", "reason_code": "INPUT.REPOSITORY_NAME_INVALID",
+                            "error": "New extension repository must be named ext2-<rt|ul|py|mpy>-<name>"})
+    local = re.fullmatch(pattern, project.name)
+    if local and local[1] != match[1]:
+        raise StageBlocked({"status": "BLOCKED", "reason_code": "INPUT.REPOSITORY_MODE_MISMATCH",
+                            "error": "New repository mode prefix differs from the project directory"})
+    config_path = project / "extension" / "public" / "config.json"
+    if config_path.is_file():
+        mode = read_json(config_path).get("mode")
+        expected = {"upload": "ul", "python-block": "py"}.get(mode)
+        if expected and expected != match[1]:
+            raise StageBlocked({"status": "BLOCKED", "reason_code": "INPUT.REPOSITORY_MODE_MISMATCH",
+                                "error": "New repository prefix disagrees with extension config.mode"})
+
+
 def cmd_remote(args: argparse.Namespace) -> int:
     try:
         ctx = context(args, need_authorizations=("push",) + (("create_repository",) if args.create else ()))
@@ -563,6 +582,8 @@ def cmd_remote(args: argparse.Namespace) -> int:
             raise StageBlocked({"status": "BLOCKED", "reason_code": "INPUT.GITEE_TARGET_REQUIRED", "error": "--description is required when creating a repository (may be an explicit empty string)"})
         if not args.owner or not args.repo_name:
             raise StageBlocked({"status": "BLOCKED", "reason_code": "INPUT.GITEE_TARGET_REQUIRED", "error": "--owner and --repo-name are required; never infer them"})
+        if args.create:
+            validate_new_repository_name(ctx["project"], args.repo_name)
     except StageBlocked as blocked:
         return emit(blocked.payload, blocked.code)
 
@@ -607,7 +628,7 @@ def cmd_remote(args: argparse.Namespace) -> int:
     created = False
     initial_private, promote_after_push = decide_create_privacy(args.create, requested_public)
     if args.create:
-        body = {"name": args.repo_name, "private": initial_private, "description": args.description or "", "auto_init": False}
+        body = {"name": args.repo_name, "path": args.repo_name, "private": initial_private, "description": args.description or "", "auto_init": False}
         path = f"/orgs/{args.org}/repos" if args.org else "/user/repos"
         status, payload = gitee_api("POST", path, token, body=body)
         if status not in (200, 201):
@@ -622,7 +643,12 @@ def cmd_remote(args: argparse.Namespace) -> int:
         if status != 200 or not isinstance(payload, dict):
             return emit({"status": "BLOCKED", "reason_code": "GITEE.VERIFY_FAILED", "http_status": status, "error": "could not verify the existing repository"}, 2)
 
-    full_name = str(payload.get("full_name") or f"{owner}/{args.repo_name}")
+    if not isinstance(payload, dict) or payload.get("full_name") != f"{owner}/{args.repo_name}":
+        return emit({"status": "BLOCKED", "reason_code": "GITEE.REPOSITORY_IDENTITY_MISMATCH",
+                     "created": created, "expected_full_name": f"{owner}/{args.repo_name}",
+                     "actual_full_name": payload.get("full_name") if isinstance(payload, dict) else None,
+                     "error": "Repository identity differs from the requested target; no Git remote was configured"}, 2)
+    full_name = payload["full_name"]
     html_url = str(payload.get("html_url") or f"https://gitee.com/{owner}/{args.repo_name}")
     private_flag = bool(payload.get("private"))
     clone_url = (

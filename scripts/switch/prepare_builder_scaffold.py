@@ -25,6 +25,18 @@ from update_skill import download, parse_version
 RELEASES_URL = "https://gitee.com/api/v5/repos/mind-plus/mindplus-ext2-builder/releases"
 ARCHIVE_NAME = "mindplus-ext2-builder-Scaffold.zip"
 
+# 发布通道是按设计匿名查询的（转换阶段不引入凭据依赖），因此会撞上 Gitee 的匿名限流。
+# 403 只影响 api/v5 的列表查询，asset 下载 URL 不受影响，所以有可复现的无凭据恢复路径。
+RELEASE_CHANNEL_HINT = (
+    "the Gitee releases API is queried anonymously and answered HTTP {code}; this is the anonymous "
+    "rate limit, not a missing release. Asset download URLs are not rate limited. Recover without "
+    "credentials: read the release list through an authenticated request "
+    "(GET /repos/mind-plus/mindplus-ext2-builder/releases?per_page=100), pick the latest non-prerelease "
+    "release that contains " + ARCHIVE_NAME + ", download that asset, then rerun this script with "
+    "--archive <zip> --sha256 <digest>. When the chosen release publishes no " + ARCHIVE_NAME
+    + ".sha256 attachment, record checksum_status: RECORDED_ONLY and do not claim a publisher digest was verified."
+)
+
 FORBIDDEN_PARTS = {".git", "examples", "node_modules", "build"}
 REQUIRED_PATHS = {
     ".babelrc",
@@ -88,15 +100,28 @@ def select_release(releases: list) -> dict:
         text = download(checksums[0]["browser_download_url"], limit=4096).decode("ascii").strip()
         match = re.fullmatch(r"([0-9a-fA-F]{64}) [ *]" + re.escape(ARCHIVE_NAME), text)
         if not match:
-            raise ScaffoldError("Invalid scaffold SHA-256 attachment")
+            raise ScaffoldError(
+                "Invalid scaffold SHA-256 attachment: expected sha256sum format "
+                f"'<64 hex digits>' + two spaces (or ' *') + '{ARCHIVE_NAME}' on one line"
+            )
         result["expected_sha256"] = match[1].lower()
     return result
+
+
+def fetch(url: str) -> bytes:
+    """Download from the public release channel, reporting a rate limit as a recovery step."""
+    try:
+        return download(url)
+    except urllib.error.HTTPError as exc:
+        if exc.code in {403, 429}:
+            raise ScaffoldError(RELEASE_CHANNEL_HINT.format(code=exc.code)) from exc
+        raise
 
 
 def latest_release() -> dict:
     releases = []
     for page in range(1, 11):
-        batch = json.loads(download(f"{RELEASES_URL}?page={page}&per_page=100"))
+        batch = json.loads(fetch(f"{RELEASES_URL}?page={page}&per_page=100"))
         if not isinstance(batch, list):
             raise ScaffoldError("Invalid Scaffold releases response")
         releases.extend(batch)

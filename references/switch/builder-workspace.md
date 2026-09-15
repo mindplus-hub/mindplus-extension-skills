@@ -138,3 +138,11 @@ user_action_required: NONE | RUN_NPM_INSTALL_AND_BUILD | RUN_NPM_BUILD
 沿用所选附件的 `.gitignore` 和工具文件，不用旧模板覆盖。运行日志写在既定工作记录目录，不能仅依靠 `.gitignore` 判断文件是否适合发布；发布仍检查实际文件集合和敏感信息。已有 V2 升级不自动替换 Builder。
 
 若 Release 提供同名 `.zip.sha256`，下载后必须比对；没有时记录 `checksum_status: RECORDED_ONLY`，不得声称发布方摘要已验证。脚手架与 Skill 自升级是独立下载流程：Skill 自升级仍强制要求摘要文件。显式本地 `--archive` 必须同时提供 `--sha256`，不为本地包声称“最新版本”。
+
+### 发布通道被限流（HTTP 403 / 429）
+
+`switch__prepare_builder_scaffold.py` 按设计**匿名**查询 `api/v5` 的 Release 列表（转换阶段不引入凭据依赖），因此可能撞上 Gitee 的匿名限流并返回 `403`；此时脚本输出 `BUILDER_SCAFFOLD`，错误信息里带恢复步骤。这种限流是**暂时**的，稍后重跑通常即可通过；`403` 也只影响 `api/v5` 的列表查询，**asset 下载 URL 不受影响**，所以还有一条可复现的无凭据恢复路径：
+
+1. 用已授权的令牌请求 `GET /repos/mind-plus/mindplus-ext2-builder/releases?per_page=100`，按版本号取最新非草稿、非预发布且带 `mindplus-ext2-builder-Scaffold.zip` 的 Release（不要按返回顺序取）；令牌只用于这次只读查询，不写入任何记录。
+2. 从该 Release 的 `browser_download_url` 匿名下载该 asset，并同时取同名 `.zip.sha256` 附件。
+3. 用同一归档重跑脚本：`--archive <zip> --sha256 <digest>`，摘要取附件里的值。记录 Release tag、asset URL 与摘要。

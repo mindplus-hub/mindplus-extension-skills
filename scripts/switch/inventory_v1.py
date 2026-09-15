@@ -195,10 +195,47 @@ def canonical_v2_id(value: object) -> str:
     return re.sub(r"[^A-Za-z0-9]", "", str(value or "")).lower()
 
 
+MPEXT_NAME_RE = re.compile(r"^(?P<identity>.+)-V\d+(?:\.\d+){1,3}\.mpext$", re.IGNORECASE)
+SOURCE_VERSION_SUFFIX_RE = re.compile(r"-V\d+(?:\.\d+){1,3}$", re.IGNORECASE)
+
+
+def normalize_identity_text(value: object) -> str:
+    """Mind+ V1 的包身份不含空白字符。
+
+    空白在导出/匹配旧包时被写成 `-`：author `DJKJ` + id `ESP8266 IOT` 对应的旧包是
+    `djkj-esp8266-iot-thirdex-V0.0.1.mpext`，而不是保留空格的形式。只做小写与空白替换，
+    下划线、中文、括号等原始字符保留（与已发布仓库的 compatibilityId 一致）。
+    """
+    return re.sub(r"\s", "-", str(value)).lower()
+
+
+def config_package_identity(config: object) -> str | None:
+    """从 V1 `author`/`id` 派生的旧包身份；缺少字段时返回 None。"""
+    if not isinstance(config, dict) or not config.get("author") or not config.get("id"):
+        return None
+    return f"{normalize_identity_text(config['author'])}-{normalize_identity_text(config['id'])}-thirdex"
+
+
 def legacy_package_identities(source: Path) -> list[str]:
+    """收集可证明的旧包身份，优先使用实际 `.mpext` 文件名。
+
+    V1 源有两种常见布局：包在源目录**内部**，或与源目录**并列**（目录名等于包名去掉
+    版本号，例如 `x-thirdex-V0.0.1/` 与 `x-thirdex-V0.0.1.mpext` 同级）。后者只采纳与
+    源目录同名的同级包，避免把同级其它扩展的包计入。
+    """
+    candidates = list(source.glob("*.mpext"))
+    source_prefix = SOURCE_VERSION_SUFFIX_RE.sub("", source.name)
+    try:
+        siblings = sorted(source.parent.glob("*.mpext"), key=lambda item: item.as_posix().casefold())
+    except OSError:
+        siblings = []
+    for package in siblings:
+        match = MPEXT_NAME_RE.match(package.name)
+        if match and match.group("identity").casefold() == source_prefix.casefold():
+            candidates.append(package)
     identities = set()
-    for package in source.glob("*.mpext"):
-        match = re.match(r"^(?P<identity>.+)-V\d+(?:\.\d+){1,3}\.mpext$", package.name, re.IGNORECASE)
+    for package in candidates:
+        match = MPEXT_NAME_RE.match(package.name)
         if match:
             identities.add(match.group("identity").lower())
     return sorted(identities, key=str.casefold)
@@ -324,9 +361,9 @@ def source_anomalies(
         findings.append(
             {"code": "LEGACY_PACKAGE_IDENTITY_CONFLICT", "identities": package_identities}
         )
-    elif len(package_identities) == 1 and isinstance(config, dict) and config.get("author") and config.get("id"):
-        config_identity = f"{config['author']}-{config['id']}-thirdex".lower()
-        if package_identities[0] != config_identity:
+    elif len(package_identities) == 1:
+        config_identity = config_package_identity(config)
+        if config_identity and package_identities[0] != config_identity:
             findings.append(
                 {
                     "code": "LEGACY_PACKAGE_CONFIG_IDENTITY_CONFLICT",
@@ -433,9 +470,7 @@ def main() -> int:
     reference_features = sorted({feature for values in mode_features.values() for feature in values})
     findings = source_anomalies(signatures, dependencies, config, package_identities)
 
-    fallback_compatibility = None
-    if isinstance(config, dict) and config.get("author") and config.get("id"):
-        fallback_compatibility = f"{config['author']}-{config['id']}-thirdex".lower()
+    fallback_compatibility = config_package_identity(config)
     expected_compatibility = package_identities[0] if len(package_identities) == 1 else fallback_compatibility
     compatibility_source = "mpext_filename" if len(package_identities) == 1 else "config_author_id" if not package_identities else None
 

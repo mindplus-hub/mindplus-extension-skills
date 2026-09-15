@@ -13,7 +13,7 @@ CREATE_FRESH 与 CONVERT_FRESH 在 `mpa.py start` 冻结路径前，按实际运
 - 先确认运行模式再生成名称。现有 `UPLOAD` 对应 `ul`，`PYTHON_BLOCK` 对应 `py`；命名约定不增加 Skill 尚未支持的实时或 MicroPython 创建／转换能力，不得为了通过路由伪装成已有模式。
 - 只添加一次前缀。例如上传库 `sensor` → `ext2-ul-sensor`。来源名称为 `ext2-sensor` 时取业务名称 `sensor`，不叠成 `ext2-ul-ext2-sensor`；已有模式前缀必须与实际模式一致，不一致时先纠正拟建名称。
 - 用户给出父目录时，在其下创建上述名称的子目录。显式目标不合规时，说明并确定符合约定的目标再启动，不静默改写已冻结路径。路由、转换初始化和脚手架均校验格式。
-- 新建远端仓库若无另行指定名称，沿用此名称；已有远端目标不擅自重命名。前缀不加入 `config.id`，不改变 Builder 的 `extension/`、构建产物名称和旧兼容身份。
+- 新建远端仓库无另行指定名称时沿用目录名；显式指定的新名称也必须符合四类格式，并与目录及已知 config.mode 的模式前缀一致。建仓请求明确传入 path，回读 full_name 必须与授权目标一致。已有远端目标不擅自重命名。前缀不加入 `config.id`，不改变 Builder 的 `extension/`、构建产物名称和旧兼容身份。
 - UPGRADE_EXISTING、REVIEW_EXISTING、PUBLISH_GITEE 保留已有路径；fork 已有 V2 不为此自动改名。
 
 这是新建前的路径约束，不受 P1 命名建议豁免；空目录、来源隔离、模式支持范围和授权条件仍同时适用。

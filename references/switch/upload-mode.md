@@ -46,10 +46,12 @@ extension/
 - `index.js` 按当前 Builder 引入 `ArgumentType`、`BlockType`、图标、`Func` 和 locales，实现 `setLocale`、`getCodePrimitives`、`getInfo`。
 - block 的 opcode、类型、text、arguments、menu、defaultValue、outputTypes 必须逐行对应语义矩阵。扩展名、积木和菜单显示文字均用 `formatMessage`，并在 `en.json`/`zh-cn.json` 中保持 key 对齐；动态菜单可采用 `menuText` + `buildMenuItems` 样式。
 - V1 enum 通常变成 V2 menu；分别保留显示文字、实际 value 和默认值。
+- 菜单文字的 `formatMessage` 必须发生在 `getInfo()` 调用期间：菜单项写成函数、在 `getInfo()` 内调用（`menus: { xMenu: menu(xItems()) }`），不要做成模块顶层常量——那样在 `import` 时（locale 仍是默认值）就求值并冻结，切换语言后只有积木文字跟着变，**下拉框仍是默认语言**。判断方法：设置目标语言后读取 `getInfo()` 的 `menus`，确认 `items[].text` 已切换。
 - `func.js` 方法使用当前签名：`functionName(generator, block, parameter)`；参数从 `parameter.NAME.code` 读取。
 - V1 namespace 或兼容前缀不写入函数名。旧 opcode `winster-maxbot_driver-thirdex.speed` 在 V2
   必须对应 `blocks[].opcode: 'speed'` 与 `func.js` 的 `speed(...)`。
 - `addInclude`、`addObject`、`addVariable`、`addSetup`、`addFunction` 各自只放对应职责。不要机械复制 V1 的 `addObject` 参数形态或 `PROGMEM`。
+- `addInclude` 的实参只写**裸头文件名**，不写 `#include` 指令、尖括号或引号。运行时实现（upload-gui generator，2026-09-15 核对）就是一参 `addInclude('X.h')` → `#include <X.h>`、两参 `addInclude('键', 'X.h')` → `#include "X.h"`：两个实参都被**原样**塞进指令里，`id` 只多承担一个去重/覆盖键的作用。因此一参时 `id` 本身也不能带尖括号，两参时第二个参数是头文件名而不是整条指令。V1 的 `Generator.addInclude(id, '#include <X.h>')` 第二个参数是整条指令，照抄到 V2 会生成 `#include "#include <X.h>"`，编译必然失败；正确写法是丢掉 `#include`、尖括号和引号，只留 `X.h`。`check_converted_extension.py` 会检查 `func.js` 里的字符串字面量实参（计算得来的实参不判断）。注意生成的 `upload.generator.add-include` Topic 措辞会误导：它把 `code` 写成"实际生成代码"、把 `id` 举例成 `<MPython.h>`；按运行时实现，这两个实参都只能是**裸名字**，以本文件的说明为准。
 - COMMAND 返回语句；REPORTER/BOOLEAN 按当前 Builder 优先级返回 `[code, priority]`。普通 STRING 不因类型名自动添加 `symbol/menu`；V1 `shadow="string"` 则按共享规则添加 `inputParams.symbol: '""'`，`shadow="normal"` 不显示引号。
 
 ## 颜色与图标

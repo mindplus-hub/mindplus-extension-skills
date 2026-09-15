@@ -15,6 +15,7 @@ import hashlib
 import json
 import os
 import shutil
+import stat
 import subprocess
 import sys
 import uuid
@@ -85,11 +86,34 @@ def hide_path(path: Path) -> None:
         subprocess.run(["attrib", "+h", str(path)], capture_output=True, check=False)
 
 
-def cleanup_run_dir(run_root: Path) -> None:
-    """Remove one run directory, clearing the Windows hidden attribute first."""
+def _force_remove(function, path, exc_info) -> None:
+    """Retry one failed removal once after clearing the write-protect bit."""
+    try:
+        os.chmod(path, stat.S_IWRITE | stat.S_IREAD)
+        function(path)
+    except OSError:
+        # Best effort only: the caller verifies the result instead of trusting it.
+        pass
+
+
+def cleanup_run_dir(run_root: Path) -> bool:
+    """Remove one run directory and report whether it is actually gone.
+
+    Windows refuses to delete read-only or in-use entries, so the hidden
+    attribute is cleared first and a failing entry is made writable once before
+    retrying. ``shutil.rmtree`` cannot distinguish "removed" from "still there"
+    when its errors are swallowed, so the outcome is verified and returned: a
+    failed cleanup must never be reported as a completed one.
+    """
+    if not run_root.exists():
+        return True
     if os.name == "nt":
-        subprocess.run(["attrib", "-h", str(run_root), "/S", "/D"], capture_output=True, check=False)
-    shutil.rmtree(run_root, ignore_errors=True)
+        try:
+            subprocess.run(["attrib", "-h", str(run_root), "/S", "/D"], capture_output=True, check=False)
+        except OSError:
+            pass
+    shutil.rmtree(run_root, onerror=_force_remove)
+    return not run_root.exists()
 
 
 def leaf_reference(workflow: str) -> str:
@@ -555,12 +579,25 @@ def cmd_transition(args: argparse.Namespace) -> int:
         return emit({"status": "FAIL", "error": str(exc)}, 2)
 
     if run.get("state") == "TERMINAL":
+        # A finished run may still hold its records: cleanup is best effort and may
+        # not have happened (keep_evidence, or a removal that Windows refused).
+        # Report what is actually on disk instead of reporting success blindly.
+        records_present = run_root.exists()
+        retained_on_purpose = bool(run.get("keep_evidence"))
+        cleanup_hint = None
+        if records_present and not retained_on_purpose:
+            cleanup_hint = (
+                f"python {quote(Path(__file__).resolve().as_posix())} clean "
+                f"--work-root {quote(work_root.as_posix())} --run-id {quote(args.run_id)} --force"
+            )
         return emit(
             {
                 "status": "PASS",
                 "message": "run is already complete",
-                "run_root": str(run_root),
-                "next_command": None,
+                "run_root": str(run_root) if records_present else None,
+                "records_present": records_present,
+                "reason_code": None if (not records_present or retained_on_purpose) else "RECORDS.CLEANUP_INCOMPLETE",
+                "next_command": cleanup_hint,
             },
             0,
         )
@@ -636,18 +673,33 @@ def cmd_transition(args: argparse.Namespace) -> int:
         evidence_cleaned = False
         if not keep_evidence:
             # Records are retained only on explicit request; successful runs clean up.
-            cleanup_run_dir(run_root)
-            evidence_cleaned = True
+            evidence_cleaned = cleanup_run_dir(run_root)
+        if keep_evidence:
+            message = "run complete; run evidence retained (--keep-evidence)"
+            reason_code = None
+        elif evidence_cleaned:
+            message = "run complete; run evidence cleaned"
+            reason_code = None
+        else:
+            message = "run complete, but the run records could not be removed (a Windows lock or read-only entry)"
+            reason_code = "RECORDS.CLEANUP_INCOMPLETE"
+        cleanup_hint = None
+        if not evidence_cleaned and not keep_evidence:
+            cleanup_hint = (
+                f"python {quote(Path(__file__).resolve().as_posix())} clean "
+                f"--work-root {quote(work_root.as_posix())} --run-id {quote(args.run_id)} --force"
+            )
         return emit(
             {
                 "status": "PASS",
-                "message": "run complete" + ("" if keep_evidence else "; run evidence cleaned (--keep-evidence retains it)"),
+                "message": message,
+                "reason_code": reason_code,
                 "run_root": None if evidence_cleaned else str(run_root),
                 "evidence_cleaned": evidence_cleaned,
                 "project_root": handoff.get("project_root"),
                 "handoffs": handoff_names,
                 "external_actions_performed": ["push"] if handoff.get("outcome") == "PUSHED" else [],
-                "next_command": None,
+                "next_command": cleanup_hint,
             },
             0,
         )
@@ -732,8 +784,14 @@ def cmd_clean(args: argparse.Namespace) -> int:
         if state != "TERMINAL" and not args.force:
             report.append({"run_id": run_id, "removed": False, "note": f"state is {state}; use --force to remove anyway"})
             continue
-        cleanup_run_dir(run_root)
-        report.append({"run_id": run_id, "removed": True, "note": f"state was {state}"})
+        removed = cleanup_run_dir(run_root)
+        report.append(
+            {
+                "run_id": run_id,
+                "removed": removed,
+                "note": f"state was {state}" if removed else f"state was {state}; removal failed (locked or read-only entries remain)",
+            }
+        )
 
     for ms_root in (work_root / ".mindplus-agent" / "conversions", work_root / ".ms"):
         if args.all and ms_root.is_dir():
@@ -750,8 +808,16 @@ def cmd_clean(args: argparse.Namespace) -> int:
                 if "RUNNING" in status_text and not args.force:
                     report.append({"run_id": f"{ms_root.relative_to(work_root).as_posix()}/{run_dir.name}", "removed": False, "note": f"switch log is {status_text}; use --force"})
                     continue
-                cleanup_run_dir(run_dir)
-                report.append({"run_id": f"{ms_root.relative_to(work_root).as_posix()}/{run_dir.name}", "removed": True, "note": f"switch log was {status_text or 'unknown'}"})
+                removed = cleanup_run_dir(run_dir)
+                report.append(
+                    {
+                        "run_id": f"{ms_root.relative_to(work_root).as_posix()}/{run_dir.name}",
+                        "removed": removed,
+                        "note": f"switch log was {status_text or 'unknown'}"
+                        if removed
+                        else f"switch log was {status_text or 'unknown'}; removal failed",
+                    }
+                )
         elif args.run_id and not run_ids and ms_root.is_dir():
             report.append({"run_id": args.run_id, "removed": False, "note": "use resume to list parent runs; .ms run ids differ"})
     removed = sum(1 for item in report if item["removed"])

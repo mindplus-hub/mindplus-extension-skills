@@ -106,13 +106,13 @@ class PublicationRegressions(unittest.TestCase):
                 context = {"project": base, "token": "fake", "state_dir": state, "project_sha256": "hash"}
                 args = argparse.Namespace(
                     preflight=base / "preflight.json", state_dir=state,
-                    owner="mind-plus", repo_name="demo", org="mind-plus",
+                    owner="mind-plus", repo_name="ext2-ul-demo", org="mind-plus",
                     create=True, private=False, public=True, description="d",
                     remote_name="origin", transport="https",
                 )
                 # A creation-time public request can be silently downgraded, so the
                 # record must carry what Gitee actually reported back.
-                created = {"full_name": "mind-plus/demo", "name": "demo", "private": reported_private}
+                created = {"full_name": "mind-plus/ext2-ul-demo", "name": "ext2-ul-demo", "private": reported_private}
                 with patch.object(pub, "context", return_value=context), \
                      patch.object(pub, "load_stage", side_effect=[{}, {"branch": "main"}]), \
                      patch.object(pub, "gitee_api", side_effect=[(200, {"login": "u"}), (201, created)]) as api, \
@@ -123,6 +123,8 @@ class PublicationRegressions(unittest.TestCase):
                      contextlib.redirect_stdout(io.StringIO()):
                     self.assertEqual(pub.cmd_remote(args), 0)
                 body = api.call_args_list[1].kwargs["body"]
+                self.assertEqual(body["path"], "ext2-ul-demo")
+                self.assertEqual(body["name"], body["path"])
                 self.assertIs(body["private"], False, "creation must request the requested visibility")
                 self.assertIs(body["auto_init"], False, "auto_init would seed unreviewed remote history")
                 record = json.loads((state / "publish-remote.json").read_text(encoding="utf-8"))
@@ -140,3 +142,17 @@ class PublicationRegressions(unittest.TestCase):
             with self.assertRaises(pub.StageBlocked):
                 pub.public_intent(state, "owner", "another")
             self.assertEqual(pub.decide_create_privacy(False, True), (False, True))
+
+    def test_new_repository_naming_and_config_mode(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp) / "ext2-ul-sensor"
+            config = project / "extension/public/config.json"
+            config.parent.mkdir(parents=True)
+            write_json(config, {"mode": "upload"})
+            pub.validate_new_repository_name(project, "ext2-ul-newname")
+            for name in ("sensor", "ext2-sensor", "ext2-py-sensor", "ext2-ul-", "../ext2-ul-sensor"):
+                with self.subTest(name=name), self.assertRaises(pub.StageBlocked):
+                    pub.validate_new_repository_name(project, name)
+            write_json(config, {"mode": "python-block"})
+            with self.assertRaises(pub.StageBlocked):
+                pub.validate_new_repository_name(project, "ext2-ul-sensor")

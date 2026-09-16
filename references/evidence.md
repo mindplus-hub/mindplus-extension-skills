@@ -1,18 +1,12 @@
-# Evidence and profiles
+# Review stages and evidence
 
-| Profile | Scope |
+| Stage | Scope |
 | --- | --- |
-| BASIC | Configuration, references/resources and representative static semantics; no mandatory build or GUI |
-| SOURCE_READY | Basic source checks plus successful package build |
-| HOST_READY | Explicit full static acceptance, current build, Mind+ import, block visibility and representative target compilation |
-| DEVICE_READY | Separate explicit physical validation; outside these lifecycle leaves |
+| Lite | After entering a producer: compare official catalog/Gitee candidates, resolve identity collisions and an existing base/fork |
+| Basic | After production, before publication: source/security checks, successful build, block display and representative behavior, ZIP ≤ 5,000,000 bytes |
 
-Publication has no minimum review profile. It proves the approved repository content reached the verified remote ref, not Mind+ or hardware usability.
+The [Basic contract](review-basic.md) binds source hash, exact ZIP hash and actual evidence files. Missing required observations are NOT_RUN/BLOCKED, not a static-only Basic pass. Build proves the recorded build scope; representative tests do not prove all device behavior. Reuse evidence only while source, artifact, scope and environment remain valid.
 
-Use STATIC for source checks, HOST_BUILD for build/host observations, RUNTIME for runtime behavior and EXTERNAL_DEVICE for remote/device observations with the actual scope stated. Required PASS needs evidence. Mind+ GUI PASS additionally needs `confirmed_by: "user"`.
+Use STATIC for source checks, HOST_BUILD for build/display observations, and RUNTIME for exercised behavior. Describe command/method, inputs, expected and actual results. Record user-confirmed GUI observations or actual observation evidence; never infer visibility from build success.
 
-Do not repeat checks when their source hash, scope, artifacts and relevant environment remain valid. After a change, rerun affected checks. A missing optional build/GUI observation is NOT_RUN, not a BASIC blocker. Explicit HOST_READY retains all its requirements and cannot be silently downgraded.
-
-Review stays read-only. Report actual defects and essential missing evidence; do not replace verification with editing a handoff.
-
-Apply [issue-levels.md](issue-levels.md) to classify development findings. Check `priority` is optional for backward compatibility. `P0` requires `required: true`; `P1`/`P2` require `required: false`. Keep actual FAIL results and evidence for unresolved advisory findings; do not relabel them PASS. Unperformed verification remains NOT_RUN without a defect priority.
+[P0/P1/P2](issue-levels.md) classify defects independently. Preserve advisory FAIL with evidence; don't relabel it PASS. Review preserves extension source; authorized builds and checks may produce artifacts/evidence. Source edits require affected checks again.

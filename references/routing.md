@@ -2,16 +2,14 @@
 
 Read this file before any leaf reference.
 
-At the beginning of a new task, first follow the version-check step in `SKILL.md`: run `python <absolute skill path>/scripts/update_skill.py` from any working directory, then reload `SKILL.md` if updated. This is a skill-entry step, not a network operation inside the deterministic routing CLI. Continue the installed version if the update is unavailable; keep active runs on their existing version.
-
-After that version step, follow [official-repository-discovery.md](official-repository-discovery.md) to check the official organization for the conversation's relevant repositories and resolve whether to use a matching repository as a fork base. This happens before `mpa.py start`; the router cannot infer a conversation-level source choice or fork authorization. Reuse a source decision already supplied.
+Enter after the update check. Select the leaf from known request facts, then perform its Lite source check before project writes. If Lite changes the base or project path, create a new run; never rewrite the frozen request.
 
 ## Make a route request
 
 Preferred: the wizard, which routes, opens the parent run, and prints the next command.
 
 ```text
-python scripts/mpa.py start --goals <CONVERT,CREATE,UPGRADE,REVIEW,PUBLISH> --project-root <abs> --work-root <abs> [--v1-source <abs>] [--extension-spec <abs>] [--review-handoff <abs>] [--review-profile BASIC|HOST_READY] [--auth <name>]... [--run-id <id>]
+python scripts/mpa.py start --goals <CONVERT,CREATE,UPGRADE,REVIEW,PUBLISH> --project-root <abs> --work-root <abs> [--v1-source <abs>] [--extension-spec <abs>] [--review-handoff <abs>] [--review-profile BASIC] [--auth <name>]... [--run-id <id>]
 ```
 
 Raw CLI with the same contract (JSON in, JSON out):
@@ -27,7 +25,7 @@ Request facts, matching [contracts/route-request.schema.json](contracts/route-re
 - `paths.project_root`: required for all workflows; for conversion/creation it must be absent or empty and named `ext2-<mode>-<name>`; apply [project-naming.md](project-naming.md) before freezing the request.
 - `paths.extension_spec`: optional at route time. Without it, creation freezes `<parent_run_root>/extension-spec.json` before writing the project.
 - `paths.review_handoff`: optional current producer/review evidence for direct publication. It does not remove a requested review or override this run's new handoff.
-- `review_profile`: BASIC by default. Explicit HOST_READY inserts full acceptance; ordinary publication never inserts review.
+- `review_profile`: BASIC only. Producers and PUBLISH automatically include REVIEW_EXISTING; Unsupported profiles return ROUTE.REVIEW_PROFILE_UNSUPPORTED. Lite is a phase inside each producer, not a profile that bypasses Basic.
 - `authorizations`: booleans describing only actions explicitly requested. Never include a token or other secret; token presence is checked later by the publication leaf.
 
 ## Where the selection logic lives

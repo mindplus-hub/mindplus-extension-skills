@@ -96,8 +96,9 @@ def route(request: dict[str, Any], registry: dict[str, Any]) -> dict[str, Any]:
         raise RouteError("workflow registry must contain exactly the five supported workflows")
 
     review_profile = request.get("review_profile", "BASIC")
-    if review_profile not in {"BASIC", "HOST_READY"}:
-        raise RouteError("review_profile must be BASIC or HOST_READY")
+    if review_profile != "BASIC":
+        return result(state="TERMINAL", status="BLOCKED", reason_code="ROUTE.REVIEW_PROFILE_UNSUPPORTED",
+                      message="Supported artifact review profile: BASIC. Lite is a producer entry phase.", facts={"review_profile": review_profile})
 
     raw_goals = request.get("goals")
     if not isinstance(raw_goals, list) or not raw_goals:
@@ -287,7 +288,7 @@ def route(request: dict[str, Any], registry: dict[str, Any]) -> dict[str, Any]:
     if producer:
         workflows.append(producer)
 
-    review_needed = "REVIEW" in goals or review_profile == "HOST_READY"
+    review_needed = producer is not None or bool(goals & {"REVIEW", "PUBLISH"})
     if review_needed:
         workflows.append("REVIEW_EXISTING")
     if "PUBLISH" in goals:

@@ -2,6 +2,10 @@
 
 Load only for `UPGRADE_EXISTING` when the user asks to upgrade, fix, or add features to an existing V2 extension. This modifies the existing implementation; it does not synchronize V1 into V2 or recreate the extension from a scaffold.
 
+Before source-dependent writes, complete [Lite source selection](../official-repository-discovery.md), preserve comparison/fork evidence and add required `lite_source_selection` to the producer handoff.
+
+Before npm lifecycle scripts or extension loading, inspect install hooks, dependencies and executable code for unexplained dangerous behavior per the security scope in [Basic](../review-basic.md). Reuse this evidence in the later Basic review; do not execute suspicious code merely to test it.
+
 ## Inspect and establish ownership before code changes
 
 1. Locate the actual extension configuration and entry files, inspect the current branch, remotes, working changes, version fields and repository instructions. Verify that this is V2 using [shared-v2-patterns.md](../switch/shared-v2-patterns.md) and the relevant mode reference. A non-empty directory alone is not proof of V2. Preserve unrelated working changes; do not reset, clean, or overwrite them.
@@ -28,7 +32,7 @@ When adding blocks or explicitly reorganizing the palette, use [block-organizati
 
 Run the relevant config, entry/resource, locale and generator checks against the final source, reusing the BASIC scope described in [review.md](review.md) without inserting a separate review workflow. Use project tests or focused regression examples to verify each changed behavior and representative existing behavior, including parameter order, defaults and generated source. Do not invent a V1 inventory to run the conversion checker. Validate README changes with the existing README checker where applicable.
 
-Use the existing build setup when available and authorized. Keep installation/build attempts bounded as in other producers; record a skipped build as optional `NOT_RUN` with a reason, never PASS. Resolve failures in the required checks. Mind+ GUI and device acceptance are not implicit; explicit HOST_READY requests still use the separate acceptance leaf.
+Use the existing build setup when available and authorized. Keep installation/build attempts bounded as in other producers; record a skipped build as optional `NOT_RUN` with a reason, never PASS. Resolve failures in the required checks. Producer completion proceeds to Basic for required build/display/behavior and ZIP checks; skipped verification blocks publication. Device acceptance is outside this skill.
 
 Use `mpa.py handoff --workflow UPGRADE_EXISTING --status PASS --outcome UPGRADED` with these required, evidenced PASS checks:
 

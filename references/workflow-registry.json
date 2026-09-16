@@ -6,8 +6,7 @@
       "producer": "mindplus-switch",
       "requires_absent_or_empty_target": true,
       "allowed_next": [
-        "REVIEW_EXISTING",
-        "PUBLISH_GITEE"
+        "REVIEW_EXISTING"
       ]
     },
     "CREATE_FRESH": {
@@ -15,8 +14,7 @@
       "producer": "mindplus-create",
       "requires_absent_or_empty_target": true,
       "allowed_next": [
-        "REVIEW_EXISTING",
-        "PUBLISH_GITEE"
+        "REVIEW_EXISTING"
       ]
     },
     "REVIEW_EXISTING": {
@@ -38,8 +36,7 @@
       "producer": "mindplus-upgrade",
       "requires_existing_target": true,
       "allowed_next": [
-        "REVIEW_EXISTING",
-        "PUBLISH_GITEE"
+        "REVIEW_EXISTING"
       ]
     }
   }

@@ -2,7 +2,7 @@
 
 One self-contained skill contains five progressively loaded leaves. The router selects work; the leaves implement domain behavior; scripts enforce routing, handoffs and publication transport. No sibling skills or checkouts are required.
 
-Entry sequence: skill version check -> [official repository discovery and user source choice](official-repository-discovery.md) -> deterministic routing -> selected leaf. Public discovery reuses the corpus lookup helper but runs before routing, independently of technical-reference fallback.
+Questions: version check -> relevant reference -> answer. Development: version check -> route -> selected leaf -> [Lite source selection](official-repository-discovery.md) -> production -> [Basic](review-basic.md) -> authorized publication. Existing-project review enters Basic directly; standalone publication also requires Basic.
 
 ## Instruction placement and maintenance
 
@@ -19,14 +19,12 @@ For each addition, identify its scope and authoritative file, link it from the r
 ## Default lifecycle
 
 ```text
-CREATE_FRESH  -- basic producer checks --> optional PUBLISH_GITEE
-CONVERT_FRESH -- basic producer checks --> optional PUBLISH_GITEE
-UPGRADE_EXISTING -- basic upgrade checks --> optional PUBLISH_GITEE
-REVIEW_EXISTING (BASIC)                  --> optional PUBLISH_GITEE
-PUBLISH_GITEE                            # standalone is supported
+CREATE / CONVERT / UPGRADE -> leaf entry LITE -> producer -> REVIEW_EXISTING (BASIC) -> optional PUBLISH
+REVIEW                    -> REVIEW_EXISTING (BASIC)
+PUBLISH                   -> REVIEW_EXISTING (BASIC) -> PUBLISH_GITEE
 ```
 
-Explicit `review_profile: HOST_READY` inserts REVIEW_EXISTING after any producer and before publication. It retains full acceptance gates. Ordinary publication has no mandatory review profile.
+Lite is a producer entry phase; Basic is the artifact review profile. Publication depends only on the Basic evidence and publication gates documented here.
 
 Routing decisions live in `scripts/route_workflow.py`; allowed edges live in `references/workflow-registry.json` and are enforced during transition. `mpa.py` composes route/start/handoff/transition/resume. Default profiles and optional detail live in the relevant leaf references.
 
@@ -35,9 +33,9 @@ Routing decisions live in `scripts/route_workflow.py`; allowed edges live in `re
 ## Evidence and request identity
 
 - Each run owns one immutable request. Identical start is idempotent; a different request needs a new run ID.
-- Producer checks are not repeated as an independent review unless requested. Unchanged evidence may be reused; changed content requires affected checks again.
+- Basic reuses valid producer evidence; changed source, artifacts or relevant environment require affected checks again.
 - This run's producer/review handoff takes precedence over external evidence. Only direct publication uses an optional external handoff.
-- Publication without a handoff freezes its own source hash after token/authorization checks. A supplied handoff must be current and passing. Explicit HOST_READY requires a valid HOST_READY result.
+- Publication requires a current Basic report even without a lifecycle handoff. The preflight and every publishing stage recheck source, ZIP and evidence hashes.
 - Creation may refine a spec after routing: use the supplied spec path, otherwise `<parent_run_root>/extension-spec.json`, and freeze it before project writes.
 - Source hash, publication manifest, committed tree and verified remote ref are separate facts; none proves Mind+ or physical device behavior.
 
@@ -45,4 +43,4 @@ Routing decisions live in `scripts/route_workflow.py`; allowed edges live in `re
 
 `scripts/switch/` and `references/switch/` hold the shared producer mechanics and verified corpus. Creation enters through `spec_to_inventory.py`; conversion through `inventory_v1.py`. Both reuse topic selection and static checks. Preserve the selected scaffold, source semantics and mode-specific contracts.
 
-HOST_READY detail is in `references/workflows/review-host-ready.md`, loaded only on request. The package remains standalone; future plugin packaging does not change the workflow contract.
+Both package variants contain the complete lifecycle. The versioned `mindplus.review-basic/v1` evidence contract binds the source, artifact and checks for reproducible review and publication.

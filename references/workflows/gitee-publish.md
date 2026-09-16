@@ -12,7 +12,7 @@ Before reading project paths, the review handoff, Git state, or Gitee API detail
 python scripts/prepare_gitee_publish.py \
   --project-root <project_root> \
   --auth commit --auth push \
-  [--review-handoff <current-handoff.json>] [--require-host-ready] \
+  [--review-handoff <current-basic-handoff.json>] [--basic-review <basic-review.json>] \
   [--create-repo] \
   --output <run-evidence>/publish-preflight.json
 ```
@@ -31,9 +31,9 @@ The script's first gate never prints the credential value. On Windows it asks Gi
 
 After token presence, require explicit commit/push authorization (`--auth commit --auth push`). New-repository mode additionally requires `--auth create_repository` and `--create-repo`. The current route supplies these authorizations; a prior review need not already carry permission for a later publication request.
 
-A review handoff is optional. Without one, preflight snapshots the current project and records authorization. If supplied, producer or review evidence must be passing and its project/hash must match. This run's latest producer/review result takes precedence over older external evidence. With explicit `--require-host-ready`, the HOST_READY outcome and user-confirmed host gates remain mandatory.
+A lifecycle handoff is optional, but current [Basic evidence](../review-basic.md) is mandatory. Pass its report with `--basic-review`, or supply a REVIEWED_BASIC handoff carrying the `basic_review` artifact. Static-only legacy review does not substitute for complete Basic evidence. Source hash, actual ZIP size/digest and evidence digests are verified before Git inspection and at each publication stage.
 
-No separate static audit, provenance ledger, build or GUI acceptance is added by publication. Plan/commit still inspect the exact file set, staged content, secrets and committed tree. Drift invalidates the publication snapshot; refresh affected checks and preflight rather than automatically demanding full acceptance.
+Publication reuses Basic rather than repeating its semantic review or build. Plan/commit still inspect staged files, secrets and committed tree. Drift requires affected checks and a refreshed report/preflight; no successful publication can bypass missing build or block observations.
 
 Missing authorization is WAITING_USER. A supplied invalid/stale handoff blocks; do not edit it to manufacture success.
 
@@ -75,7 +75,7 @@ The stages below are implemented by the deterministic tool; run them in order an
 python scripts/prepare_gitee_publish.py ... --output <run-evidence>/publish-preflight.json   # first gate (above)
 python scripts/gitee_publish.py plan    --preflight <preflight.json> --state-dir <run-evidence>/publish
 python scripts/gitee_publish.py commit  --preflight <preflight.json> --state-dir <run-evidence>/publish --message <explicit message> [--branch <b>] [--author-name <n> --author-email <e>]
-python scripts/gitee_publish.py remote  --preflight <preflight.json> --state-dir <run-evidence>/publish --owner <o> --repo-name <r> [--org <org>] [--create --private|--public --description <d>] [--remote-name origin] [--ssh]
+python scripts/gitee_publish.py remote  --preflight <preflight.json> --state-dir <run-evidence>/publish --owner <o> --repo-name <r> [--org <org>] [--create --description <d>] [--private|--public] [--remote-name origin] [--ssh]
 python scripts/gitee_publish.py push    --preflight <preflight.json> --state-dir <run-evidence>/publish
 ```
 
@@ -95,7 +95,7 @@ PREPARE -> COMMIT -> ENSURE_REMOTE -> PUSH -> VERIFY
 - Exclude `node_modules`, `build`, caches, `.mindplus-agent`, `.ms`, logs, editor state, generated credentials, and unrelated artifacts. Do not assume `.gitignore` makes the set safe.
 - Scan every candidate file and the later staged diff for tokens, passwords, private URLs, certificates/private keys, large accidental archives, and machine-specific paths.
 - Recompute the project hash immediately before staging. It must still equal the snapshot hash.
-- If `.gitignore`, README, metadata, generated files, or any source content needs changing, stop with `REVIEW.STALE_HOST_READY_HANDOFF` after the user changes it and refresh the affected checks and preflight. Publishing must not make that edit.
+- If `.gitignore`, README, metadata, generated files, or any source content needs changing, stop with `REVIEW.STALE_BASIC_HANDOFF` after the user changes it and refresh the affected checks and preflight. Publishing must not make that edit.
 
 A dirty Git worktree is not automatically safe merely because its files were hashed. The publication manifest must show that every staged addition, modification, and deletion belongs to the frozen project and intended repository.
 
@@ -123,6 +123,8 @@ For an existing repository:
 - Do not overwrite an existing remote URL unless the user explicitly approves that exact change.
 
 For a new repository:
+
+新建扩展仓库先按 [命名规范](../project-naming.md) 校验 `--repo-name` 及模式前缀；POST 同时传 name/path，返回 full_name 不匹配时停止，不向意外目标配置 remote 或推送。已有仓库不因旧名称缺少前缀而拒绝发布。
 
 - Require `--create-repo`, `create_repository: true`, and explicit owner/org, name, description, and visibility.
 - Check for a collision before creation. A collision is not permission to reuse or recreate it.
@@ -160,7 +162,7 @@ Only verified ref equality and completed requested visibility/Topic checks may r
 Use a precise namespaced reason, including:
 
 - `INPUT.GITEE_TARGET_REQUIRED` for ambiguous target facts.
-- `REVIEW.STALE_HOST_READY_HANDOFF` for any reviewed-content drift.
+- `REVIEW.STALE_BASIC_HANDOFF` for any reviewed-content drift.
 - `GIT.PUBLICATION_SET_MISMATCH` for staged paths outside the reviewed manifest.
 - `SECURITY.CREDENTIAL_MATERIAL_FOUND` for secret-like content.
 - `GIT.UNRELATED_CHANGES_PRESENT` when safe staging cannot isolate user-owned work.
@@ -183,5 +185,3 @@ An explicit `remote --public` also applies to an existing repository. Public int
 After branch SHA verification, GET repository metadata. If already public, skip PATCH; otherwise PATCH with the existing repository display `name` and `private: false`, then GET again even if PATCH failed or timed out. Only verified target identity and `private: false` allow Topic completion. Git `ls-remote` may use a credential helper, so accessible refs do not prove public visibility; the authenticated repository API's explicit private field is the visibility evidence.
 
 Changing an existing repository's visibility is **owner-only** and is not a token-scope problem: an organization administrator with `permission.admin: true` on the repository still gets `401 修改仓库公开属性失败，您没有此项权限`. When that happens, report `GITEE.VISIBILITY_UPDATE_FAILED` with the HTTP status and tell the user the namespace owner must make the change (or that the repository must be recreated public from the start) — do not retry with broader credentials, and do not treat an empty public creation as impossible.
-
-新建扩展仓库先按 [命名规范](../project-naming.md) 校验 `--repo-name` 及模式前缀；POST 同时传 name/path，返回 full_name 不匹配时停止，不向意外目标配置 remote 或推送。已有仓库不因旧名称缺少前缀而拒绝发布。

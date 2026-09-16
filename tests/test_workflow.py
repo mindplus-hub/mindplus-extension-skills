@@ -19,6 +19,7 @@ SWITCH_REFERENCES = REFERENCES / "switch"
 sys.path.insert(0, str(SCRIPTS))
 
 from hash_project import compute_project_hash
+from check_basic_review import BASIC_CHECKS
 
 
 def run_script(name: str, *args: str, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
@@ -79,67 +80,61 @@ def request(
     }
 
 
-def host_ready_handoff(
+def basic_handoff(
     project_root: Path,
     *,
     authorized: bool = True,
     confirmed: bool = True,
 ) -> dict:
+    from check_basic_review import BASIC_CHECKS
+    report_path = basic_report_fixture(project_root)
     project_hash, _ = compute_project_hash(project_root)
-    user_confirmed_ids = {"mindplus_import", "blocks_visible", "representative_target_compile"}
-    checks = []
-    for check_id in (
-        "builder_build",
-        "mindplus_import",
-        "blocks_visible",
-        "representative_target_compile",
-    ):
-        checks.append(
-            {
-                "id": check_id,
-                "layer": "HOST_BUILD",
-                "claim": check_id.replace("_", " "),
-                "required": True,
-                "result": "PASS",
-                "evidence": [str(project_root / "evidence")],
-                "owner": None,
-                "trigger": None,
-                "confirmed_by": "user" if (confirmed and check_id in user_confirmed_ids) else None,
-            }
-        )
-    return {
-        "schema_version": "mindplus-agent.handoff/v1",
-        "run_id": "review-run",
-        "parent_run_id": "parent-run",
-        "workflow": "REVIEW_EXISTING",
-        "producer": "mindplus-review",
-        "state": "TERMINAL",
-        "status": "PASS",
-        "outcome": "REVIEWED_HOST_READY",
-        "reason_code": None,
-        "input_provenance": {
-            "type": "EXISTING_V2",
-            "path": str(project_root),
-            "manifest": None,
-            "sha256": project_hash,
-            "commit": None,
-        },
-        "project_root": str(project_root),
-        "project_sha256": project_hash,
-        "artifacts": [],
-        "checks": checks,
-        "authorizations": {
-            "local_write": False,
-            "install": False,
-            "build": True,
-            "mindplus_ui": True,
-            "commit": authorized,
-            "create_repository": False,
-            "push": authorized,
-            "device_upload": False,
-        },
-        "next": [{"workflow": "PUBLISH_GITEE", "condition": "HOST_READY and current source hash"}],
-    }
+    checks = [{"id": name, "layer": "STATIC", "claim": name, "required": True, "result": "PASS",
+               "evidence": [str(report_path)], "confirmed_by": None} for name in sorted(BASIC_CHECKS)]
+    if not confirmed:
+        checks = [c for c in checks if c["id"] != "blocks_visible"]
+    return {"schema_version": "mindplus-agent.handoff/v1", "run_id": "review-run", "parent_run_id": "parent-run",
+            "workflow": "REVIEW_EXISTING", "producer": "mindplus-review", "state": "TERMINAL", "status": "PASS",
+            "outcome": "REVIEWED_BASIC", "reason_code": None,
+            "input_provenance": {"type": "EXISTING_V2", "path": str(project_root), "manifest": None, "sha256": project_hash, "commit": None},
+            "project_root": str(project_root), "project_sha256": project_hash,
+            "artifacts": [{"kind": "basic_review", "path": str(report_path), "sha256": None}], "checks": checks,
+            "authorizations": {"local_write": False, "install": False, "build": True, "mindplus_ui": True,
+                               "commit": authorized, "create_repository": False, "push": authorized, "device_upload": False},
+            "next": [{"workflow": "PUBLISH_GITEE", "condition": "BASIC and current hashes"}]}
+
+
+def basic_report_fixture(project):
+    # Synthetic evidence for contract tests only; never treated as a real extension review.
+    import zipfile
+    from hash_project import file_digest
+    from check_basic_review import EVIDENCE_CHECKS
+    root = project / ".mindplus-agent" / "fixture-basic"
+    root.mkdir(parents=True, exist_ok=True)
+    package = root / "extension.zip"
+    with zipfile.ZipFile(package, "w") as z:
+        z.writestr("main.js", "test artifact")
+        z.writestr("config.json", "{}")
+    log = root / "observations.log"
+    log.write_text("Synthetic test evidence: build and block observation fixture", encoding="utf-8")
+    digest = file_digest(package)
+    checks = {name: {"result": "PASS", "method": "unit-test fixture", "summary": "synthetic verification",
+                    "artifact_sha256": digest, "evidence": [{"path": str(log), "sha256": file_digest(log)}]}
+              for name in EVIDENCE_CHECKS}
+    checks["builder_build"]["exit_code"] = 0
+    report = {"schema_version": "mindplus.review-basic/v1", "status": "PASS", "project_root": str(project),
+              "project_sha256": compute_project_hash(project)[0], "artifact": {"path": str(package), "sha256": digest}, "checks": checks}
+    path = root / "basic-review.json"
+    write_json(path, report)
+    return path
+
+
+def lite_fixture(project):
+    path = project.parent / (project.name + "-lite-selection.json")
+    write_json(path, {"schema_version": "mindplus.review-lite-selection/v1", "status": "PASS",
+                     "project_root": str(project), "decision": "EXPLICIT_SOURCE_UNVERIFIED", "comparison": "fixture only",
+                     "source_decision": "explicit local source in fixture", "limitation": "offline test"})
+    return path
 
 
 class RouteTests(unittest.TestCase):
@@ -163,7 +158,7 @@ class RouteTests(unittest.TestCase):
             routed = json.loads(completed.stdout)
             self.assertEqual(
                 routed["workflows"],
-                ["CONVERT_FRESH", "PUBLISH_GITEE"],
+                ["CONVERT_FRESH", "REVIEW_EXISTING", "PUBLISH_GITEE"],
             )
 
     def test_sync_is_explicitly_unsupported(self) -> None:
@@ -203,7 +198,7 @@ class RouteTests(unittest.TestCase):
             project.mkdir()
             (project / "package.json").write_text("{}", encoding="utf-8")
             handoff = base / "handoff.json"
-            write_json(handoff, host_ready_handoff(project))
+            write_json(handoff, basic_handoff(project))
             input_path = base / "request.json"
             write_json(
                 input_path,
@@ -216,7 +211,7 @@ class RouteTests(unittest.TestCase):
             )
             completed = run_script("route_workflow.py", "--input", str(input_path))
             self.assertEqual(completed.returncode, 0, completed.stderr or completed.stdout)
-            self.assertEqual(json.loads(completed.stdout)["workflows"], ["PUBLISH_GITEE"])
+            self.assertEqual(json.loads(completed.stdout)["workflows"], ["REVIEW_EXISTING", "PUBLISH_GITEE"])
 
     def test_publish_without_push_authorization_waits(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -225,7 +220,7 @@ class RouteTests(unittest.TestCase):
             project.mkdir()
             (project / "package.json").write_text("{}", encoding="utf-8")
             handoff = base / "handoff.json"
-            write_json(handoff, host_ready_handoff(project))
+            write_json(handoff, basic_handoff(project))
             input_path = base / "request.json"
             write_json(input_path, request(["PUBLISH"], project, review_handoff=str(handoff)))
             completed = run_script("route_workflow.py", "--input", str(input_path))
@@ -368,7 +363,7 @@ class TokenTests(unittest.TestCase):
             project.mkdir()
             (project / "package.json").write_text("{}", encoding="utf-8")
             handoff = base / "handoff.json"
-            write_json(handoff, host_ready_handoff(project))
+            write_json(handoff, basic_handoff(project))
             env = dict(os.environ)
             env["GITEE_TOKEN"] = "test-token-not-for-network"
             env.pop("GITEE_ACCESS_TOKEN", None)
@@ -393,7 +388,7 @@ class TokenTests(unittest.TestCase):
             source = project / "extension.js"
             source.write_text("before", encoding="utf-8")
             handoff = base / "handoff.json"
-            write_json(handoff, host_ready_handoff(project))
+            write_json(handoff, basic_handoff(project))
             source.write_text("after", encoding="utf-8")
             env = dict(os.environ)
             env["GITEE_TOKEN"] = "test-token-not-for-network"
@@ -407,7 +402,7 @@ class TokenTests(unittest.TestCase):
                 env=env,
             )
             self.assertEqual(completed.returncode, 2)
-            self.assertEqual(json.loads(completed.stdout)["reason_code"], "REVIEW.STALE_HOST_READY_HANDOFF")
+            self.assertEqual(json.loads(completed.stdout)["reason_code"], "REVIEW.HANDOFF_INVALID")
 
     def test_publish_preflight_rejects_unauthorized_push(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -416,7 +411,7 @@ class TokenTests(unittest.TestCase):
             project.mkdir()
             (project / "package.json").write_text("{}", encoding="utf-8")
             handoff = base / "handoff.json"
-            write_json(handoff, host_ready_handoff(project, authorized=False))
+            write_json(handoff, basic_handoff(project, authorized=False))
             env = dict(os.environ)
             env["GITEE_TOKEN"] = "test-token-not-for-network"
             env.pop("GITEE_ACCESS_TOKEN", None)
@@ -440,7 +435,7 @@ class TokenTests(unittest.TestCase):
             project.mkdir()
             (project / "package.json").write_text("{}", encoding="utf-8")
             handoff = base / "handoff.json"
-            write_json(handoff, host_ready_handoff(project))
+            write_json(handoff, basic_handoff(project))
             env = dict(os.environ)
             env["GITEE_TOKEN"] = "test-token-not-for-network"
             env.pop("GITEE_ACCESS_TOKEN", None)
@@ -459,17 +454,17 @@ class TokenTests(unittest.TestCase):
 
 
 class HandoffTests(unittest.TestCase):
-    def test_valid_host_ready_handoff_passes(self) -> None:
+    def test_valid_basic_handoff_passes(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             project = Path(directory)
-            handoff = project / "handoff.json"
-            write_json(handoff, host_ready_handoff(project))
+            handoff = project / ".mindplus-agent" / "handoff.json"
+            write_json(handoff, basic_handoff(project))
             completed = run_script(
                 "validate_handoff.py",
                 "--input",
                 str(handoff),
                 "--require-outcome",
-                "REVIEWED_HOST_READY",
+                "REVIEWED_BASIC",
                 "--check-artifacts",
             )
             self.assertEqual(completed.returncode, 0, completed.stderr or completed.stdout)
@@ -477,32 +472,29 @@ class HandoffTests(unittest.TestCase):
     def test_host_ready_missing_check_fails(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             project = Path(directory)
-            value = host_ready_handoff(project)
+            value = basic_handoff(project)
             value["checks"] = value["checks"][:-1]
-            handoff = project / "handoff.json"
+            handoff = project / ".mindplus-agent" / "handoff.json"
             write_json(handoff, value)
             completed = run_script("validate_handoff.py", "--input", str(handoff))
             self.assertEqual(completed.returncode, 1)
-            self.assertIn("HOST_READY is missing check", completed.stdout)
+            self.assertIn("BASIC review requires evidenced PASS", completed.stdout)
 
     def test_host_ready_without_user_confirmation_fails(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             project = Path(directory)
-            handoff = project / "handoff.json"
-            write_json(handoff, host_ready_handoff(project, confirmed=False))
+            handoff = project / ".mindplus-agent" / "handoff.json"
+            write_json(handoff, basic_handoff(project, confirmed=False))
             completed = run_script("validate_handoff.py", "--input", str(handoff))
             self.assertEqual(completed.returncode, 1)
-            self.assertIn("requires confirmed_by 'user'", completed.stdout)
-            self.assertIn("mindplus_import", completed.stdout)
-            self.assertIn("blocks_visible", completed.stdout)
-            self.assertIn("representative_target_compile", completed.stdout)
+            self.assertIn("BASIC review requires evidenced PASS: blocks_visible", completed.stdout)
 
     def test_passing_required_check_without_evidence_fails(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             project = Path(directory)
-            value = host_ready_handoff(project)
+            value = basic_handoff(project)
             value["checks"][0]["evidence"] = []
-            handoff = project / "handoff.json"
+            handoff = project / ".mindplus-agent" / "handoff.json"
             write_json(handoff, value)
             completed = run_script("validate_handoff.py", "--input", str(handoff))
             self.assertEqual(completed.returncode, 1)
@@ -759,7 +751,7 @@ class EmbeddedSwitchTests(unittest.TestCase):
                 check=False,
             )
             self.assertEqual(routed.returncode, 0, routed.stderr or routed.stdout)
-            self.assertEqual(json.loads(routed.stdout)["workflows"], ["CONVERT_FRESH"])
+            self.assertEqual(json.loads(routed.stdout)["workflows"], ["CONVERT_FRESH", "REVIEW_EXISTING"])
 
 
 class MpaTests(unittest.TestCase):
@@ -868,6 +860,7 @@ class MpaTests(unittest.TestCase):
                 "--outcome", "CONVERTED",
                 "--check", "conversion_check=PASS",
                 "--evidence", f"conversion_check={evidence}",
+                "--check", "lite_source_selection=PASS", "--evidence", "lite_source_selection=" + str(lite_fixture(project)),
             )
             self.assertEqual(completed.returncode, 0, completed.stderr or completed.stdout)
             handoff_path = Path(json.loads(completed.stdout)["handoff_path"])
@@ -902,14 +895,14 @@ class MpaTests(unittest.TestCase):
                 "--run-id", "rev",
                 "--workflow", "REVIEW_EXISTING",
                 "--status", "PASS",
-                "--outcome", "REVIEWED_HOST_READY",
+                "--outcome", "REVIEWED_BASIC",
                 "--check", "mindplus_import=PASS",
                 "--evidence", f"mindplus_import={evidence}",
             )
             self.assertEqual(completed.returncode, 1)
             output = json.loads(completed.stdout)
-            self.assertEqual(output["reason_code"], "REVIEW.USER_EVIDENCE_REQUIRED")
-            self.assertTrue(output["user_checklist"])
+            self.assertEqual(output["reason_code"], "INPUT.INVALID_HANDOFF")
+            self.assertTrue(output["errors"])
             handoffs = base / ".mindplus-agent" / "runs" / "rev" / "handoffs"
             self.assertFalse((handoffs / "REVIEW_EXISTING.json").exists())
 
@@ -956,17 +949,17 @@ class MpaTests(unittest.TestCase):
                 "--run-id", "adv",
                 "--workflow", "REVIEW_EXISTING",
                 "--status", "PASS",
-                "--outcome", "REVIEWED_HOST_READY",
+                "--outcome", "REVIEWED_BASIC",
                 "--check", "builder_build=PASS",
                 "--evidence", f"builder_build={evidence}",
             ]
-            for check_id in ("mindplus_import", "blocks_visible", "representative_target_compile"):
+            for check_id in sorted(BASIC_CHECKS - {"builder_build"}):
                 handoff_arguments += [
                     "--check", f"{check_id}=PASS",
                     "--evidence", f"{check_id}={evidence}",
                     "--confirmed", check_id,
                 ]
-            written = self.run_mpa(*handoff_arguments)
+            written = self.run_mpa(*handoff_arguments, "--artifact", "basic_review=" + str(basic_report_fixture(project)))
             self.assertEqual(written.returncode, 0, written.stderr or written.stdout)
             completed = self.run_mpa("transition", "--work-root", str(base), "--run-id", "adv")
             self.assertEqual(completed.returncode, 0, completed.stderr or completed.stdout)
@@ -999,21 +992,21 @@ class MpaTests(unittest.TestCase):
                 "--run-id", "stale",
                 "--workflow", "REVIEW_EXISTING",
                 "--status", "PASS",
-                "--outcome", "REVIEWED_HOST_READY",
+                "--outcome", "REVIEWED_BASIC",
                 "--check", "builder_build=PASS",
                 "--evidence", f"builder_build={evidence}",
             ]
-            for check_id in ("mindplus_import", "blocks_visible", "representative_target_compile"):
+            for check_id in sorted(BASIC_CHECKS - {"builder_build"}):
                 handoff_arguments += [
                     "--check", f"{check_id}=PASS",
                     "--evidence", f"{check_id}={evidence}",
                     "--confirmed", check_id,
                 ]
-            self.run_mpa(*handoff_arguments)
+            self.run_mpa(*handoff_arguments, "--artifact", "basic_review=" + str(basic_report_fixture(project)))
             (project / "package.json").write_text('{"changed": true}', encoding="utf-8")
             completed = self.run_mpa("transition", "--work-root", str(base), "--run-id", "stale")
             self.assertEqual(completed.returncode, 1)
-            self.assertEqual(json.loads(completed.stdout)["reason_code"], "REVIEW.STALE_HOST_READY_HANDOFF")
+            self.assertEqual(json.loads(completed.stdout)["reason_code"], "TRANSITION.INVALID_HANDOFF")
 
     def test_mpa_resume_lists_runs_and_reports_position(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -1056,6 +1049,7 @@ class MpaTests(unittest.TestCase):
                 "--outcome", "CONVERTED",
                 "--check", "conversion_check=PASS",
                 "--evidence", f"conversion_check={evidence}",
+                "--check", "lite_source_selection=PASS", "--evidence", "lite_source_selection=" + str(lite_fixture(project)),
             )
             self.assertEqual(converted.returncode, 0, converted.stderr or converted.stdout)
 
@@ -1069,17 +1063,17 @@ class MpaTests(unittest.TestCase):
                 "--run-id", "conv",
                 "--workflow", "REVIEW_EXISTING",
                 "--status", "PASS",
-                "--outcome", "REVIEWED_HOST_READY",
+                "--outcome", "REVIEWED_BASIC",
                 "--check", "builder_build=PASS",
                 "--evidence", f"builder_build={evidence}",
             ]
-            for check_id in ("mindplus_import", "blocks_visible", "representative_target_compile"):
+            for check_id in sorted(BASIC_CHECKS - {"builder_build"}):
                 review_arguments += [
                     "--check", f"{check_id}=PASS",
                     "--evidence", f"{check_id}={evidence}",
                     "--confirmed", check_id,
                 ]
-            reviewed = self.run_mpa(*review_arguments)
+            reviewed = self.run_mpa(*review_arguments, "--artifact", "basic_review=" + str(basic_report_fixture(project)))
             self.assertEqual(reviewed.returncode, 0, reviewed.stderr or reviewed.stdout)
 
             to_publish = self.run_mpa("transition", "--work-root", str(base), "--run-id", "conv")
@@ -1150,7 +1144,7 @@ def sample_spec(mode: str = "UPLOAD") -> dict:
         "assets": [],
         "style": {"color1": "#00B0F0"},
         "readme_claims": [],
-        "review_profile": "HOST_READY",
+        "review_profile": "BASIC",
     }
 
 
@@ -1366,7 +1360,7 @@ def publish_fixture(base: Path, authorized: bool = True) -> tuple[Path, Path, Pa
     (extension / "index.js").write_text("export default {};", encoding="utf-8")
     (project / "node_modules" / "somepkg" / "pkg.js").write_text("module.exports=1;", encoding="utf-8")
     handoff_path = base / "handoff.json"
-    write_json(handoff_path, host_ready_handoff(project, authorized=authorized))
+    write_json(handoff_path, basic_handoff(project, authorized=authorized))
     preflight_path = base / "publish-preflight.json"
     preflight = make_preflight(project, handoff_path, preflight_path)
     assert preflight.returncode == 0, preflight.stderr or preflight.stdout
@@ -1413,12 +1407,12 @@ class MpaEvidenceTests(unittest.TestCase):
             self.assertEqual(started.returncode, 0, started.stderr or started.stdout)
             handoff_args = ["handoff", "--work-root", str(base), "--run-id", "rev1",
                 "--workflow", "REVIEW_EXISTING", "--status", "PASS",
-                "--outcome", "REVIEWED_HOST_READY",
+                "--outcome", "REVIEWED_BASIC",
                 "--check", "builder_build=PASS", "--evidence", f"builder_build={evidence}"]
-            for check_id in ("mindplus_import", "blocks_visible", "representative_target_compile"):
+            for check_id in sorted(BASIC_CHECKS - {"builder_build"}):
                 handoff_args += ["--check", f"{check_id}=PASS", "--evidence", f"{check_id}={evidence}",
                                  "--confirmed", check_id]
-            written = run_script("mpa.py", *handoff_args)
+            written = run_script("mpa.py", *handoff_args, "--artifact", "basic_review=" + str(basic_report_fixture(project)))
             self.assertEqual(written.returncode, 0, written.stderr or written.stdout)
             completed = run_script("mpa.py",
                 "transition", "--work-root", str(base), "--run-id", "rev1", "--keep-evidence",
@@ -1516,7 +1510,7 @@ class GiteePublishTests(unittest.TestCase):
                 env_extra=env,
             )
             self.assertEqual(committed.returncode, 2)
-            self.assertEqual(json.loads(committed.stdout)["reason_code"], "REVIEW.STALE_HOST_READY_HANDOFF")
+            self.assertEqual(json.loads(committed.stdout)["reason_code"], "REVIEW.HANDOFF_INVALID")
 
     def test_plan_stops_on_credential_material(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -1524,7 +1518,7 @@ class GiteePublishTests(unittest.TestCase):
             project, handoff_path, preflight = publish_fixture(base)
             # The secret must be part of the reviewed content: add it, then re-review and re-preflight.
             (project / "extension" / "notes.js").write_text('const GITEE_TOKEN = "abcdef123456789";', encoding="utf-8")
-            write_json(handoff_path, host_ready_handoff(project, authorized=True))
+            write_json(handoff_path, basic_handoff(project, authorized=True))
             refreshed = make_preflight(project, handoff_path, preflight)
             self.assertEqual(refreshed.returncode, 0, refreshed.stderr or refreshed.stdout)
             planned = run_gitee(
@@ -1611,7 +1605,7 @@ class GiteePublishTests(unittest.TestCase):
             # Trailing whitespace inside the reviewed content must not block the commit.
             padded = project / "extension" / "padded.js"
             padded.write_text("const value = 1;   \n", encoding="utf-8")
-            write_json(handoff_path, host_ready_handoff(project, authorized=True))
+            write_json(handoff_path, basic_handoff(project, authorized=True))
             refreshed = make_preflight(project, handoff_path, preflight)
             self.assertEqual(refreshed.returncode, 0, refreshed.stderr or refreshed.stdout)
             state = base / "state"

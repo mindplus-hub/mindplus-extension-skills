@@ -1,27 +1,20 @@
 ---
 name: mindplus-extension-skills
 metadata:
-  version: "0.3.5"
-description: Create, upgrade existing, or freshly convert Mind+ V2 extensions with basic checks, review existing extensions, and publish authorized projects to Gitee. Use HOST_READY acceptance only when explicitly requested. Does not synchronize V1 into an existing V2 project or perform device acceptance.
+  version: "0.3.6"
+description: Create, upgrade or freshly convert Mind+ V2 extensions, check existing sources with Lite duplicate discovery, perform Basic pre-publication review, and publish authorized projects to Gitee.
 ---
 
 # MindPlus Extension Skills
 
-Use the smallest workflow matching the request. Default: create/convert/upgrade with basic checks, then publish only if requested. Do not insert a separate review or Mind+ GUI acceptance into ordinary development or publication.
+Create, convert or upgrade an extension, review its artifact, then publish if authorized. Lite selects the development source; Basic checks publication readiness. The five leaves belong to this one self-contained skill. For maintenance read [architecture.md](references/architecture.md).
 
-This directory is self-contained. Internal producer names (`mindplus-switch`, `mindplus-create`, `mindplus-upgrade`, `mindplus-review`, `mindplus-gitee-publish`) are not separately installed skills. For maintenance read [architecture.md](references/architecture.md).
+## Entry and routing
 
-## Entry check (including questions)
-
-Every new invocation of this skill starts with [skill-update.md](references/skill-update.md), including short questions, explanations and usage advice. Perform the update check before answering or running the next step; do not require a development or publication goal to trigger it. Reuse the completed check within the same active task. Explicit offline or pinned-version requests retain their exceptions. After this entry check, answer a question directly using relevant references; do not create a project/run or ask for source/fork selection merely to answer a question. Development tasks continue below.
-
-## Route and execute
-
-0. Before each new task, follow [skill-update.md](references/skill-update.md) to check the active installation and reload this skill after an update. Skip for explicit offline or pinned-version use; do not repeat within an active run.
-1. Immediately after the version check, follow [official-repository-discovery.md](references/official-repository-discovery.md): check the official `https://gitee.com/mind-plus` organization for repositories mentioned in the active conversation. For a matching development base, show verified candidates and ask whether to fork an existing repository before source-dependent writes; reuse an explicit choice already supplied. Public discovery does not require a token; actual fork development follows the upgrade leaf token/ownership gates.
-2. Read [routing.md](references/routing.md).
-3. Before CREATE/CONVERT routing, choose an absent or empty outer project directory named `ext2-<mode>-<name>` per [project-naming.md](references/project-naming.md). Freeze this path only after applying the naming rule. Run `python scripts/mpa.py start --goals <CONVERT,CREATE,UPGRADE,REVIEW,PUBLISH> --project-root <abs> --work-root <abs>` with known source/spec paths and authorizations already supplied by the user's request. Ordinary review uses `BASIC`. Pass `--review-profile HOST_READY` only for explicit full acceptance; it inserts a review even when REVIEW is not listed.
-4. Follow `next_command` and load only the selected leaf. Record results with `mpa.py handoff`, advance with `mpa.py transition`, and recover interruptions with `mpa.py resume`. Reusing a run ID must not change its request.
+1. Every new task, including a simple question, starts with [skill-update.md](references/skill-update.md). Reuse the completed check within the active task; retain explicit offline/pinned exceptions. After updating, reload this entry. Questions then use only relevant references and receive a direct answer without a lifecycle run.
+2. For project work read [routing.md](references/routing.md). Fresh CREATE/CONVERT uses an absent or empty `ext2-<mode>-<name>` directory per [project-naming.md](references/project-naming.md). Start `scripts/mpa.py` with the known request and existing authorization.
+3. Load only the selected leaf. At CREATE/CONVERT/UPGRADE entry, perform **Lite** [source discovery](references/official-repository-discovery.md) before source-dependent writes. Check the appropriate official JSON and Gitee repositories; within the same mode and type, matching config.author + config.id uses an existing base or authorized fork; an id-only collision adds the author suffix (Chinese in pinyin) to the new folder. A changed base/path requires a new immutable route request.
+4. Complete the producer, then **Basic** [pre-publication review](references/review-basic.md). The router also inserts Basic before standalone publication. Reuse current checks; do not repeat builds or observations with unchanged scope and artifacts. Follow `next_command`, `handoff`, `transition` and `resume`.
 
 | Workflow | Reference |
 | --- | --- |
@@ -31,25 +24,12 @@ Every new invocation of this skill starts with [skill-update.md](references/skil
 | REVIEW_EXISTING | [review.md](references/workflows/review.md) |
 | PUBLISH_GITEE | [gitee-publish.md](references/workflows/gitee-publish.md) |
 
-Creation, conversion and upgrade already include static checks. Reuse those checks; no independent review is required before publishing. Explicit REVIEW runs use BASIC by default. Direct PUBLISH needs authorization and a current publication snapshot, not a HOST_READY certificate. Optional prior handoffs must still match the current project.
+## Boundaries and completion
 
-## Pre-publication issue levels
+- Basic requires source/config checks, malicious-code review, successful build, observed block display and representative behavior, and an actual extension ZIP no larger than **5,000,000 bytes**. Missing verification retains the project but blocks publication. See [review-basic.md](references/review-basic.md) for the evidence contract.
+- [P0/P1/P2](references/issue-levels.md) classify defects, not review levels. P0 blocks; P1 is advisory; P2 optional. Authorization, secrets, source integrity, fork ownership, artifact size and required verification remain independent gates.
+- Existing V2 feature work uses UPGRADE; fresh conversion never overwrites it. Verify an authorized personal fork before editing a non-owned repository. V1-to-existing-V2 synchronization remains unsupported.
+- Review does not modify extension source. Authorized builds and checks may write artifacts and evidence. Source fixes belong to development and require affected checks again. Build/push success does not prove physical device behavior.
+- Publishing requires authorization and token presence, then current Basic evidence, exact staged content, secret/target checks, fast-forward push, remote-ref, visibility and Topic verification. Never record credentials. Creating or converting alone does not authorize publication.
 
-For producer checks and BASIC review, read [issue-levels.md](references/issue-levels.md). P0 blocks completion/publication; P1 is advisory and P2 optional to fix. Classify by actual impact, preserve raw check evidence, and report unperformed verification separately. Do not add an independent review merely to assign levels. Authorization, secrets, repository target and explicitly requested acceptance remain separate gates.
-
-## Boundaries and evidence
-
-- Fresh conversion/creation requires an absent or empty target. Use UPGRADE for feature changes to existing V2 repositories; V1-to-existing-V2 synchronization remains unsupported. For non-owned repositories, authenticate with a personal token and verify a personal fork before modifying extension files; see the upgrade leaf.
-- Keep the latest stable Scaffold Release selected for this run and bounded install/build attempts. Build when the environment is available; report skipped or unavailable build separately from static success. Never call skipped work PASS.
-- Review is read-only. Rerun affected checks after correction; changing a handoff is not verification.
-- Only explicit HOST_READY acceptance requires build, Mind+ import, block visibility and representative compilation. Host observations need user confirmation. Build or publication success never proves hardware behavior.
-- Publication checks authorization, exact staged content, secrets, target repository, fast-forward push and remote-ref equality. It does not repeat semantic review. Missing token returns WAITING_USER before Git/remote activity. Never record credentials.
-- Reuse authorization already supplied; creating/converting does not itself authorize publication or device actions.
-
-Before handoff/transition read [handoff.md](references/handoff.md). Use [evidence.md](references/evidence.md) to distinguish BASIC, build and HOST_READY claims. The [registry](references/workflow-registry.json) defines allowed transitions.
-
-Publication includes adding and verifying the repository Topic `MindPlus-Ext2` after the branch push and requested visibility succeed, preserving existing Topics. This is not a Git tag or Release. If Topic verification fails, report the verified push separately and resume the publication leaf without claiming full completion.
-
-## Completion
-
-Report the project, achieved checks, limitations and any performed external actions. Successful runs clean hidden run records unless the user requested `--keep-evidence`; the removal is verified, and a run whose records could not be deleted is reported as `RECORDS.CLEANUP_INCOMPLETE` instead of being counted as cleaned. Failed or waiting runs retain recovery evidence. A verified push is repository publication, not Mind+ or device acceptance.
+Before handoff read [handoff.md](references/handoff.md); claims follow [evidence.md](references/evidence.md). Report achieved checks, P0/P1/P2, missing verification, artifact size and actual external actions. Successful runs clean hidden records unless `--keep-evidence` is requested; failed/waiting runs retain them. Never claim deleted evidence remains available. Cleanup failure is `RECORDS.CLEANUP_INCOMPLETE`.

@@ -2,6 +2,10 @@
 
 Load this leaf only for `CREATE_FRESH`.
 
+Before source-dependent writes, complete [Lite source selection](../official-repository-discovery.md). Preserve its comparison/fork evidence and add required `lite_source_selection` to the producer handoff.
+
+Before npm lifecycle scripts or extension loading, inspect install hooks, dependencies and executable code for unexplained dangerous behavior per the security scope in [Basic](../review-basic.md). Reuse this evidence in the later Basic review; do not execute suspicious code merely to test it.
+
 ## Required contract
 
 Creation consumes an `extension-spec.json` matching [../contracts/extension-spec.schema.json](../contracts/extension-spec.schema.json). The target must be absent or empty and satisfy [project-naming.md](../project-naming.md) before routing.
@@ -34,7 +38,7 @@ If the corpus is unavailable or does not cover a requested feature, first apply 
 REFINE_SPEC -> PREPARE -> CREATE -> VERIFY -> HANDOFF
 ```
 
-1. Resolve and normalize the new author per [author-identity.md](../switch/author-identity.md), using the user-supplied name or available account/Git/computer username; do not default to template authors. Leave `identity.compatibility_id` empty unless a legacy compatibility target and its source identity are confirmed; never derive it from the new author/id. Freeze the approved spec and record its SHA-256 before project writes. Use the path recorded by `--extension-spec`, otherwise write `<parent_run_root>/extension-spec.json`; the handoff uses that same fallback. Do not inherit HOST_READY from an example spec unless the user requested acceptance.
+1. Resolve and normalize the new author per [author-identity.md](../switch/author-identity.md), using the user-supplied name or available account/Git/computer username; do not default to template authors. Leave `identity.compatibility_id` empty unless a legacy compatibility target and its source identity are confirmed; never derive it from the new author/id. Freeze the approved spec and record its SHA-256 before project writes. Use the path recorded by `--extension-spec`, otherwise write `<parent_run_root>/extension-spec.json`; the handoff uses that same fallback. Use the BASIC artifact review profile.
 2. Use the latest stable Scaffold Release selected for this run through the embedded `scripts/switch/prepare_builder_scaffold.py` helper.
 3. When the environment is available and installation is within the request, attempt at most one `npm install`. Record the attempt before starting. Never use `npm ci` or clone the Builder.
 4. Create only the extension files and root README authorized by the spec. When producing the cover, apply [cover-design.md](../switch/cover-design.md). Preserve exact IDs, parameter order/defaults, menu values, generator semantics, resources, dependencies, and board conditions. Organize blocks per [block-organization.md](../switch/block-organization.md) using the spec's `blocks[].submenu` annotations; write `supportDevices`, `sku`, and `supportArch` exactly per [conventions.md](../switch/conventions.md) and [device-ids.json](../switch/device-ids.json) — device IDs outside the dictionary stop the run.
@@ -42,4 +46,4 @@ REFINE_SPEC -> PREPARE -> CREATE -> VERIFY -> HANDOFF
 6. Run `scripts/switch/check_converted_extension.py --project-root <project_root> --inventory <run_root>/record/spec-inventory.json --mode <selected_mode>` plus resource checks, and at most one `npm run build` when installation passed.
 7. Write a `CREATED` handoff with `review_status: NOT_RUN`, the frozen spec hash, artifacts, checks, and actual install/build evidence.
 
-Creation includes basic static checks. If the build is unavailable, mark it optional/NOT_RUN with the concrete limitation; a skipped build cannot claim SOURCE_READY or HOST_READY. Apply [issue-levels.md](../issue-levels.md): P0 defects need resolution; P1/P2 are reported separately without blocking. An actual attempted-build defect remains P0. On producer success proceed directly to publication when requested; run independent review only when requested.
+Creation includes producer static checks. Record unavailable build as NOT_RUN with its limitation, never PASS. Apply [issue-levels.md](../issue-levels.md) to actual defects. Producer completion proceeds to mandatory Basic; no publication until build, block observations, security review and ZIP size checks pass.

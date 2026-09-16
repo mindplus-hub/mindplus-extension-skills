@@ -413,7 +413,7 @@ def collect_source(source: Path) -> dict[str, bytes]:
         relative = path.relative_to(source)
         if any(part in IGNORED for part in relative.parts):
             continue
-        if relative.parts[0] not in {"tools", "tests", ".workflow", "assets"} and relative.as_posix() not in {"README.md", "release-info.json", "struct.jpg", ".gitignore"}:
+        if relative.parts[0] not in {"tools", "tests", ".workflow", "assets"} and relative.as_posix() not in {"README.md", "release-info.json", "struct.jpg", "struct.png", ".gitignore"}:
             continue
         if path.is_symlink() or (getattr(path.lstat(), "st_file_attributes", 0) & 0x400):
             raise PackageError(f"Source contains a link/reparse point: {relative}")

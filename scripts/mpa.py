@@ -28,8 +28,7 @@ from route_workflow import AUTHORIZATION_FIELDS, REGISTRY_PATH
 from route_workflow import read_json as read_route_json
 from route_workflow import route as route_request_fn
 from validate_handoff import (
-    HOST_READY_CHECKS,
-    USER_CONFIRMED_CHECKS,
+    BASIC_CHECKS,
     WORKFLOW_PRODUCER,
     load as load_handoff,
     validate as validate_handoff_data,
@@ -49,12 +48,9 @@ NEXT_CONDITIONS = {
     "REVIEW_EXISTING": "producer handoff PASS and project exists",
     "PUBLISH_GITEE": "passing requested checks and current project hash",
 }
-USER_EVIDENCE_CHECKLIST = [
-    "1. Import the built extension package into the Mind+ host.",
-    "2. Confirm the extension blocks appear in the palette and are correctly localized.",
-    "3. Run a representative target compilation for the declared board scope.",
-    "4. Only after the user confirms these observations, rerun with --confirmed <check_id>.",
-]
+
+
+
 ROUTE_FIX = {
     "WORKSPACE.PROJECT_NAME_PREFIX_REQUIRED": "Correct --project-root to an absent or empty ext2-<rt|ul|py|mpy>-<name> directory before starting. Do not rename an existing project or change a frozen run path.",
     "AUTH.PUSH_NOT_AUTHORIZED": "Ask the user for commit and push authorization, then rerun the same command with --auth commit --auth push.",
@@ -68,7 +64,7 @@ ROUTE_FIX = {
     "INPUT.REVIEW_HANDOFF_NOT_FOUND": "The supplied --review-handoff file does not exist; fix the path or drop the flag to insert a review first.",
     "INPUT.GOALS_REQUIRED": "Rerun with --goals (one or more of CONVERT, CREATE, UPGRADE, REVIEW, PUBLISH).",
 }
-
+ROUTE_FIX["ROUTE.REVIEW_PROFILE_UNSUPPORTED"] = "Use BASIC for artifact review; Lite runs at producer entry."
 
 def emit(value: dict[str, Any], code: int) -> int:
     payload = dict(value)
@@ -151,6 +147,8 @@ def next_command_for(workflow: str, ctx: dict[str, Any]) -> str:
     header = f"Read {leaf_reference(workflow)} fully, then run:"
     if workflow == "REVIEW_EXISTING":
         header = f"Use review profile {ctx.get('review_profile', 'BASIC')}. " + header
+    if workflow in {"CREATE_FRESH", "CONVERT_FRESH", "UPGRADE_EXISTING"}:
+        header += " Complete the leaf LITE source selection before source-dependent writes. "
     if workflow == "CONVERT_FRESH":
         command = f"python {quote(skill + '/scripts/switch/init_run.py')} --work-root {quote(ctx['work_root'])} --v1-source {quote(ctx['v1_source'])}"
         if ctx.get("parent_run_id"):
@@ -172,8 +170,6 @@ def next_command_for(workflow: str, ctx: dict[str, Any]) -> str:
         for auth in ("commit", "push", "create_repository"):
             if ctx.get("authorizations", {}).get(auth):
                 command += f" --auth {auth}"
-        if ctx.get("review_profile") == "HOST_READY":
-            command += " --require-host-ready"
         if ctx.get("create_repository"):
             command += " --create-repo"
     else:
@@ -401,25 +397,10 @@ def cmd_handoff(args: argparse.Namespace) -> int:
     for check_id, result in results_by_id.items():
         if result == "PASS" and check_id not in optional and not evidence_by_id.get(check_id):
             forgery.append(f"required check {check_id} is PASS without --evidence; add --evidence {check_id}=<path>")
-        if result == "PASS" and check_id in USER_CONFIRMED_CHECKS and check_id not in confirmed:
-            forgery.append(f"Mind+ host GUI check {check_id} is PASS without user confirmation; add --confirmed {check_id} only after the user observed it")
-    if forgery:
-        return emit(
-            {
-                "status": "FAIL",
-                "reason_code": "REVIEW.USER_EVIDENCE_REQUIRED",
-                "errors": forgery,
-                "user_checklist": USER_EVIDENCE_CHECKLIST,
-                "next_command": "Ask the user to perform the checklist. After explicit confirmation rerun adding --confirmed <check_id>; otherwise record the check as NOT_RUN with --status BLOCKED.",
-            },
-            1,
-        )
-
-    for check_id, result in sorted(results_by_id.items()):
         checks.append(
             {
                 "id": check_id,
-                "layer": "HOST_BUILD" if check_id in HOST_READY_CHECKS else "STATIC",
+                "layer": "HOST_BUILD" if check_id in {"builder_build", "blocks_visible", "package_size"} else "RUNTIME" if check_id == "blocks_functional" else "STATIC",
                 "claim": check_id.replace("_", " "),
                 **({"priority": priorities[check_id]} if check_id in priorities else {}),
                 "required": check_id not in optional,
@@ -507,6 +488,10 @@ def cmd_handoff(args: argparse.Namespace) -> int:
     artifacts = []
     for kind, path_text in parse_pairs(args.artifact, "artifact", errors):
         artifacts.append({"kind": kind, "path": str(Path(path_text).expanduser().resolve(strict=False)), "sha256": None})
+    if workflow == "PUBLISH_GITEE" and status == "PASS":
+        upstream = build_context(work_root, request, run).get("review_handoff")
+        if upstream and not any(a["kind"] == "basic_review" for a in artifacts):
+            artifacts.extend(a for a in load_handoff(Path(upstream)).get("artifacts", []) if a.get("kind") == "basic_review")
     if workflow == "CONVERT_FRESH":
         child = run_root / "children" / "CONVERT_FRESH"
         for name in ("record.json", "log.md"):
@@ -537,7 +522,7 @@ def cmd_handoff(args: argparse.Namespace) -> int:
         "next": next_entries,
     }
 
-    required_outcome = "REVIEWED_HOST_READY" if workflow == "REVIEW_EXISTING" and status == "PASS" and request.get("review_profile") == "HOST_READY" else None
+    required_outcome = "REVIEWED_BASIC" if workflow == "REVIEW_EXISTING" and status == "PASS" else None
     validation_errors = validate_handoff_data(handoff, required_outcome, True)
     if validation_errors:
         return emit(
@@ -617,7 +602,7 @@ def cmd_transition(args: argparse.Namespace) -> int:
         )
 
     handoff = load_handoff(handoff_path)
-    required_outcome = "REVIEWED_HOST_READY" if current == "REVIEW_EXISTING" and handoff.get("status") == "PASS" and read_request(run_root).get("review_profile") == "HOST_READY" else None
+    required_outcome = "REVIEWED_BASIC" if current == "REVIEW_EXISTING" and handoff.get("status") == "PASS" else None
     errors = validate_handoff_data(handoff, required_outcome, True)
     if errors:
         return emit(
@@ -710,7 +695,7 @@ def cmd_transition(args: argparse.Namespace) -> int:
         return emit({"status": "FAIL", "reason_code": "TRANSITION.NOT_ALLOWED", "error": "transition is not registered"}, 1)
     if next_workflow == "PUBLISH_GITEE":
         profile = read_request(run_root).get("review_profile", "BASIC")
-        gate_errors = validate_handoff_data(handoff, "REVIEWED_HOST_READY" if profile == "HOST_READY" else None, True)
+        gate_errors = validate_handoff_data(handoff, "REVIEWED_BASIC", True)
         if gate_errors:
             return emit({"status": "FAIL", "reason_code": "REVIEW.HANDOFF_INVALID", "errors": gate_errors,
                          "next_command": "Rerun the requested checks and write a current handoff."}, 1)
@@ -723,7 +708,7 @@ def cmd_transition(args: argparse.Namespace) -> int:
             return emit(
                 {
                     "status": "FAIL",
-                    "reason_code": "REVIEW.STALE_HOST_READY_HANDOFF",
+                    "reason_code": "REVIEW.STALE_BASIC_HANDOFF",
                     "errors": ["The project changed after the recorded checks; refresh the affected checks."],
                     "next_command": "Rerun the affected checks in the current leaf and write a new handoff.",
                 },
@@ -910,7 +895,7 @@ def main() -> int:
     start.add_argument("--v1-source", type=Path)
     start.add_argument("--extension-spec", type=Path)
     start.add_argument("--review-handoff", type=Path, help="optional prior evidence for direct publication")
-    start.add_argument("--review-profile", choices=["BASIC", "HOST_READY"], default="BASIC", help="HOST_READY explicitly adds full Mind+ acceptance; BASIC is the default")
+    start.add_argument("--review-profile", default="BASIC", help="supported artifact review profile: BASIC")
     start.add_argument("--work-root", required=True, type=Path)
     start.add_argument("--run-id")
     start.add_argument("--auth", action="append", help="authorization to grant; repeatable")

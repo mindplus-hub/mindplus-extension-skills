@@ -11,6 +11,7 @@ import sys
 from pathlib import Path
 
 from check_gitee_token import resolve_token
+from check_basic_review import verify_file as verify_basic
 from hash_project import HashError, compute_project_hash
 from validate_handoff import load as load_handoff
 from validate_handoff import validate as validate_handoff
@@ -40,7 +41,7 @@ def main() -> int:
     parser.add_argument("--project-root", required=True, type=Path)
     parser.add_argument("--review-handoff", type=Path, help="optional current producer/review evidence")
     parser.add_argument("--auth", action="append", choices=["commit", "push", "create_repository"], help="current explicit authorization; repeatable")
-    parser.add_argument("--require-host-ready", action="store_true", help="only for explicitly requested full acceptance")
+    parser.add_argument("--basic-review", type=Path, help="passing source and ZIP bound BASIC report")
     parser.add_argument(
         "--create-repo",
         action="store_true",
@@ -74,16 +75,15 @@ def main() -> int:
     if handoff_path:
         try:
             handoff = load_handoff(handoff_path)
-            errors = validate_handoff(handoff, "REVIEWED_HOST_READY" if args.require_host_ready else None, True)
+            errors = validate_handoff(handoff, "REVIEWED_BASIC", True)
             if handoff.get("state") != "TERMINAL" or handoff.get("status") != "PASS" or handoff.get("workflow") not in {"CONVERT_FRESH", "CREATE_FRESH", "REVIEW_EXISTING"}:
                 errors.append("upstream evidence must be a completed passing producer or review handoff")
         except (OSError, ValueError, json.JSONDecodeError) as exc:
             errors = [str(exc)]
-    elif args.require_host_ready:
-        errors = ["explicit HOST_READY acceptance requires a current review handoff"]
+
     if errors:
         emit({"state": "TERMINAL", "status": "BLOCKED", "outcome": "PUBLISH_PRECHECK_FAILED",
-              "reason_code": "REVIEW.HOST_READY_HANDOFF_INVALID" if args.require_host_ready else "REVIEW.HANDOFF_INVALID",
+              "reason_code": "REVIEW.HANDOFF_INVALID",
               "token_present": True, "token_source": token_source, "errors": errors}, args.output)
         return 2
 
@@ -166,7 +166,7 @@ def main() -> int:
                 "state": "TERMINAL",
                 "status": "BLOCKED",
                 "outcome": "PUBLISH_PRECHECK_FAILED",
-                "reason_code": "REVIEW.STALE_HOST_READY_HANDOFF",
+                "reason_code": "REVIEW.STALE_BASIC_HANDOFF",
                 "token_present": True,
                 "token_source": token_source,
                 "expected_sha256": expected_hash,
@@ -175,6 +175,19 @@ def main() -> int:
             },
             args.output,
         )
+        return 2
+
+    basic_path = args.basic_review
+    if basic_path is None and handoff:
+        basic_path = next((Path(a["path"]) for a in handoff.get("artifacts", []) if a.get("kind") == "basic_review"), None)
+    try:
+        if basic_path is None:
+            raise ValueError("A passing BASIC report is required before publication")
+        basic_path = basic_path.expanduser().resolve()
+        verify_basic(project, basic_path)
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        emit({"state": "TERMINAL", "status": "BLOCKED", "outcome": "PUBLISH_PRECHECK_FAILED",
+              "reason_code": "REVIEW.BASIC_NOT_READY", "errors": [str(exc)]}, args.output)
         return 2
 
     try:
@@ -240,7 +253,7 @@ def main() -> int:
             "project_root": str(project),
             "review_handoff": str(handoff_path) if handoff_path else None,
             "authorizations": handoff_authorizations,
-            "require_host_ready": args.require_host_ready,
+            "basic_review": str(basic_path),
             "project_sha256": actual_hash,
             "source_file_count": source_file_count,
             "git": git_facts,

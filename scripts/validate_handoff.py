@@ -9,6 +9,8 @@ import re
 import sys
 from pathlib import Path
 from typing import Any
+from check_basic_review import BASIC_CHECKS, verify_file as verify_basic
+from check_lite_review import verify_selection
 
 
 SCHEMA_VERSION = "mindplus-agent.handoff/v1"
@@ -46,17 +48,6 @@ AUTHORIZATION_FIELDS = {
     "create_repository",
     "push",
     "device_upload",
-}
-HOST_READY_CHECKS = {
-    "builder_build",
-    "mindplus_import",
-    "blocks_visible",
-    "representative_target_compile",
-}
-USER_CONFIRMED_CHECKS = {
-    "mindplus_import",
-    "blocks_visible",
-    "representative_target_compile",
 }
 CHECK_RESULTS = {"PASS", "FAIL", "NOT_RUN", "ACCEPTED_LIMITATION", "CARRIED_RISK"}
 CREDENTIAL_URL_RE = re.compile(r"[a-z][a-z0-9+.-]*://[^/\s:@]+:[^@\s/]+@", re.IGNORECASE)
@@ -169,7 +160,7 @@ def validate(data: dict[str, Any], require_outcome: str | None, check_artifacts:
             protected = {"config_schema", "extension_static_integrity", "source_semantics",
                          "repository_ownership", "version_bump", "upgrade_regression",
                          "publication_snapshot_current", "publication_set_reviewed",
-                         "git_commit", "gitee_repository", "remote_ref_verified", "repository_topic_verified"} | HOST_READY_CHECKS
+                         "git_commit", "gitee_repository", "remote_ref_verified", "repository_topic_verified", "lite_source_selection"} | BASIC_CHECKS
             if priority in {"P1", "P2"} and check_id in protected:
                 errors.append(f"required gate cannot be downgraded: {check_id}")
             if priority and check.get("result") == "FAIL" and not check.get("evidence"):
@@ -185,6 +176,16 @@ def validate(data: dict[str, Any], require_outcome: str | None, check_artifacts:
             if check.get("required") is True and status == "PASS" and check.get("result") != "PASS":
                 errors.append(f"passing handoff has non-passing required check: {check_id}")
 
+    if workflow in {"CREATE_FRESH", "CONVERT_FRESH", "UPGRADE_EXISTING"} and status == "PASS":
+        check = checks_by_id.get("lite_source_selection", {})
+        if check.get("required") is not True or check.get("result") != "PASS" or not check.get("evidence"):
+            errors.append("producer requires evidenced PASS: lite_source_selection")
+        elif check_artifacts and project:
+            try:
+                verify_selection(project, load(Path(check["evidence"][0])))
+            except (OSError, ValueError, KeyError, TypeError) as exc:
+                errors.append(f"Lite selection invalid: {exc}")
+
     if workflow == "UPGRADE_EXISTING" and status == "PASS":
         if data.get("outcome") != "UPGRADED" or state != "TERMINAL":
             errors.append("passing upgrade requires TERMINAL/UPGRADED")
@@ -196,31 +197,22 @@ def validate(data: dict[str, Any], require_outcome: str | None, check_artifacts:
     if data.get("outcome") == "REVIEWED_BASIC":
         if workflow != "REVIEW_EXISTING" or state != "TERMINAL" or status != "PASS":
             errors.append("REVIEWED_BASIC requires a TERMINAL/PASS review")
-        for check_id in ("config_schema", "extension_static_integrity", "source_semantics"):
+        for check_id in sorted(BASIC_CHECKS):
             check = checks_by_id.get(check_id, {})
             if check.get("required") is not True or check.get("result") != "PASS" or not check.get("evidence"):
                 errors.append(f"BASIC review requires evidenced PASS: {check_id}")
 
-    if data.get("outcome") == "REVIEWED_HOST_READY":
-        if workflow != "REVIEW_EXISTING" or producer != "mindplus-review":
-            errors.append("REVIEWED_HOST_READY must come from mindplus-review")
-        if state != "TERMINAL" or status != "PASS":
-            errors.append("REVIEWED_HOST_READY requires TERMINAL/PASS")
-        for check_id in sorted(HOST_READY_CHECKS):
-            if check_id not in checks_by_id:
-                errors.append(f"HOST_READY is missing check: {check_id}")
-            elif checks_by_id[check_id].get("result") != "PASS":
-                errors.append(f"HOST_READY check must PASS: {check_id}")
-        for check_id in sorted(USER_CONFIRMED_CHECKS):
-            check = checks_by_id.get(check_id)
-            if (
-                isinstance(check, dict)
-                and check.get("result") == "PASS"
-                and check.get("confirmed_by") != "user"
-            ):
-                errors.append(
-                    f"HOST_READY GUI check requires confirmed_by 'user' (host-observed evidence): {check_id}"
-                )
+    if workflow in {"REVIEW_EXISTING", "PUBLISH_GITEE"} and status == "PASS":
+        if workflow == "REVIEW_EXISTING" and data.get("outcome") != "REVIEWED_BASIC":
+            errors.append("Review requires a complete REVIEWED_BASIC result")
+        reports = [a for a in data.get("artifacts", []) if a.get("kind") == "basic_review"]
+        if len(reports) != 1:
+            errors.append("BASIC requires exactly one basic_review artifact")
+        elif check_artifacts and project:
+            try:
+                verify_basic(project, Path(reports[0]["path"]))
+            except (OSError, ValueError, KeyError, TypeError) as exc:
+                errors.append(f"BASIC report invalid: {exc}")
 
     if data.get("outcome") == "TOKEN_REQUIRED":
         if workflow not in {"PUBLISH_GITEE", "UPGRADE_EXISTING"}:

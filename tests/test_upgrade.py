@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from test_workflow import run_script
+from test_workflow import run_script, lite_fixture
 from route_workflow import route, read_json, REGISTRY_PATH
 from hash_project import compute_project_hash
 from validate_handoff import validate
@@ -18,8 +18,7 @@ class UpgradeTests(unittest.TestCase):
             registry = read_json(REGISTRY_PATH)
             self.assertEqual(route(request, registry)["reason_code"], "WORKSPACE.EXISTING_PROJECT_REQUIRED")
             (project / "config.json").write_text('{"version":"1.0.0"}')
-            for profile, expected in (("BASIC", ["UPGRADE_EXISTING", "PUBLISH_GITEE"]),
-                                      ("HOST_READY", ["UPGRADE_EXISTING", "REVIEW_EXISTING", "PUBLISH_GITEE"])):
+            for profile, expected in (("BASIC", ["UPGRADE_EXISTING", "REVIEW_EXISTING", "PUBLISH_GITEE"]),):
                 request.update(goals=["UPGRADE", "PUBLISH"], review_profile=profile)
                 self.assertEqual(route(request, registry)["workflows"], expected)
             for producer in ("CREATE", "CONVERT"):
@@ -55,6 +54,7 @@ class UpgradeTests(unittest.TestCase):
             for check in ("repository_ownership", "version_bump", "config_schema", "extension_static_integrity",
                           "source_semantics", "upgrade_regression"):
                 args += ["--check", check + "=PASS", "--evidence", check + "=" + str(config)]
+            args += ["--check", "lite_source_selection=PASS", "--evidence", "lite_source_selection=" + str(lite_fixture(project))]
             result = run_script(*args)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             handoff = json.loads((base / ".mindplus-agent/runs/upgrade/handoffs/UPGRADE_EXISTING.json").read_text())
@@ -66,8 +66,8 @@ class UpgradeTests(unittest.TestCase):
             self.assertEqual(validate(handoff, None, True), [])
             result = run_script("mpa.py", "transition", "--work-root", str(base), "--run-id", "upgrade")
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-            self.assertEqual(json.loads(result.stdout)["advanced_to"], "PUBLISH_GITEE")
-            self.assertIn("UPGRADE_EXISTING.json", json.loads(result.stdout)["next_command"])
+            self.assertEqual(json.loads(result.stdout)["advanced_to"], "REVIEW_EXISTING")
+            self.assertIn("review.md", json.loads(result.stdout)["next_command"])
 
 
 if __name__ == "__main__":

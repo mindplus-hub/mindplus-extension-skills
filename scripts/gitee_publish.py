@@ -27,6 +27,7 @@ from urllib.parse import urlencode, quote
 from check_gitee_token import resolve_token
 from validate_handoff import validate as validate_handoff
 from hash_project import IGNORED_DIRECTORIES, HashError, compute_project_hash
+from check_basic_review import verify_file as verify_basic
 
 SKILL_ROOT = Path(__file__).resolve().parent.parent
 API_BASE = "https://gitee.com/api/v5"
@@ -227,15 +228,13 @@ def context(args: argparse.Namespace, need_authorizations: tuple[str, ...] = ())
 
     handoff = read_json(Path(preflight["review_handoff"])) if preflight.get("review_handoff") else {}
     if handoff:
-        errors = validate_handoff(handoff, "REVIEWED_HOST_READY" if preflight.get("require_host_ready") else None, True)
+        errors = validate_handoff(handoff, "REVIEWED_BASIC", True)
         if handoff.get("status") != "PASS" or handoff.get("state") != "TERMINAL" or handoff.get("workflow") not in {"CONVERT_FRESH", "CREATE_FRESH", "REVIEW_EXISTING"}:
             errors.append("upstream handoff is not a passing producer or review")
         if handoff.get("project_sha256") != preflight.get("project_sha256") or Path(handoff.get("project_root", "")).resolve() != Path(preflight["project_root"]).resolve():
             errors.append("upstream evidence no longer matches the publication snapshot")
         if errors:
             raise StageBlocked({"status": "BLOCKED", "reason_code": "REVIEW.HANDOFF_INVALID", "errors": errors})
-    elif preflight.get("require_host_ready"):
-        raise StageBlocked({"status": "BLOCKED", "reason_code": "REVIEW.HOST_READY_HANDOFF_INVALID", "error": "HOST_READY evidence is missing"})
     authorizations = preflight.get("authorizations", handoff.get("authorizations", {}))
     missing = [name for name in need_authorizations if authorizations.get(name) is not True]
     if missing:
@@ -256,10 +255,14 @@ def context(args: argparse.Namespace, need_authorizations: tuple[str, ...] = ())
     if fresh_hash != preflight.get("project_sha256"):
         raise StageBlocked(
             {
-                "status": "BLOCKED", "reason_code": "REVIEW.STALE_HOST_READY_HANDOFF",
+                "status": "BLOCKED", "reason_code": "REVIEW.STALE_BASIC_HANDOFF",
                 "error": "The project changed after publication preflight; refresh the affected checks and publication plan.",
             }
         )
+    try:
+        verify_basic(project, Path(preflight.get("basic_review", "")))
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        raise StageBlocked({"status": "BLOCKED", "reason_code": "REVIEW.BASIC_NOT_READY", "error": str(exc)})
     return {
         "state_dir": state_dir, "token": token, "token_source": token_source, "preflight": preflight,
         "preflight_path": preflight_path, "handoff": handoff, "project": project, "project_sha256": fresh_hash,
@@ -327,7 +330,7 @@ def drift_check(project: Path, plan: dict[str, Any]) -> None:
     if sorted(current) != sorted(planned):
         raise StageBlocked(
             {
-                "status": "BLOCKED", "reason_code": "REVIEW.STALE_HOST_READY_HANDOFF",
+                "status": "BLOCKED", "reason_code": "REVIEW.STALE_BASIC_HANDOFF",
                 "error": "Project file set changed after the plan was written; rerun the plan stage (and review if content changed).",
             }
         )
@@ -459,7 +462,7 @@ def cmd_commit(args: argparse.Namespace) -> int:
 
     after_hash = compute_project_hash(project)[0]
     if after_hash != ctx["project_sha256"]:
-        return emit({"status": "BLOCKED", "reason_code": "REVIEW.STALE_HOST_READY_HANDOFF", "error": "staging changed the project hash"}, 2)
+        return emit({"status": "BLOCKED", "reason_code": "REVIEW.STALE_BASIC_HANDOFF", "error": "staging changed the project hash"}, 2)
 
     head = git(project, "rev-parse", "HEAD")
     reused = False
@@ -832,7 +835,7 @@ def cmd_push(args: argparse.Namespace) -> int:
         )
     after_hash = compute_project_hash(project)[0]
     if after_hash != ctx["project_sha256"]:
-        return emit({"status": "BLOCKED", "reason_code": "REVIEW.STALE_HOST_READY_HANDOFF", "error": "project hash changed during publication"}, 2)
+        return emit({"status": "BLOCKED", "reason_code": "REVIEW.STALE_BASIC_HANDOFF", "error": "project hash changed during publication"}, 2)
 
     visibility_promotion = None
     try:

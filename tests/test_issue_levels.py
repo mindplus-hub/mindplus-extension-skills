@@ -3,15 +3,17 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from test_workflow import run_script, host_ready_handoff, publish_fixture
+from test_workflow import run_script, basic_handoff, publish_fixture
 from validate_handoff import validate
+from check_basic_review import BASIC_CHECKS
+from test_workflow import basic_report_fixture
 
 
 class IssueLevelTests(unittest.TestCase):
     def test_p0_cannot_be_hidden_as_optional(self):
         with tempfile.TemporaryDirectory() as directory:
             project, _, _ = publish_fixture(Path(directory))
-            data = host_ready_handoff(project)
+            data = basic_handoff(project)
             data['checks'].append({'id': 'syntax_error', 'priority': 'P0', 'required': False,
                                    'result': 'FAIL', 'evidence': [str(project)]})
             self.assertTrue(any('P0' in error for error in validate(data, None, True)))
@@ -27,7 +29,8 @@ class IssueLevelTests(unittest.TestCase):
             self.assertEqual(start.returncode, 0, start.stdout)
             args = ['mpa.py', 'handoff', '--work-root', str(base), '--run-id', 'levels', '--workflow',
                     'REVIEW_EXISTING', '--status', 'PASS', '--outcome', 'REVIEWED_BASIC']
-            for check in ('config_schema', 'extension_static_integrity', 'source_semantics'):
+            args += ["--artifact", "basic_review=" + str(basic_report_fixture(project))]
+            for check in sorted(BASIC_CHECKS):
                 args += ['--check', check + '=PASS', '--evidence', check + '=' + str(project)]
             for check, priority in (('block_color', 'P1'), ('trailing_spaces', 'P2')):
                 args += ['--check', check + '=FAIL', '--priority', check + '=' + priority,

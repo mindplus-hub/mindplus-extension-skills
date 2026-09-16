@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from test_workflow import publish_fixture, host_ready_handoff, write_json, make_preflight, run_gitee, run_script, FAKE_TOKEN
+from test_workflow import publish_fixture, basic_handoff, write_json, make_preflight, run_gitee, run_script, FAKE_TOKEN
 import gitee_publish as pub
 
 
@@ -30,7 +30,7 @@ class PublicationRegressions(unittest.TestCase):
                 (project / "old.txt").unlink()
                 if pre_staged:
                     git("add", "-u", "--", "old.txt")
-                write_json(handoff, host_ready_handoff(project, authorized=True))
+                write_json(handoff, basic_handoff(project, authorized=True))
                 self.assertEqual(make_preflight(project, handoff, preflight).returncode, 0)
                 common = ["--preflight", str(preflight), "--state-dir", str(base / "state")]
                 for stage in (["plan"], ["commit", "--message", "delete obsolete"]):
@@ -49,6 +49,10 @@ class PublicationRegressions(unittest.TestCase):
                                 "--work-root", str(base), "--review-handoff", str(handoff),
                                 "--auth", "commit", "--auth", "push", "--run-id", "direct")
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            current = base / ".mindplus-agent/runs/direct/handoffs/REVIEW_EXISTING.json"
+            write_json(current, json.loads(handoff.read_text(encoding="utf-8")))
+            advanced = run_script("mpa.py", "transition", "--work-root", str(base), "--run-id", "direct")
+            self.assertEqual(advanced.returncode, 0, advanced.stdout)
             args = ["mpa.py", "handoff", "--work-root", str(base), "--run-id", "direct", "--workflow", "PUBLISH_GITEE",
                     "--status", "PASS", "--outcome", "PUSHED"]
             for check in ("review_gate_current", "publication_set_reviewed", "git_commit", "gitee_repository", "remote_ref_verified"):
@@ -56,7 +60,7 @@ class PublicationRegressions(unittest.TestCase):
             result = run_script(*args)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             recorded = json.loads((base / ".mindplus-agent/runs/direct/handoffs/PUBLISH_GITEE.json").read_text(encoding="utf-8"))
-            self.assertEqual(Path(recorded["input_provenance"]["path"]), handoff)
+            self.assertEqual(Path(recorded["input_provenance"]["path"]), current)
 
     def test_visibility_failure_preserves_verified_push_without_success_handoff(self):
         for response in ((403, {}), (200, {"private": True}), (200, {"private": False}), pub.StageBlocked({"reason_code": "NETWORK"})):

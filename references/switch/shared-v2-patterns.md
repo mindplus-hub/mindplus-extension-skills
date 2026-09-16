@@ -54,7 +54,9 @@ V1 注解中 `.defl="..."` 外层引号是注解语法，不是默认值本身�
   `generator.addCode(...)` 机械搬入 Python `func.js`。`addImport`/`addInit` 等区域 API 与积木
   位置的 `return code` 分工按 Python Topic 执行。
 
-## 颜色与图标门禁
+## 颜色与图标规范
+
+颜色和图标样式按 [issue-levels.md](../issue-levels.md) 列为 P1；缺少必需字段或资源导致加载失败才是 P0。下列样式目标不单独阻断构建或发布。
 
 - `getInfo()` 必须提供 `color1`、`color2`、`color3`，不能三个值相同；有 V1 `//% color="#xxxxxx"`
   时，`color1` 优先采用该值。
@@ -77,6 +79,10 @@ V1 注解中 `.defl="..."` 外层引号是注解语法，不是默认值本身�
 - 字符串元数据没有可验证描述时写 `""`；`meta.runtimeVersion` 没有实际 Runtime API 证据时写 `""`。`libraryConfig` 等必需数组使用 schema 的空数组默认值；`supportDevices`、`supportArch` 等结构型可选字段没有证据时省略，不能写一个会改变语义的空结构。
 - `config.json` 的严格字段、JSON 类型和固定值检查必须在唯一一次 Builder build 之前完成；检查失败时先修正或记录敏感节点，不用构建成功掩盖配置错误。
 
+## 二级菜单
+
+遇到 V1 `blockType="tag"` 二级标签文字时，按 [标签到二级菜单映射](v1-secondary-labels.md) 转换；空标签函数不生成真实功能积木。
+
 ## 翻译门禁
 
 - 扫描 V1 `_locales/`、`_menus/`、入口文件和双语 config；“V1 没有完整 locales”不等于“没有可迁移翻译证据”。
@@ -87,6 +93,4 @@ V1 注解中 `.defl="..."` 外层引号是注解语法，不是默认值本身�
 
 ## 硬边界
 
-`boardConfig` 不是 V2 扩展 `public/config.json` 顶层字段；不要因为旧说明或模型知识添加未在当前资料/Builder 中出现的字段。完整审核、目标代码编译、Mind+ 导入、上传和设备观察不属于本 Skill。
-
-遇到 V1 `blockType="tag"` 二级标签文字时，按 [标签到二级菜单映射](v1-secondary-labels.md) 转换；空标签函数不生成真实功能积木。
+`boardConfig` 不是 V2 扩展 `public/config.json` 顶层字段；不要因为旧说明或模型知识添加未在当前资料/Builder 中出现的字段。转换产物进入 Basic 检查构建、积木显示与代表性行为；上传和设备验收不属于本 Skill。

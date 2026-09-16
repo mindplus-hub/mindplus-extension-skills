@@ -17,3 +17,9 @@ CREATE_FRESH 与 CONVERT_FRESH 在 `mpa.py start` 冻结路径前，按实际运
 - UPGRADE_EXISTING、REVIEW_EXISTING、PUBLISH_GITEE 保留已有路径；fork 已有 V2 不为此自动改名。
 
 这是新建前的路径约束，不受 P1 命名建议豁免；空目录、来源隔离、模式支持范围和授权条件仍同时适用。
+
+## Lite 查重后的作者后缀
+
+路由后的 Lite 以同模式、同类型的 config.author + config.id 判同一库，并选用已有库／fork。只有 id 相同而 author 不同时，新文件夹使用 `ext2-<mode>-<库名称>-<作者id>`；中文作者转换为已确认的拼音，只追加一次后缀。保留四类模式前缀及 config.id。此约束不被 P1 命名建议豁免。
+
+目录变化发生在项目写入之前；已有运行保留记录，使用新路径重新 start，不改写旧请求。新远端默认沿用这个目录名；现存远端不自动改名。Lite 证据中的 original_folder/author/author_slug 由验证器核验与实际路径相符。

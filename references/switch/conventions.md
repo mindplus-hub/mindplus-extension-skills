@@ -63,14 +63,13 @@ CREATE 的作者来源与英文规范化见 [author-identity.md](author-identity
 本 Skill 面向从未做过扩展开发的用户，**不假设用户机器上存在任何示例项目或参考库**。
 编写扩展所需的全部知识来自 Skill 内置语料：generated/ 的官方 Wiki 事实、本词典、
 [block-organization.md](block-organization.md)、shared-v2-patterns 与各模式文档；
-内置语料有缺口时按 [official-corpus.md](official-corpus.md) 检索官方 Gitee 组织仓库。
+内置语料有缺口时按 [official-corpus.md](official-corpus.md) 检索 Gitee Topic 扩展仓库。
 
 1. 内置语料优先且通常足够；能用词典回答的问题不转引任何外部项目。
 2. 用户**主动提供**的示例项目/旧扩展可以作为 C2 证据参考（例如"参考这个 C4001 的组织方式"），
    此时采用的每条惯例必须在 run log / spec 里记录来源路径；未提供的不要去找、不要假设存在。
-3. 内置语料缺口的第一回退：按 official-corpus.md 协议检索官方组织
-   `gitee.com/mind-plus`（只读、带 provenance 存证，官方发布行为按 C2 记录）。
-   学到的可复用惯例（如新设备 ID）作为词典更新提案回填，运行中不改词典。
+3. 内置语料缺口的第一回退：按 official-corpus.md 协议检索带 `MindPlus-Ext2` Topic 的公开仓库
+   （只读、带 provenance 存证，按 C1 参考记录）。词典回填仍需 C2/C3 证据，运行中不改词典。
 4. 内置语料与官方仓库都不覆盖、用户也未提供参考时，停止为 `REFERENCE.UNSUPPORTED_TOPIC`，
    并把缺口转成一个具体的、零基础用户能回答的问题（例如"你的扩展需要限定哪些主控板？
    以下是内置清单…"），不得推断。

@@ -14,6 +14,7 @@ from urllib.parse import urlparse
 BASE = "https://resource.mindplus.top/mindplus/"
 MODES = {"rt": "realtime", "ul": "upload", "py": "python-block", "mpy": "micropython-block"}
 MAX_BYTES = 8 * 1024 * 1024
+PUBLICATION_TOPIC = "MindPlus-Ext2"
 
 
 class SafeRedirect(urllib.request.HTTPRedirectHandler):
@@ -148,14 +149,13 @@ def inspect(mode, kind, query, reader=fetch):
                                   "candidates": match_entries(entries, query)})
     except (OSError, ValueError) as exc:
         report["sources"].append({"url": url, "complete": False, "error": str(exc)})
-    repos = []
     complete = False
     try:
         for page in range(1, 11):
-            repo_url = f"https://gitee.com/api/v5/orgs/mind-plus/repos?page={page}&per_page=100"
+            repo_url = f"https://gitee.com/api/v5/search/repositories?q={PUBLICATION_TOPIC}&page={page}&per_page=100"
             batch, digest = reader(repo_url)
-            repos.extend(batch)
-            report["sources"].append({"url": repo_url, "sha256": digest, "complete": len(batch) < 100,
+            report["sources"].append({"url": repo_url, "sha256": digest, "scope": {"type": "topic", "name": PUBLICATION_TOPIC},
+                                      "complete": len(batch) < 100,
                                       "candidates": match_entries(batch, query)})
             if len(batch) < 100:
                 complete = True

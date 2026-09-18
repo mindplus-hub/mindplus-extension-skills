@@ -42,6 +42,17 @@ class ReviewLevelsTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             inspect("py", "device", {}, incomplete)
 
+    def test_lite_repository_discovery_uses_the_publication_topic(self):
+        seen = []
+        def complete(url):
+            seen.append(url)
+            return [], "a" * 64
+        report = inspect("ul", "extension", {"id": "sensor"}, complete)
+        self.assertEqual(report["status"], "CANDIDATES_READY")
+        topic_sources = [source for source in report["sources"] if "gitee.com" in source["url"]]
+        self.assertEqual(topic_sources[0]["scope"], {"type": "topic", "name": "MindPlus-Ext2"})
+        self.assertIn("/search/repositories?q=MindPlus-Ext2", seen[1])
+
     def test_lite_selection_cannot_waive_collision_or_fork(self):
         from hash_project import file_digest
         with tempfile.TemporaryDirectory() as tmp:

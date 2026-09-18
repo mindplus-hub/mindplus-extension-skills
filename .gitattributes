@@ -1,0 +1,3 @@
+# The bundled switch corpus is hash-pinned by manifest.json.  Git must not
+# rewrite its LF bytes on Windows checkouts.
+references/switch/generated/** text eol=lf

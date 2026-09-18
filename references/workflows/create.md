@@ -30,7 +30,7 @@ python scripts/switch/select_reference_topics.py --inventory <run_root>/record/s
 
    Require `PASS` from both; the adapter reports missing spec fields instead of inferring them. Load only the returned Topic paths.
 
-If the corpus is unavailable or does not cover a requested feature, first apply the official Gitee organization fallback defined in [conventions.md](../switch/conventions.md) and [official-corpus.md](../switch/official-corpus.md) (read-only search of `gitee.com/mind-plus` with provenance); only when that also fails (and no user-supplied reference exists) stop as `REFERENCE.UNSUPPORTED_TOPIC`; do not invent a Builder field or API.
+If the corpus is unavailable or does not cover a requested feature, first apply the Topic fallback defined in [conventions.md](../switch/conventions.md) and [official-corpus.md](../switch/official-corpus.md) (read-only search of public `MindPlus-Ext2` repositories with provenance); only when that also fails (and no user-supplied reference exists) stop as `REFERENCE.UNSUPPORTED_TOPIC`; do not invent a Builder field or API.
 
 ## Workflow
 

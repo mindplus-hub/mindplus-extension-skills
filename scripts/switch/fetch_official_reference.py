@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Read-only search and fetch from the official Mind+ Gitee organization (corpus fallback).
+"""Read-only search and fetch from public Gitee repositories carrying the MindPlus topic.
 
 Public GET endpoints only: no token, no login, no mutation. Downloaded files are data
 evidence with a provenance record; never execute fetched content.
@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import Any
 
 
-ORG = "mind-plus"
+PUBLICATION_TOPIC = "MindPlus-Ext2"
 API_BASE = "https://gitee.com/api/v5"
 RAW_BASE = "https://gitee.com"
 USER_AGENT = "mindplus-extension-skills/official-corpus-fallback"
@@ -53,8 +53,20 @@ def http_get_bytes(url: str) -> bytes:
         raise FetchError(f"GET failed: {url}: {exc}") from exc
 
 
+def split_repository(repo: str) -> tuple[str, str]:
+    parts = repo.split("/")
+    if len(parts) != 2 or any(not part or part in {".", ".."} for part in parts):
+        raise FetchError("repo must be an owner/repository path from the Topic search result")
+    return parts[0], parts[1]
+
+
+def repository_url(repo: str) -> str:
+    owner, name = split_repository(repo)
+    return f"{API_BASE}/repos/{urllib.parse.quote(owner, safe='')}/{urllib.parse.quote(name, safe='')}"
+
+
 def default_branch(repo: str) -> str:
-    detail = http_get_json(f"{API_BASE}/repos/{ORG}/{repo}")
+    detail = http_get_json(repository_url(repo))
     branch = detail.get("default_branch") if isinstance(detail, dict) else None
     return str(branch) if branch else "master"
 
@@ -68,7 +80,8 @@ def cmd_list(args: argparse.Namespace) -> int:
     reached_end = False
     try:
         while True:
-            batch = http_get_json(f"{API_BASE}/orgs/{ORG}/repos?page={page}&per_page=100")
+            query = urllib.parse.urlencode({"q": PUBLICATION_TOPIC, "page": page, "per_page": 100})
+            batch = http_get_json(f"{API_BASE}/search/repositories?{query}")
             if not isinstance(batch, list) or any(not isinstance(item, dict) for item in batch):
                 raise FetchError("Repository listing returned an invalid response; absence cannot be determined")
             repositories.extend(batch)
@@ -81,7 +94,7 @@ def cmd_list(args: argparse.Namespace) -> int:
 
     entries = [
         {
-            "name": item.get("path") or item.get("name"),
+            "name": item.get("full_name") or item.get("path") or item.get("name"),
             "description": item.get("description"),
             "url": item.get("html_url"),
             "updated_at": item.get("updated_at"),
@@ -94,7 +107,7 @@ def cmd_list(args: argparse.Namespace) -> int:
     return emit(
         {
             "status": "PASS",
-            "org": ORG,
+            "topic": PUBLICATION_TOPIC,
             "count": len(entries),
             "first_page": first_page,
             "last_page": page,
@@ -102,16 +115,16 @@ def cmd_list(args: argparse.Namespace) -> int:
             "complete": first_page == 1 and reached_end,
             "next_page": None if reached_end else page + 1,
             "repositories": entries,
-            "next_command": "python scripts/switch/fetch_official_reference.py tree --repo <name>  to locate config.json, then fetch",
+            "next_command": "python scripts/switch/fetch_official_reference.py tree --repo <owner/repo>  to locate config.json, then fetch",
         },
         0,
     )
 
 
 def cmd_tree(args: argparse.Namespace) -> int:
-    ref = args.ref or default_branch(args.repo)
     try:
-        listing = http_get_json(f"{API_BASE}/repos/{ORG}/{args.repo}/contents/{args.path}?ref={ref}")
+        ref = args.ref or default_branch(args.repo)
+        listing = http_get_json(f"{repository_url(args.repo)}/contents/{urllib.parse.quote(args.path, safe='/')}?ref={urllib.parse.quote(ref, safe='')}")
     except FetchError as exc:
         return emit({"status": "BLOCKED", "reason_code": "OFFICIAL_CORPUS.NETWORK", "error": str(exc)}, 2)
     if not isinstance(listing, list):
@@ -140,9 +153,11 @@ def safe_evidence_name(repo: str, path: str) -> str:
 
 
 def cmd_fetch(args: argparse.Namespace) -> int:
-    ref = args.ref or default_branch(args.repo)
-    raw_url = f"{RAW_BASE}/{ORG}/{args.repo}/raw/{ref}/{args.path}"
     try:
+        ref = args.ref or default_branch(args.repo)
+        owner, name = split_repository(args.repo)
+        raw_url = "/".join((RAW_BASE, urllib.parse.quote(owner, safe=''), urllib.parse.quote(name, safe=''), "raw",
+                              urllib.parse.quote(ref, safe=''), urllib.parse.quote(args.path, safe='/')))
         content = http_get_bytes(raw_url)
     except FetchError as exc:
         return emit({"status": "BLOCKED", "reason_code": "OFFICIAL_CORPUS.NETWORK", "error": str(exc)}, 2)
@@ -158,8 +173,8 @@ def cmd_fetch(args: argparse.Namespace) -> int:
     sha256 = hashlib.sha256(content).hexdigest()
     provenance = {
         "schema_version": 1,
-        "source": "official-gitee-org",
-        "org": ORG,
+        "source": "gitee-topic",
+        "topic": PUBLICATION_TOPIC,
         "repo": args.repo,
         "path": args.path,
         "ref": ref,
@@ -197,19 +212,19 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    list_parser = subparsers.add_parser("list", help="List official organization repositories")
+    list_parser = subparsers.add_parser("list", help="List public repositories found by the MindPlus extension Topic")
     list_parser.add_argument("--search", help="Client-side filter by name/description substring")
     list_parser.add_argument("--page", type=int, help="Single page to fetch (default: paginate up to 10 pages)")
     list_parser.set_defaults(handler=cmd_list)
 
     tree_parser = subparsers.add_parser("tree", help="List one repository directory")
-    tree_parser.add_argument("--repo", required=True)
+    tree_parser.add_argument("--repo", required=True, help="owner/repository returned by list")
     tree_parser.add_argument("--path", default="")
     tree_parser.add_argument("--ref")
     tree_parser.set_defaults(handler=cmd_tree)
 
     fetch_parser = subparsers.add_parser("fetch", help="Download one file with a provenance record")
-    fetch_parser.add_argument("--repo", required=True)
+    fetch_parser.add_argument("--repo", required=True, help="owner/repository returned by list")
     fetch_parser.add_argument("--path", required=True)
     fetch_parser.add_argument("--ref")
     fetch_parser.add_argument("--evidence-dir", required=True, type=Path)

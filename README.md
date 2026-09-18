@@ -171,6 +171,10 @@ $mindplus-extension-skills 检查 extensions/v2-demo 的配置和资源引用，
 
 ## 版本更新
 
+- V0.3.7
+   - Gitee 候选范围改为全站 `MindPlus-Ext2` Topic
+   - 引用语料包固定使用 LF 检出，避免 Windows 自动换行导致 manifest 哈希校验失败
+
 - V0.3.6
    - 审核分为开发前 Lite 查重与产物完成后的 Basic 审核，独立发布也须通过 Basic
    - 发布各阶段重新核验源码、ZIP 和证据摘要，防止复用失效审核结果

@@ -24,7 +24,7 @@
     "dev-DFRobot-unihikerK10": {"observed_version_specs": ["^0.0.1"], "evidence": {"verified_projects": ["ext2-BLESerial", "ext2-emsmartfarm", "ext2-espnow"]}}
   },
   "version_spec_format": "^<major>.<minor>.<patch> (all verified entries and the official docs example use ^0.0.1)",
-  "unknown_device_recovery": "Pick boards from this dictionary by board name. If the user's target board is not listed: (1) search the official mind-plus Gitee organization for an extension supporting that board and read its config.json supportDevices (official-corpus.md protocol, C2-official evidence); (2) ask the user for the exact dev-DFRobot-... ID (visible in Mind+ or its official docs); (3) scope by architecture instead via supportArch, or omit supportDevices for a whole-arch extension. Never invent or approximate an ID, and propose the verified new entry as a dictionary update afterwards.",
+  "unknown_device_recovery": "Pick boards from this dictionary by board name. If the user's target board is not listed: (1) search public Gitee repositories with the MindPlus-Ext2 Topic for an extension supporting that board and read its config.json supportDevices (official-corpus.md protocol, C1 reference; require C2/C3 before dictionary updates); (2) ask the user for the exact dev-DFRobot-... ID (visible in Mind+ or its official docs); (3) scope by architecture instead via supportArch, or omit supportDevices for a whole-arch extension. Never invent or approximate an ID, and propose the verified new entry as a dictionary update afterwards.",
   "sku_format": {
     "empty": "No DFRobot SKU product (communication/board extensions): use \"\".",
     "single": "One SKU code, e.g. \"SEN0237\".",

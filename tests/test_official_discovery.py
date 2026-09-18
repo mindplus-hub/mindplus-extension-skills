@@ -20,6 +20,7 @@ class OfficialDiscoveryTests(unittest.TestCase):
         with patch.object(discovery, "http_get_json", side_effect=batches) as request:
             with contextlib.redirect_stdout(output):
                 code = discovery.cmd_list(argparse.Namespace(page=page, search="target"))
+            self.request_urls = [call.args[0] for call in request.call_args_list]
         return code, json.loads(output.getvalue()), request.call_count
 
     def test_full_pagination_finds_later_match(self):
@@ -29,6 +30,8 @@ class OfficialDiscoveryTests(unittest.TestCase):
         self.assertEqual(result["count"], 1)
         self.assertTrue(result["complete"])
         self.assertIsNone(result["next_page"])
+        self.assertEqual(result["topic"], "MindPlus-Ext2")
+        self.assertIn("/search/repositories?q=MindPlus-Ext2", self.request_urls[0])
 
     def test_page_cap_is_not_proof_of_absence(self):
         code, result, calls = self.lookup([[{"path": "other"}] * 100] * 10)
@@ -38,7 +41,7 @@ class OfficialDiscoveryTests(unittest.TestCase):
         self.assertFalse(result["complete"])
         self.assertEqual(result["next_page"], 11)
 
-    def test_single_later_page_does_not_cover_organization(self):
+    def test_single_later_page_does_not_cover_the_topic(self):
         _, result, calls = self.lookup([[]], page=11)
         self.assertEqual(calls, 1)
         self.assertTrue(result["reached_end"])
@@ -51,6 +54,13 @@ class OfficialDiscoveryTests(unittest.TestCase):
                 self.assertNotEqual(code, 0)
                 self.assertEqual(result["status"], "BLOCKED")
                 self.assertNotIn("repositories", result)
+
+    def test_tree_rejects_a_repository_without_owner(self):
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            code = discovery.cmd_tree(argparse.Namespace(repo="not-a-full-name", path="", ref="main"))
+        self.assertNotEqual(code, 0)
+        self.assertEqual(json.loads(output.getvalue())["reason_code"], "OFFICIAL_CORPUS.NETWORK")
 
 
 if __name__ == "__main__":

@@ -182,6 +182,11 @@ def read_location(location: str, max_bytes: int) -> tuple[bytes, str, bool]:
                 final = response.geturl()
         except OSError as exc:
             raise ReferenceError(f"release download failed: {exc}") from exc
+        # urlopen follows redirects silently, so a 302 to plain HTTP would let a
+        # MITM rewrite latest.json and the bundle digest it carries. The bytes are
+        # only evidence if the whole transfer stayed on HTTPS.
+        if urllib.parse.urlparse(final).scheme != "https":
+            raise ReferenceError(f"release download left HTTPS: {final}")
         remote = True
     else:
         raise ReferenceError(f"release location must be HTTPS or a local test path: {location}")

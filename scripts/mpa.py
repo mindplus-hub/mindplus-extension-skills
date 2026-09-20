@@ -393,10 +393,9 @@ def cmd_handoff(args: argparse.Namespace) -> int:
     for check_id, joined in parse_pairs(args.evidence, "evidence", errors):
         evidence_by_id[check_id] = [part.strip() for part in joined.split(",") if part.strip()]
 
-    forgery: list[str] = []
+    # A PASS without --evidence is rejected by validate_handoff_data below, which
+    # is the single authoritative gate for that contract; do not duplicate it here.
     for check_id, result in results_by_id.items():
-        if result == "PASS" and check_id not in optional and not evidence_by_id.get(check_id):
-            forgery.append(f"required check {check_id} is PASS without --evidence; add --evidence {check_id}=<path>")
         checks.append(
             {
                 "id": check_id,

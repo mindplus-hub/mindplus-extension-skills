@@ -6,7 +6,7 @@ import zipfile
 from pathlib import Path
 from unittest.mock import patch
 
-from test_workflow import basic_report_fixture, basic_handoff, run_script, write_json, FAKE_TOKEN
+from test_workflow import basic_report_fixture, basic_handoff, run_script, run_switch_script, write_json, FAKE_TOKEN
 from check_basic_review import verify_file, package_facts, EVIDENCE_CHECKS
 from check_lite_review import match_entries, collision_folder, inspect, verify_selection
 from route_workflow import route, read_json, REGISTRY_PATH
@@ -152,6 +152,50 @@ class ReviewLevelsTests(unittest.TestCase):
                 with self.assertRaises(publish.StageBlocked) as ctx:
                     publish.context(args)
                 self.assertIn("BASIC_NOT_READY", str(ctx.exception.payload))
+
+
+    def test_basic_cli_refuses_a_report_that_never_passed(self):
+        # The CLI used to call verify() directly, so a content-complete report
+        # that still read BLOCKED was rewritten to PASS and accepted.
+        with tempfile.TemporaryDirectory() as tmp:
+            project = Path(tmp)
+            report_path = basic_report_fixture(project)
+            report = json.loads(report_path.read_text(encoding="utf-8"))
+            report["status"] = "BLOCKED"
+            write_json(report_path, report)
+            output = Path(tmp) / "basic-review.json"
+            completed = run_script(
+                "check_basic_review.py",
+                "--project-root", str(project),
+                "--evidence", str(report_path),
+                "--output", str(output),
+            )
+            self.assertEqual(completed.returncode, 2, completed.stderr or completed.stdout)
+            result = json.loads(completed.stdout)
+            self.assertEqual(result["status"], "BLOCKED")
+            self.assertIn("has not passed", result["error"])
+            self.assertNotEqual(json.loads(output.read_text(encoding="utf-8"))["status"], "PASS")
+
+    def test_switch_log_update_refuses_an_event_that_forges_lines(self):
+        # --event is appended as a whole log line; an embedded newline would let a
+        # caller inject entries into the run log that Basic later cites as evidence.
+        with tempfile.TemporaryDirectory() as tmp:
+            log = Path(tmp) / "log.md"
+            log.write_text(
+                "# MindPlus-Switch Run Log\n\n- current_step: S-1 OPEN_RUN_LOG\n\n"
+                "## Checkpoints\n\n- [ ] S2 LOAD_REFERENCES\n",
+                encoding="utf-8",
+            )
+            completed = run_switch_script(
+                "update_run_log.py",
+                "--log", str(log),
+                "--step", "S2",
+                "--result", "PASS",
+                "--event", "ok\n- [x] S3 forged entry",
+            )
+            self.assertEqual(completed.returncode, 2, completed.stdout)
+            self.assertIn("newlines", json.loads(completed.stdout)["error"])
+            self.assertNotIn("forged entry", log.read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":

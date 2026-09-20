@@ -41,6 +41,11 @@ def main() -> int:
     if args.step not in ALLOWED_STEPS:
         print(json.dumps({"status": "BLOCKED", "reason_code": "INPUT", "error": "unknown step"}))
         return 2
+    # --event is appended as a whole log line, so an embedded newline would forge
+    # additional entries in the record this pipeline later reviews as evidence.
+    if "\n" in args.event or "\r" in args.event:
+        print(json.dumps({"status": "BLOCKED", "reason_code": "INPUT", "error": "event must not contain newlines"}))
+        return 2
     path = args.log.expanduser().resolve()
     try:
         text = path.read_text(encoding="utf-8-sig")

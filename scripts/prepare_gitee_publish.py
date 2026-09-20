@@ -28,12 +28,18 @@ def emit(value: dict, output: Path | None) -> None:
 
 
 def git(project: Path, *arguments: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        ["git", "-c", f"safe.directory={project.as_posix()}", "-C", str(project), *arguments],
-        text=True,
-        capture_output=True,
-        check=False,
-    )
+    try:
+        return subprocess.run(
+            ["git", "-c", f"safe.directory={project.as_posix()}", "-C", str(project), *arguments],
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=120,
+        )
+    except subprocess.TimeoutExpired as exc:
+        # Reported as OSError so callers keep their existing structured handling
+        # instead of crashing with a traceback on a hung git.
+        raise OSError(f"git {arguments[0] if arguments else ''} timed out after 120s") from exc
 
 
 def main() -> int:

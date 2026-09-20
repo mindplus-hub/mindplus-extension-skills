@@ -118,23 +118,6 @@ git clone https://gitee.com/mind-plus/mindplus-extension-skills.git ".claude/ski
 先整理规格并完成创建和基础检查，不发布。
 ```
 
-### ZCode
-
-用户主目录下的相对安装目录为 `.zcode/skills/mindplus-extension-skills/`。在用户主目录中执行：
-
-```powershell
-New-Item -ItemType Directory -Force ".zcode/skills" | Out-Null
-git clone https://gitee.com/mind-plus/mindplus-extension-skills.git ".zcode/skills/mindplus-extension-skills"
-```
-
-安装后进入 **设置 → 技能 → 刷新**，确认已启用；在对话中输入 `$` 选择：
-
-```text
-$mindplus-extension-skills 检查 extensions/v2-demo 的配置和资源引用，使用 BASIC。
-```
-
-如果已在 Codex 或 Claude Code 安装，也可以从 ZCode 的 **设置 → 技能 → 导入** 扫描外部技能，并选择复制或软链接；复制为独立副本，软链接需要来源目录持续可用。见 [ZCode 官方技能文档](https://zcode.z.ai/cn/docs/skill)。
-
 ### Others：其他 Agent
 
 支持 Agent Skills 目录的工具，可以按其文档将完整目录放入技能搜索路径；不同工具的目录和调用符号可能不同，不要默认都使用 `.claude/skills` 或 `$`。
@@ -170,6 +153,15 @@ $mindplus-extension-skills 检查 extensions/v2-demo 的配置和资源引用，
 自更新会按安装布局选择 ZIP，并核对同名 `.zip.sha256` 文件；下载或校验失败不会安装。Release 的通用源码包保留原目录结构。
 
 ## 版本更新
+
+- V0.3.8
+   - 运行日志更新拒绝含换行的 `--event`，防止伪造被审核引用的记录行
+   - Basic 审核命令补上与 `verify_file` 一致的状态门，未通过的报告不再被改写为 PASS
+   - 引用发布包下载后核验最终地址仍为 HTTPS，阻止重定向降级替换清单
+   - 运行记录 `run.json` 改为原子写入，中断不再留下失效的截断记录
+   - Git 探测与 Windows 隐藏属性调用增加超时，避免挂起阻塞整个流程
+   - 移除 `mpa.py` 中与交接校验重复的伪造 PASS 检测，避免两处判定分叉
+   - 补充日志注入与 Basic 状态门的回归用例
 
 - V0.3.7
    - Gitee 候选范围改为全站 `MindPlus-Ext2` Topic

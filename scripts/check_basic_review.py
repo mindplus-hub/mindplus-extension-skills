@@ -92,11 +92,16 @@ def verify(project, report):
     return facts
 
 
-def verify_file(project, path):
-    regular_file(path)
-    report = json.loads(path.read_text(encoding="utf-8-sig"))
+def require_passed(report):
+    """A BASIC report only authorizes publication once it already reads PASS."""
     if not isinstance(report, dict) or report.get("status") != "PASS":
         raise ValueError("BASIC review has not passed")
+    return report
+
+
+def verify_file(project, path):
+    regular_file(path)
+    report = require_passed(json.loads(path.read_text(encoding="utf-8-sig")))
     return verify(project, report)
 
 
@@ -107,7 +112,7 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     try:
-        report = json.loads(args.evidence.read_text(encoding="utf-8-sig"))
+        report = require_passed(json.loads(args.evidence.read_text(encoding="utf-8-sig")))
         facts = verify(args.project_root, report)
         report.update(status="PASS", artifact=facts)
         report["checks"]["package_size"] = {"result": "PASS", "size_bytes": facts["size_bytes"], "max_bytes": MAX_PACKAGE_BYTES}

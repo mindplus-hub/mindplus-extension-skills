@@ -25,9 +25,17 @@ class RunError(RuntimeError):
 
 
 def hide_path(path: Path) -> None:
-    """Hide run-record directories on Windows so work roots stay uncluttered."""
-    if os.name == "nt":
-        subprocess.run(["attrib", "+h", str(path)], capture_output=True, check=False)
+    """Hide run-record directories on Windows so work roots stay uncluttered.
+
+    Cosmetic only: a missing or hanging ``attrib`` must never abort run
+    initialization, so the timeout is bounded and every failure is swallowed.
+    """
+    if os.name != "nt":
+        return
+    try:
+        subprocess.run(["attrib", "+h", str(path)], capture_output=True, check=False, timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        pass
 
 
 def read_bytes(path: Path) -> bytes:
@@ -137,8 +145,13 @@ def initialize_run(
         "current_workflow": route.get("workflows", [None])[0] if route.get("workflows") else None,
         "authorizations": request.get("authorizations", {}),
     }
-    with run_file.open("w", encoding="utf-8", newline="\n") as output_handle:
+    # Write through a sibling temp file and rename: a crash mid-write would
+    # otherwise leave a truncated run.json, and the idempotency branch that
+    # re-reads this file would then raise RunError forever.
+    temporary = run_file.with_name(run_file.name + ".tmp")
+    with temporary.open("w", encoding="utf-8", newline="\n") as output_handle:
         output_handle.write(json.dumps(run, ensure_ascii=False, indent=2) + "\n")
+    os.replace(temporary, run_file)
     hide_path(run_root.parent)
     hide_path(run_root)
     return {"status": "PASS", "run_id": run_id, "run_root": str(run_root), "run_file": str(run_file)}

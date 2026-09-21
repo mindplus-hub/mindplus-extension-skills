@@ -154,6 +154,10 @@ git clone https://gitee.com/mind-plus/mindplus-extension-skills.git ".claude/ski
 
 ## 版本更新
 
+- V0.3.9
+   - 更新流程结构图
+   - `.gitignore` 补充
+
 - V0.3.8
    - 运行日志更新拒绝含换行的 `--event`，防止伪造被审核引用的记录行
    - Basic 审核命令补上与 `verify_file` 一致的状态门，未通过的报告不再被改写为 PASS

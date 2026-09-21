@@ -93,10 +93,24 @@ def verify(project, report):
 
 
 def require_passed(report):
-    """A BASIC report only authorizes publication once it already reads PASS."""
-    if not isinstance(report, dict) or report.get("status") != "PASS":
-        raise ValueError("BASIC review has not passed")
-    return report
+    """A BASIC report only authorizes publication once it already reads PASS.
+
+    The check is fail-closed on an explicit top-level ``status``; it is never
+    inferred from the eight checks. Report the actual reason so a missing field
+    is not mistaken for a failed review.
+    """
+    if not isinstance(report, dict):
+        raise ValueError(f'BASIC evidence must be a JSON object, not {type(report).__name__}')
+    status = report.get("status")
+    if status == "PASS":
+        return report
+    if status is None:
+        raise ValueError(
+            'BASIC evidence is missing the top-level "status" field; this validator is fail-closed and '
+            'requires an explicit "status": "PASS" in the input file (the eight checks alone are not enough)'
+        )
+    detail = ", ".join(f"{key}={report[key]!r}" for key in ("reason_code", "error") if report.get(key))
+    raise ValueError(f'BASIC evidence status is {status!r}, expected "PASS"' + (f" ({detail})" if detail else ""))
 
 
 def verify_file(project, path):

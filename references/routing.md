@@ -32,6 +32,8 @@ Request facts, matching [contracts/route-request.schema.json](contracts/route-re
 
 There is exactly one implementation of the routing rules: the branch chain in `scripts/route_workflow.py` over the facts above, backed by [workflow-registry.json](workflow-registry.json). This file deliberately keeps no parallel rule table or goal-to-workflow examples; when prose and script disagree, the script wins. The wizard prints a fix hint (`next_command`) for every blocked reason code, and `ROUTE_FIX` in `scripts/mpa.py` is the authoritative recovery text.
 
+Invoke scripts through their documented CLI contracts and treat the printed JSON as the result; do not read script sources to understand or verify behavior — that costs many rounds and changes nothing. Read `--help` when a flag is unclear, and read `reason_code` before anything else when a call fails: it names the recovery text the wizard already returned in `next_command`. Only a `reason_code` with no `next_command` justifies looking further.
+
 The script checks goals, path existence and emptiness, and the authorization gates. It does not inspect V1 block semantics, load Builder references, validate a review handoff, or access Gitee.
 
 ## Reason-code index
@@ -49,6 +51,7 @@ Blocked or waiting results carry one of these codes; the wizard prints the recov
 | `INPUT.V1_SOURCE_NOT_FOUND` / `INPUT.REVIEW_HANDOFF_NOT_FOUND` | supplied path does not exist |
 | `WORKSPACE.PROJECT_ROOT_NOT_DIRECTORY` / `WORKSPACE.TARGET_NOT_EMPTY` / `WORKSPACE.PROJECT_PARENT_NOT_FOUND` / `WORKSPACE.EXISTING_PROJECT_REQUIRED` | unusable project_root facts |
 | `WORKSPACE.PROJECT_NAME_PREFIX_REQUIRED` | fresh project directory lacks lowercase `ext2-` or a nonempty suffix; correct the target before starting |
+| `WORKSPACE.WORK_ROOT_MISSING` | `--work-root` does not exist; create it (it may be empty) before `start` |
 | `INPUT.INVALID_ROUTE_REQUEST` | malformed request (wrong types or unknown fields) |
 
 ## Route result

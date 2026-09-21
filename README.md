@@ -154,6 +154,14 @@ git clone https://gitee.com/mind-plus/mindplus-extension-skills.git ".claude/ski
 
 ## 版本更新
 
+- V0.3.10
+   - 审核新增“报告优先”分支：只要问题清单时输出发现与未执行项，不强制产出 REVIEWED_BASIC
+   - 明确更新后只重载入口文件、脚本按 CLI 契约直接调用，避免复读文档与脚本源码
+   - Basic 观察类检查给出默认操作程序与“先判环境、再取证”的顺序，构建产物可按源码摘要复用
+   - 补充八项证据 JSON 完整骨架与 handoff 示例命令
+   - “报告优先”给出明确触发与退出条件，使用仅审核路径的 `REPORTED_FINDINGS` 终态交接并自动保留证据；后续完整 Basic 可复用仍然有效的静态检查
+   - Basic 证据 JSON Schema 将顶层 `status` 设为必填，避免 Schema 通过后被 CLI 拒绝
+
 - V0.3.9
    - 更新流程结构图
    - `.gitignore` 补充

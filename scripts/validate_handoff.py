@@ -50,6 +50,12 @@ AUTHORIZATION_FIELDS = {
     "device_upload",
 }
 CHECK_RESULTS = {"PASS", "FAIL", "NOT_RUN", "ACCEPTED_LIMITATION", "CARRIED_RISK"}
+REPORT_FIRST_OUTCOME = "REPORTED_FINDINGS"
+REPORT_FIRST_STATIC_CHECKS = frozenset(
+    {"config_schema", "extension_static_integrity", "source_semantics", "malicious_code_review"}
+)
+REPORT_FIRST_SKIPPED_CHECKS = frozenset({"blocks_visible", "blocks_functional", "package_size"})
+
 CREDENTIAL_URL_RE = re.compile(r"[a-z][a-z0-9+.-]*://[^/\s:@]+:[^@\s/]+@", re.IGNORECASE)
 
 
@@ -92,6 +98,8 @@ def validate(data: dict[str, Any], require_outcome: str | None, check_artifacts:
 
     state = data.get("state")
     status = data.get("status")
+    is_report_first = data.get("outcome") == REPORT_FIRST_OUTCOME
+
     if state not in {"RUNNING", "WAITING_USER", "TERMINAL"}:
         errors.append(f"invalid state: {state!r}")
     if status not in {"NOT_RUN", "PASS", "FAIL", "BLOCKED"}:
@@ -168,13 +176,20 @@ def validate(data: dict[str, Any], require_outcome: str | None, check_artifacts:
             evidence = check.get("evidence")
             if (
                 status == "PASS"
+                and not is_report_first
                 and check.get("required") is True
                 and check.get("result") == "PASS"
                 and not (isinstance(evidence, list) and evidence)
             ):
                 errors.append(f"passing required check has no evidence: {check_id}")
-            if check.get("required") is True and status == "PASS" and check.get("result") != "PASS":
+            if (
+                status == "PASS"
+                and not is_report_first
+                and check.get("required") is True
+                and check.get("result") != "PASS"
+            ):
                 errors.append(f"passing handoff has non-passing required check: {check_id}")
+
 
     if workflow in {"CREATE_FRESH", "CONVERT_FRESH", "UPGRADE_EXISTING"} and status == "PASS":
         check = checks_by_id.get("lite_source_selection", {})
@@ -201,18 +216,66 @@ def validate(data: dict[str, Any], require_outcome: str | None, check_artifacts:
             check = checks_by_id.get(check_id, {})
             if check.get("required") is not True or check.get("result") != "PASS" or not check.get("evidence"):
                 errors.append(f"BASIC review requires evidenced PASS: {check_id}")
+    if is_report_first:
+        if workflow != "REVIEW_EXISTING" or state != "TERMINAL" or status != "PASS":
+            errors.append("REPORTED_FINDINGS requires a TERMINAL/PASS review")
+        if data.get("next") != []:
+            errors.append("REPORTED_FINDINGS is only valid for a review-only run")
+        def require_report_evidence(check_id: str, evidence: list[Any]) -> None:
+            if not check_artifacts:
+                return
+            for item in evidence:
+                path = Path(item).expanduser() if isinstance(item, str) else None
+                if path is None or not path.is_absolute() or not path.is_file():
+                    errors.append(f"report-first evidence must be an absolute file: {check_id}")
+
+        for check_id in sorted(REPORT_FIRST_STATIC_CHECKS):
+            check = checks_by_id.get(check_id, {})
+            result = check.get("result")
+            evidence = check.get("evidence")
+            if result not in {"PASS", "FAIL"} or not (isinstance(evidence, list) and evidence):
+                errors.append(f"report-first requires evidenced PASS or FAIL: {check_id}")
+            else:
+                require_report_evidence(check_id, evidence)
+                if result == "PASS" and check.get("required") is not True:
+                    errors.append(f"report-first PASS gate must be required: {check_id}")
+                elif result == "FAIL" and check.get("priority") != "P0":
+                    errors.append(f"report-first failed gate must be P0: {check_id}")
+        build = checks_by_id.get("builder_build", {})
+        build_result = build.get("result")
+        build_evidence = build.get("evidence")
+        if build_result not in {"PASS", "FAIL", "NOT_RUN"}:
+            errors.append("report-first builder_build must be PASS, FAIL, or NOT_RUN")
+        elif build_result == "NOT_RUN" and build.get("required") is not False:
+            errors.append("report-first deferred builder_build must be optional")
+        elif build_result != "NOT_RUN" and not (isinstance(build_evidence, list) and build_evidence):
+            errors.append("report-first executed builder_build needs evidence")
+        else:
+            if build_result != "NOT_RUN":
+                require_report_evidence("builder_build", build_evidence)
+            if build_result == "FAIL" and build.get("priority") != "P0":
+                errors.append("report-first failed builder_build must be P0")
+        for check_id in sorted(REPORT_FIRST_SKIPPED_CHECKS):
+            check = checks_by_id.get(check_id, {})
+            if check.get("result") != "NOT_RUN" or check.get("required") is not False:
+                errors.append(f"report-first must defer {check_id} as optional NOT_RUN")
+
 
     if workflow in {"REVIEW_EXISTING", "PUBLISH_GITEE"} and status == "PASS":
-        if workflow == "REVIEW_EXISTING" and data.get("outcome") != "REVIEWED_BASIC":
-            errors.append("Review requires a complete REVIEWED_BASIC result")
-        reports = [a for a in data.get("artifacts", []) if a.get("kind") == "basic_review"]
-        if len(reports) != 1:
-            errors.append("BASIC requires exactly one basic_review artifact")
-        elif check_artifacts and project:
-            try:
-                verify_basic(project, Path(reports[0]["path"]))
-            except (OSError, ValueError, KeyError, TypeError) as exc:
-                errors.append(f"BASIC report invalid: {exc}")
+        if workflow == "REVIEW_EXISTING" and is_report_first:
+            pass
+        else:
+            if workflow == "REVIEW_EXISTING" and data.get("outcome") != "REVIEWED_BASIC":
+                errors.append("Review requires a complete REVIEWED_BASIC result")
+            reports = [a for a in data.get("artifacts", []) if a.get("kind") == "basic_review"]
+            if len(reports) != 1:
+                errors.append("BASIC requires exactly one basic_review artifact")
+            elif check_artifacts and project:
+                try:
+                    verify_basic(project, Path(reports[0]["path"]))
+                except (OSError, ValueError, KeyError, TypeError) as exc:
+                    errors.append(f"BASIC report invalid: {exc}")
+
 
     if data.get("outcome") == "TOKEN_REQUIRED":
         if workflow not in {"PUBLISH_GITEE", "UPGRADE_EXISTING"}:
@@ -237,6 +300,10 @@ def validate(data: dict[str, Any], require_outcome: str | None, check_artifacts:
                 errors.append(f"artifact path must be absolute: {artifact['path']}")
             elif check_artifacts and not artifact_path.exists():
                 errors.append(f"artifact does not exist: {artifact_path}")
+    if is_report_first and isinstance(artifacts, list) and any(
+        isinstance(artifact, dict) and artifact.get("kind") == "basic_review" for artifact in artifacts
+    ):
+        errors.append("REPORTED_FINDINGS must not contain a basic_review artifact")
 
     if check_artifacts and project is not None and not project.is_dir():
         errors.append(f"project_root does not exist: {project}")

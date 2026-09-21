@@ -28,7 +28,7 @@
 
 ## 保留、恢复与旧记录
 
-- 需要事后分析时，在父任务 start 使用 `--keep-evidence`，或在最终 transition 指定该选项。现有完成清理策略不变：未保留的成功父任务会连同其子记录清理；失败和等待任务保留。清理结果是**核实过的**：删除后重新检查目录，Windows 因占用或只读项拒绝删除时不谎报成功，而是返回 `RECORDS.CLEANUP_INCOMPLETE`、保留 `run_root` 并给出 `mpa.py clean --force` 恢复命令。手动 `mpa.py clean` 会删除证据，分析前不要执行。
+- 需要事后分析时，在父任务 start 使用 `--keep-evidence`，或在最终 transition 指定该选项。`REPORTED_FINDINGS` 终态会自动保留审查证据；其他未保留的成功父任务会连同其子记录清理，失败和等待任务保留。清理结果是**核实过的**：删除后重新检查目录，Windows 因占用或只读项拒绝删除时不谎报成功，而是返回 `RECORDS.CLEANUP_INCOMPLETE`、保留 `run_root` 并给出 `mpa.py clean --force` 恢复命令。手动 `mpa.py clean` 会删除证据，分析前不要执行。
 - 无父任务的独立转换收进 conversions；`clean --all` 同时识别独立转换与旧 `.ms`。运行中记录需按原有 force 规则处理。
 - 历史 `.ms/<id>` 不自动移动或复制，避免破坏既有绝对路径及哈希。继续旧任务时沿用原日志与证据路径；父 handoff 可用 `--artifact legacy_conversion_log=<旧日志绝对路径>` 显式关联。新任务不再创建 `.ms`。
 - `.mindplus-agent` 与旧 `.ms` 都从源码扫描、项目哈希和发布文件集合排除；不要在记录里保存令牌或私有源码全文。

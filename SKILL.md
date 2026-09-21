@@ -1,7 +1,7 @@
 ---
 name: mindplus-extension-skills
 metadata:
-  version: "0.3.9"
+  version: "0.3.10"
 description: Create, upgrade or freshly convert Mind+ V2 extensions, check existing sources with Lite duplicate discovery, perform Basic pre-publication review, and publish authorized projects to Gitee.
 ---
 
@@ -12,7 +12,7 @@ Create, convert or upgrade an extension, review its artifact, then publish if au
 ## Entry and routing
 
 1. Every new task, including a simple question, starts with [skill-update.md](references/skill-update.md). Reuse the completed check within the active task; retain explicit offline/pinned exceptions. After updating, reload this entry. Questions then use only relevant references and receive a direct answer without a lifecycle run.
-2. For project work read [routing.md](references/routing.md). Fresh CREATE/CONVERT uses an absent or empty `ext2-<mode>-<name>` directory per [project-naming.md](references/project-naming.md). Start `scripts/mpa.py` with the known request and existing authorization.
+2. For project work read [routing.md](references/routing.md). Fresh CREATE/CONVERT uses an absent or empty `ext2-<mode>-<name>` directory per [project-naming.md](references/project-naming.md). Start `scripts/mpa.py` with the known request and existing authorization. Invoke scripts by their documented CLI contracts and use the printed JSON as the result — do not read script sources to understand or verify behavior; `--help`, `reason_code` and `next_command` are the contract.
 3. Load only the selected leaf. At CREATE/CONVERT/UPGRADE entry, perform **Lite** [source discovery](references/official-repository-discovery.md) before source-dependent writes. Check the appropriate official JSON and Gitee repositories; within the same mode and type, matching config.author + config.id uses an existing base or authorized fork; an id-only collision adds the author suffix (Chinese in pinyin) to the new folder. A changed base/path requires a new immutable route request.
 4. Complete the producer, then **Basic** [pre-publication review](references/review-basic.md). The router also inserts Basic before standalone publication. Reuse current checks; do not repeat builds or observations with unchanged scope and artifacts. Follow `next_command`, `handoff`, `transition` and `resume`.
 
@@ -32,4 +32,4 @@ Create, convert or upgrade an extension, review its artifact, then publish if au
 - Review does not modify extension source. Authorized builds and checks may write artifacts and evidence. Source fixes belong to development and require affected checks again. Build/push success does not prove physical device behavior.
 - Publishing requires authorization and token presence, then current Basic evidence, exact staged content, secret/target checks, fast-forward push, remote-ref, visibility and Topic verification. Never record credentials. Creating or converting alone does not authorize publication.
 
-Before handoff read [handoff.md](references/handoff.md); claims follow [evidence.md](references/evidence.md). Report achieved checks, P0/P1/P2, missing verification, artifact size and actual external actions. Successful runs clean hidden records unless `--keep-evidence` is requested; failed/waiting runs retain them. Never claim deleted evidence remains available. Cleanup failure is `RECORDS.CLEANUP_INCOMPLETE`.
+Before handoff read [handoff.md](references/handoff.md); claims follow [evidence.md](references/evidence.md). Report achieved checks, P0/P1/P2, missing verification, artifact size and actual external actions. Successful runs other than terminal `REPORTED_FINDINGS` clean hidden records unless `--keep-evidence` is requested; terminal `REPORTED_FINDINGS` retains evidence automatically; failed/waiting runs retain them. Never claim deleted evidence remains available. Cleanup failure is `RECORDS.CLEANUP_INCOMPLETE`.

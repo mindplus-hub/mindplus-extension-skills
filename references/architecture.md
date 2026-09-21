@@ -26,6 +26,8 @@ PUBLISH                   -> REVIEW_EXISTING (BASIC) -> PUBLISH_GITEE
 
 Lite is a producer entry phase; Basic is the artifact review profile. Publication depends only on the Basic evidence and publication gates documented here.
 
+A findings-only review is a terminal exception: `REPORTED_FINDINGS` records an audit report and retains evidence, but is allowed only on a review-only route. It cannot transition to publication and never relaxes the Basic evidence gate.
+
 Routing decisions live in `scripts/route_workflow.py`; allowed edges live in `references/workflow-registry.json` and are enforced during transition. `mpa.py` composes route/start/handoff/transition/resume. Default profiles and optional detail live in the relevant leaf references.
 
 记录布局、父子关联与分析顺序见 [run-records.md](run-records.md)。

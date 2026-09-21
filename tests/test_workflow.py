@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import argparse
+import io
 import json
 import os
 import shutil
@@ -7,9 +9,9 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
-
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
@@ -805,6 +807,78 @@ class MpaTests(unittest.TestCase):
             self.assertEqual(output["reason_code"], "AUTH.PUSH_NOT_AUTHORIZED")
             self.assertIn("--auth commit --auth push", output["next_command"])
 
+    def test_mpa_start_input_errors_name_actionable_recovery(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            cases = (
+                (
+                    ("start", "--goals", "REVIEW", "--project-root", str(base / "project"),
+                     "--work-root", str(base / "missing")),
+                    "WORKSPACE.WORK_ROOT_MISSING",
+                    "Create the work-root directory",
+                ),
+                (
+                    ("start", "--goals", "REVIEW", "--project-root", str(base / "project"),
+                     "--work-root", str(base), "--auth", "unsupported"),
+                    "INPUT.UNKNOWN_AUTHORIZATION",
+                    "valid_values",
+                ),
+                (
+                    ("start", "--goals", "REVIEW", "--project-root", str(base / "project"),
+                     "--work-root", str(base), "--run-id", "bad/run"),
+                    "WORKSPACE.RUN_INIT",
+                    "hex run-id",
+                ),
+            )
+            for arguments, reason_code, recovery in cases:
+                with self.subTest(reason_code=reason_code):
+                    completed = self.run_mpa(*arguments)
+                    self.assertEqual(completed.returncode, 2, completed.stderr or completed.stdout)
+                    output = json.loads(completed.stdout)
+                    self.assertEqual(output["reason_code"], reason_code)
+                    self.assertIn(recovery, output["next_command"])
+
+    def test_mpa_start_request_mismatch_names_resume(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            spec = base / "spec.json"
+            spec.write_text("{}", encoding="utf-8")
+            arguments = (
+                "start", "--goals", "CREATE", "--project-root", str(base / "ext2-ul-project"),
+                "--extension-spec", str(spec), "--work-root", str(base), "--run-id", "mismatch",
+                "--auth", "local_write",
+            )
+            self.assertEqual(self.run_mpa(*arguments).returncode, 0)
+            completed = self.run_mpa(*arguments, "--auth", "build")
+            self.assertEqual(completed.returncode, 2, completed.stderr or completed.stdout)
+            output = json.loads(completed.stdout)
+            self.assertEqual(output["reason_code"], "WORKSPACE.RUN_REQUEST_MISMATCH")
+            self.assertIn("mpa.py resume", output["next_command"])
+
+    def test_mpa_invalid_route_request_names_recovery(self) -> None:
+        import mpa
+
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            output_stream = io.StringIO()
+            arguments = argparse.Namespace(
+                work_root=base,
+                goals="REVIEW",
+                project_root=base / "project",
+                v1_source=None,
+                extension_spec=None,
+                review_handoff=None,
+                run_id=None,
+                auth=None,
+                review_profile="BASIC",
+                keep_evidence=False,
+            )
+            with patch.object(mpa, "read_route_json", side_effect=ValueError("bad registry")), redirect_stdout(output_stream):
+                self.assertEqual(mpa.cmd_start(arguments), 2)
+            output = json.loads(output_stream.getvalue())
+            self.assertEqual(output["reason_code"], "INPUT.INVALID_ROUTE_REQUEST")
+            self.assertIn("fix the reported field", output["next_command"])
+
     def test_mpa_start_is_idempotent_for_existing_run(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
@@ -824,6 +898,66 @@ class MpaTests(unittest.TestCase):
             second = self.run_mpa(*arguments)
             self.assertEqual(second.returncode, 0, second.stderr or second.stdout)
             self.assertEqual(json.loads(second.stdout)["status"], "PASS_IDEMPOTENT")
+
+    def test_mpa_reported_findings_completes_review_only_run_and_retains_evidence(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            project = base / "project"
+            project.mkdir()
+            (project / "config.json").write_text("{}", encoding="utf-8")
+            evidence = base / "static-review.log"
+            evidence.write_text("reviewed", encoding="utf-8")
+            started = self.run_mpa(
+                "start", "--goals", "REVIEW", "--project-root", str(project),
+                "--work-root", str(base), "--run-id", "report-only",
+            )
+            self.assertEqual(started.returncode, 0, started.stderr or started.stdout)
+
+            handoff_arguments = [
+                "handoff", "--work-root", str(base), "--run-id", "report-only",
+                "--workflow", "REVIEW_EXISTING", "--status", "PASS", "--outcome", "REPORTED_FINDINGS",
+            ]
+            for check_id in ("config_schema", "extension_static_integrity", "source_semantics", "malicious_code_review"):
+                handoff_arguments += ["--check", check_id + "=PASS", "--evidence", check_id + "=" + str(evidence)]
+            for check_id in ("builder_build", "blocks_visible", "blocks_functional", "package_size"):
+                handoff_arguments += ["--check", check_id + "=NOT_RUN", "--optional", check_id]
+            recorded = self.run_mpa(*handoff_arguments)
+            self.assertEqual(recorded.returncode, 0, recorded.stderr or recorded.stdout)
+            self.assertEqual(json.loads(recorded.stdout)["state"], "TERMINAL")
+
+            completed = self.run_mpa("transition", "--work-root", str(base), "--run-id", "report-only")
+            self.assertEqual(completed.returncode, 0, completed.stderr or completed.stdout)
+            output = json.loads(completed.stdout)
+            self.assertEqual(output["message"], "report-first run complete; evidence retained")
+            self.assertFalse(output["evidence_cleaned"])
+            self.assertTrue(Path(output["run_root"]).is_dir())
+
+    def test_mpa_reported_findings_cannot_replace_basic_before_publish(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            project = base / "project"
+            project.mkdir()
+            (project / "config.json").write_text("{}", encoding="utf-8")
+            evidence = base / "static-review.log"
+            evidence.write_text("reviewed", encoding="utf-8")
+            started = self.run_mpa(
+                "start", "--goals", "REVIEW,PUBLISH", "--project-root", str(project),
+                "--work-root", str(base), "--run-id", "report-before-publish",
+                "--auth", "commit", "--auth", "push",
+            )
+            self.assertEqual(started.returncode, 0, started.stderr or started.stdout)
+
+            handoff_arguments = [
+                "handoff", "--work-root", str(base), "--run-id", "report-before-publish",
+                "--workflow", "REVIEW_EXISTING", "--status", "PASS", "--outcome", "REPORTED_FINDINGS",
+            ]
+            for check_id in ("config_schema", "extension_static_integrity", "source_semantics", "malicious_code_review"):
+                handoff_arguments += ["--check", check_id + "=PASS", "--evidence", check_id + "=" + str(evidence)]
+            for check_id in ("builder_build", "blocks_visible", "blocks_functional", "package_size"):
+                handoff_arguments += ["--check", check_id + "=NOT_RUN", "--optional", check_id]
+            rejected = self.run_mpa(*handoff_arguments)
+            self.assertEqual(rejected.returncode, 1, rejected.stderr or rejected.stdout)
+            self.assertIn("REPORTED_FINDINGS is only valid for a review-only run", json.loads(rejected.stdout)["errors"])
 
     def _convert_run(self, base: Path) -> Path:
         v1 = base / "v1"

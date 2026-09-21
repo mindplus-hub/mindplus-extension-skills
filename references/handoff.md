@@ -6,7 +6,7 @@ Every leaf writes one `handoff.json` matching [contracts/handoff.schema.json](co
 
 - `state`: `RUNNING`, `WAITING_USER`, or `TERMINAL`.
 - `status`: `NOT_RUN`, `PASS`, `FAIL`, or `BLOCKED`.
-- `outcome`: domain result such as `CONVERTED`, `CREATED`, `UPGRADED`, `REVIEWED_BASIC`, `PUSHED`, or `TOKEN_REQUIRED`.
+- `outcome`: domain result such as `CONVERTED`, `CREATED`, `UPGRADED`, `REVIEWED_BASIC`, `REPORTED_FINDINGS`, `PUSHED`, or `TOKEN_REQUIRED`.
 - `reason_code`: namespaced recovery reason when the run did not pass.
 
 Do not use legacy `CONVERTED_HANDOFF` or `HANDED_OFF` as the universal state. An adapter may translate those values to the fields above while preserving the original log as evidence.
@@ -15,6 +15,7 @@ Do not use legacy `CONVERTED_HANDOFF` or `HANDED_OFF` as the universal state. An
 
 - Producer to Basic: preserve source provenance and `lite_source_selection`; the router inserts `REVIEW_EXISTING`.
 - Basic returns `REVIEWED_BASIC` with all eight required checks from [review-basic.md](review-basic.md), plus exactly one `basic_review` artifact. The validator rechecks its actual source, ZIP and evidence hashes.
+- A findings-only review returns terminal/PASS `REPORTED_FINDINGS`: it records the four static gates with actual evidence, defers GUI/package checks as optional `NOT_RUN`, has no `basic_review`, and is valid only when there is no publication successor. `PASS` means the report was delivered; it never authorizes publication. Its terminal transition retains evidence for later current-hash reuse.
 - Publication requires current passing Basic evidence, even when preflight is called directly without a lifecycle handoff. Static-only results do not substitute for complete Basic evidence.
 - Publication still needs commit/push authorization and token presence before Git/remote activity.
 - Required checks need evidence; unperformed build/display/behavior is BLOCKED and retains the project.

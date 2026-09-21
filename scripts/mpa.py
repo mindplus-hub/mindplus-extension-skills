@@ -29,6 +29,7 @@ from route_workflow import read_json as read_route_json
 from route_workflow import route as route_request_fn
 from validate_handoff import (
     BASIC_CHECKS,
+    REPORT_FIRST_OUTCOME,
     WORKFLOW_PRODUCER,
     load as load_handoff,
     validate as validate_handoff_data,
@@ -63,6 +64,11 @@ ROUTE_FIX = {
     "WORKSPACE.EXISTING_PROJECT_REQUIRED": "Upgrade, review or publication needs an existing non-empty --project-root.",
     "INPUT.REVIEW_HANDOFF_NOT_FOUND": "The supplied --review-handoff file does not exist; fix the path or drop the flag to insert a review first.",
     "INPUT.GOALS_REQUIRED": "Rerun with --goals (one or more of CONVERT, CREATE, UPGRADE, REVIEW, PUBLISH).",
+    "WORKSPACE.WORK_ROOT_MISSING": "Create the work-root directory first (it may be empty), then rerun the same start command. Never point --work-root at the project root: the run records would land inside the hashed project.",
+    "INPUT.UNKNOWN_AUTHORIZATION": "Rerun start with --auth values taken from the supported set reported in valid_values.",
+    "WORKSPACE.RUN_INIT": "Use a hex run-id, or omit --run-id so the wizard generates one.",
+    "WORKSPACE.RUN_REQUEST_MISMATCH": "This run-id already belongs to another request: resume it with mpa.py resume, or rerun start with a new run-id. Never rewrite a frozen request.",
+    "INPUT.INVALID_ROUTE_REQUEST": "The request does not satisfy the route contract; fix the reported field and rerun the same start command.",
 }
 ROUTE_FIX["ROUTE.REVIEW_PROFILE_UNSUPPORTED"] = "Use BASIC for artifact review; Lite runs at producer entry."
 
@@ -206,7 +212,12 @@ def cmd_start(args: argparse.Namespace) -> int:
     work_root = args.work_root.expanduser().resolve(strict=False)
     if not work_root.is_dir():
         return emit(
-            {"status": "BLOCKED", "reason_code": "WORKSPACE.WORK_ROOT_MISSING", "error": f"work_root does not exist: {work_root}"},
+            {
+                "status": "BLOCKED",
+                "reason_code": "WORKSPACE.WORK_ROOT_MISSING",
+                "error": f"work_root does not exist: {work_root}",
+                "next_command": ROUTE_FIX["WORKSPACE.WORK_ROOT_MISSING"],
+            },
             2,
         )
 
@@ -221,6 +232,7 @@ def cmd_start(args: argparse.Namespace) -> int:
                     "reason_code": "INPUT.UNKNOWN_AUTHORIZATION",
                     "error": f"unknown --auth value: {name}",
                     "valid_values": sorted(AUTHORIZATION_FIELDS),
+                    "next_command": ROUTE_FIX["INPUT.UNKNOWN_AUTHORIZATION"],
                 },
                 2,
             )
@@ -235,14 +247,16 @@ def cmd_start(args: argparse.Namespace) -> int:
 
     run_id = args.run_id or uuid.uuid4().hex
     if not RUN_ID_RE.fullmatch(run_id):
-        return emit({"status": "BLOCKED", "reason_code": "WORKSPACE.RUN_INIT", "error": "run_id contains unsafe characters"}, 2)
+        return emit({"status": "BLOCKED", "reason_code": "WORKSPACE.RUN_INIT", "error": "run_id contains unsafe characters",
+                     "next_command": ROUTE_FIX["WORKSPACE.RUN_INIT"]}, 2)
     existing_root = work_root / ".mindplus-agent" / "runs" / run_id
     if (existing_root / "run.json").is_file():
         existing_run = read_object(existing_root / "run.json")
         saved_request = read_request(existing_root)
         saved_request.setdefault("review_profile", "BASIC")
         if saved_request != request:
-            return emit({"status": "BLOCKED", "reason_code": "WORKSPACE.RUN_REQUEST_MISMATCH", "error": "run-id already belongs to another request; resume it or choose a new run-id"}, 2)
+            return emit({"status": "BLOCKED", "reason_code": "WORKSPACE.RUN_REQUEST_MISMATCH", "error": "run-id already belongs to another request; resume it or choose a new run-id",
+                         "next_command": ROUTE_FIX["WORKSPACE.RUN_REQUEST_MISMATCH"]}, 2)
         return emit({"status": "PASS_IDEMPOTENT", "run_id": run_id, "run_root": str(existing_root),
                      "current_workflow": existing_run.get("current_workflow"), "workflows": existing_run.get("workflows"),
                      "next_command": f"python {quote(Path(__file__).resolve().as_posix())} resume --work-root {quote(work_root.as_posix())} --run-id {quote(run_id)}"}, 0)
@@ -251,7 +265,8 @@ def cmd_start(args: argparse.Namespace) -> int:
         registry = read_route_json(REGISTRY_PATH)
         routed = route_request_fn(request, registry)
     except Exception as exc:  # noqa: BLE001 - surface any contract failure verbatim
-        return emit({"status": "BLOCKED", "reason_code": "INPUT.INVALID_ROUTE_REQUEST", "error": str(exc)}, 2)
+        return emit({"status": "BLOCKED", "reason_code": "INPUT.INVALID_ROUTE_REQUEST", "error": str(exc),
+                     "next_command": ROUTE_FIX["INPUT.INVALID_ROUTE_REQUEST"]}, 2)
 
     if routed.get("status") != "PASS":
         reason = routed.get("reason_code")
@@ -521,7 +536,13 @@ def cmd_handoff(args: argparse.Namespace) -> int:
         "next": next_entries,
     }
 
-    required_outcome = "REVIEWED_BASIC" if workflow == "REVIEW_EXISTING" and status == "PASS" else None
+    required_outcome = (
+        "REVIEWED_BASIC"
+        if workflow == "REVIEW_EXISTING"
+        and status == "PASS"
+        and handoff["outcome"] != REPORT_FIRST_OUTCOME
+        else None
+    )
     validation_errors = validate_handoff_data(handoff, required_outcome, True)
     if validation_errors:
         return emit(
@@ -601,7 +622,13 @@ def cmd_transition(args: argparse.Namespace) -> int:
         )
 
     handoff = load_handoff(handoff_path)
-    required_outcome = "REVIEWED_BASIC" if current == "REVIEW_EXISTING" and handoff.get("status") == "PASS" else None
+    required_outcome = (
+        "REVIEWED_BASIC"
+        if current == "REVIEW_EXISTING"
+        and handoff.get("status") == "PASS"
+        and handoff.get("outcome") != REPORT_FIRST_OUTCOME
+        else None
+    )
     errors = validate_handoff_data(handoff, required_outcome, True)
     if errors:
         return emit(
@@ -653,12 +680,20 @@ def cmd_transition(args: argparse.Namespace) -> int:
         with (run_root / "run.json").open("w", encoding="utf-8", newline="\n") as output_handle:
             output_handle.write(json.dumps(run, ensure_ascii=False, indent=2) + "\n")
         handoff_names = [p.name for p in sorted((run_root / "handoffs").glob("*.json"))]
-        keep_evidence = bool(getattr(args, "keep_evidence", False)) or bool(run.get("keep_evidence"))
+        report_first = handoff.get("outcome") == REPORT_FIRST_OUTCOME
+        keep_evidence = (
+            bool(getattr(args, "keep_evidence", False))
+            or bool(run.get("keep_evidence"))
+            or report_first
+        )
         evidence_cleaned = False
         if not keep_evidence:
-            # Records are retained only on explicit request; successful runs clean up.
+            # Full successful runs clean records unless explicitly retained.
             evidence_cleaned = cleanup_run_dir(run_root)
-        if keep_evidence:
+        if report_first:
+            message = "report-first run complete; evidence retained"
+            reason_code = None
+        elif keep_evidence:
             message = "run complete; run evidence retained (--keep-evidence)"
             reason_code = None
         elif evidence_cleaned:

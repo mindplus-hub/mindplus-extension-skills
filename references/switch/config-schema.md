@@ -10,7 +10,7 @@
 1. 先按选定模式读取 schema，再从 V1 证据填值。不要从 V1 `config.json` 原样复制顶层结构。
 2. 顶层键必须是该模式 `allowed_fields` 的子集，必须包含 `required_fields`；其它键一律删除并在日志中记录。
 3. V1 的 `email`、`license`、`isBoard`、`platform`、`asset` 是旧格式字段，不属于 V2 `config.json`。
-4. 字符串字段没有可验证描述时写 `""`，不得用模型知识、样例值或最新版补全。`meta.runtimeVersion` 没有实际 Runtime API 证据时为 `""`，但 `meta` 和 `runtimeVersion` 仍保留。
+4. 字符串字段没有可验证描述时写 `""`，不得用模型知识、样例值或最新版补全。`meta.runtimeVersion` 没有实际 Runtime API 证据时为 `""`，但 `meta` 和 `runtimeVersion` 仍保留。留空是契约要求的结果，不是缺陷：必需字段已出现即为合规，“必填项缺失”只指字段不存在、类型不符或固定值不符，不能因为值为空字符串而在审核中定级。
 5. 结构型可选字段不能机械写空值：`supportDevices`、`supportArch` 只有对应 V1 板卡证据与当前模式文档支持时才出现；没有证据就省略。空的 `supportArch` 可能覆盖设备范围，不能把它当作普通空字符串。
 6. `compatibilityId` 仅在确认需要兼容已有 V1 库时填写；普通新建保留 `""`，不从新作者或新 ID 自动生成。V1 转 V2 的兼容迁移中，能从 `.mpext` 或 V1 `author`/原始 `id` 证明时必须填写预期的小写旧身份；身份无法证明时停止，不猜值。
 

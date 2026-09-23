@@ -22,7 +22,7 @@ class SimplifiedLifecycleTests(unittest.TestCase):
             (existing / "file").write_text("existing")
             external = base / "old-handoff.json"
             external.write_text("{}")
-            for producer, review, publish, profile, old in itertools.product((None, "CREATE", "CONVERT"), (False, True), (False, True), ("BASIC", "HOST_READY"), (False, True)):
+            for producer, review, publish, profile, old in itertools.product((None, "CREATE", "CONVERT"), (False, True), (False, True), ("BASIC", "UNSUPPORTED"), (False, True)):
                 goals = ([producer] if producer else []) + (["REVIEW"] if review else []) + (["PUBLISH"] if publish else [])
                 if not goals:
                     continue
@@ -31,7 +31,7 @@ class SimplifiedLifecycleTests(unittest.TestCase):
                                "paths": {"project_root": str(base / "ext2-ul-new" if producer else existing), "v1_source": str(source), "review_handoff": str(external) if old else None},
                                "authorizations": {"local_write": True, "commit": True, "push": True}}
                     result = route(request, read_json(REGISTRY_PATH))
-                    if profile == "HOST_READY":
+                    if profile == "UNSUPPORTED":
                         self.assertEqual(result["reason_code"], "ROUTE.REVIEW_PROFILE_UNSUPPORTED")
                         continue
                     expected = ([producer + "_FRESH"] if producer else []) + (["REVIEW_EXISTING"] if producer or review or publish else []) + (["PUBLISH_GITEE"] if publish else [])
@@ -74,11 +74,11 @@ class SimplifiedLifecycleTests(unittest.TestCase):
             handoff["checks"].pop()
             self.assertTrue(validate(handoff, None, True))
 
-    def test_full_acceptance_is_not_satisfied_by_basic(self):
+    def test_unsupported_review_profile_is_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
             project, _, _ = publish_fixture(base)
-            start = run_script("mpa.py", "start", "--goals", "REVIEW", "--review-profile", "HOST_READY", "--project-root", str(project), "--work-root", str(base), "--run-id", "full")
+            start = run_script("mpa.py", "start", "--goals", "REVIEW", "--review-profile", "UNSUPPORTED", "--project-root", str(project), "--work-root", str(base), "--run-id", "unsupported")
             self.assertNotEqual(start.returncode, 0)
             self.assertIn("ROUTE.REVIEW_PROFILE_UNSUPPORTED", start.stdout)
 

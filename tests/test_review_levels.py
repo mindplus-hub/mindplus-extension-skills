@@ -89,7 +89,7 @@ class ReviewLevelsTests(unittest.TestCase):
             request = {"goals": ["PUBLISH"], "paths": {"project_root": str(project)}, "authorizations": {"commit": True, "push": True}}
             registry = read_json(REGISTRY_PATH)
             self.assertEqual(route(request, registry)["workflows"], ["REVIEW_EXISTING", "PUBLISH_GITEE"])
-            for profile in ("FULL", "HOST_READY"):
+            for profile in ("UNKNOWN", "LEGACY"):
                 self.assertEqual(route(dict(request, review_profile=profile), registry)["reason_code"], "ROUTE.REVIEW_PROFILE_UNSUPPORTED")
 
     def test_reported_findings_is_terminal_and_cannot_publish(self):

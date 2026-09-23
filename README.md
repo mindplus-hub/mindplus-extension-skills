@@ -154,6 +154,12 @@ git clone https://gitee.com/mind-plus/mindplus-extension-skills.git ".claude/ski
 
 ## 版本更新
 
+- V0.3.11
+   - Python 模式下 `public/requirements.txt` 缺库不再作为 P0：多数环境已预装该库，真缺库会在自测／运行阶段直接失败，改按 P1 提醒并记录包名与未验证范围
+   - P0 的“必需依赖／资源缺失”收窄为加载与运行必需的入口、config、本地库源码及已引用的封面／图标资源
+   - 新增“契约要求字段完整出现、不等于字段必须有值”：`compatibilityId`、`sku`、`meta.runtimeVersion` 等按契约留空不是缺陷，不列任何等级；`required_fields` 只校验字段存在、类型与固定值，不再把“Empty compatibilityId”一类空字段当成 P1
+   - 同步到审核与转换文档：Basic 审核、转换 pre-build 扫描的依赖差异都不再单独阻断 build，保真要求（照抄 V1 声明、不主动丢行）不变
+
 - V0.3.10
    - 审核新增“报告优先”分支：只要问题清单时输出发现与未执行项，不强制产出 REVIEWED_BASIC
    - 明确更新后只重载入口文件、脚本按 CLI 契约直接调用，避免复读文档与脚本源码

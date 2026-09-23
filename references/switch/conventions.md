@@ -42,7 +42,7 @@ CREATE 的作者来源与英文规范化见 [author-identity.md](author-identity
 
 ## compatibilityId（旧包身份）
 
-`config.compatibilityId` 只有确认需要兼容已有 V1 库时才填写，否则保留空字符串 `""`。字段名是 `compatibilityId`（大写 I），不是 `compatibilityld`。
+`config.compatibilityId` 只有确认需要兼容已有 V1 库时才填写，否则保留空字符串 `""`。字段名是 `compatibilityId`（大写 I），不是 `compatibilityld`。留空就是契约要求的结果，不是缺陷，审核不得据此列 P0／P1／P2（`sku`、`meta.runtimeVersion` 同理）。
 
 - CREATE：`identity.compatibility_id` 默认空；省略或 null 也映射为空字符串。不要根据新建库的 author/id 自动拼接，也不要照抄模板值。确有旧库兼容需求时，记录用户要求及旧包身份来源后填写。
 - CONVERT：一般需要兼容被转换的 V1 库，从旧 `.mpext` 文件名或 V1 author／原始 id 取得小写身份；通常形如 `<old-author>-<old-id>-thirdex`。不能用清理后的 V2 ID 替代原始 ID；按 generated 的 `shared.v1-compatibility` 主题处理。包可能放在源目录**内部**，也可能与源目录**并列**（`x-thirdex-V0.0.1/` 与 `x-thirdex-V0.0.1.mpext` 同级），两种都要认；只能按 author/id 派生时先小写、再把空白写成 `-`（旧身份不含空白）。

@@ -358,7 +358,7 @@ class TokenTests(unittest.TestCase):
         self.assertEqual(output["reason_code"], "AUTH.GITEE_TOKEN_MISSING")
         self.assertIn("No project, Git, or Gitee operation was performed", output["message"])
 
-    def test_publish_preflight_allows_uninitialized_project_after_host_ready(self) -> None:
+    def test_publish_preflight_allows_uninitialized_project_after_basic(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
             project = base / "ext2-ul-project"
@@ -382,7 +382,7 @@ class TokenTests(unittest.TestCase):
             self.assertEqual(output["outcome"], "PUBLISH_PREPARE_READY")
             self.assertEqual(output["git"]["state"], "NOT_INITIALIZED")
 
-    def test_publish_preflight_rejects_stale_host_ready_hash(self) -> None:
+    def test_publish_preflight_rejects_stale_basic_hash(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
             project = base / "ext2-ul-project"
@@ -471,7 +471,7 @@ class HandoffTests(unittest.TestCase):
             )
             self.assertEqual(completed.returncode, 0, completed.stderr or completed.stdout)
 
-    def test_host_ready_missing_check_fails(self) -> None:
+    def test_basic_missing_check_fails(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             project = Path(directory)
             value = basic_handoff(project)
@@ -482,7 +482,7 @@ class HandoffTests(unittest.TestCase):
             self.assertEqual(completed.returncode, 1)
             self.assertIn("BASIC review requires evidenced PASS", completed.stdout)
 
-    def test_host_ready_without_user_confirmation_fails(self) -> None:
+    def test_basic_without_observation_evidence_fails(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             project = Path(directory)
             handoff = project / ".mindplus-agent" / "handoff.json"
@@ -1061,7 +1061,7 @@ class MpaTests(unittest.TestCase):
             self.assertTrue(any("evidence" in error for error in output["errors"]))
             self.assertFalse((base / ".mindplus-agent" / "runs" / "conv" / "handoffs" / "CONVERT_FRESH.json").exists())
 
-    def test_mpa_transition_advances_to_publish_after_host_ready(self) -> None:
+    def test_mpa_transition_advances_to_publish_after_basic(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)
             project = base / "ext2-ul-v2"

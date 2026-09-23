@@ -62,7 +62,9 @@ extension/
   不自动合并或选择一方。
 - V2 的 `public/requirements.txt` 只由上述两个来源产生：先放 config 声明转换出的行，再按原顺序放
   `python/libraries/requirements.txt` 的行；完全相同的重复行可以去重，但不同规格不能静默覆盖。两个来源都没有有效行时不创建文件。
-- 转换扫描器会按 V1 盘点器生成的 `expected_requirement_lines` 对比 V2 文件；出现缺失、额外、重排或规格变化时，
-  在 build 前阻断。
+- 转换扫描器会按 V1 盘点器生成的 `expected_requirement_lines` 对比 V2 文件，差异保留原始输出并逐项定级：
+  V2 少了 V1 已声明的依赖行、或源码 import 了权威源未声明的包，都按 [issue-levels.md](../issue-levels.md) 记为 P1 提醒，
+  不单独阻断 build；同一包的规格冲突仍按上文进入敏感节点。放宽的只是定级，不是保真要求——转换仍应完整照抄
+  V1 声明、不主动丢行；运行环境多数已预装这些库，真的缺库会在自测／运行阶段直接失败。
 - 转换阶段不安装 requirements、不运行真实推理；这些属于独立审核。
 - 缺少封面、图标、库源码、依赖版本或生成器 API 证据时停止，不生成替代内容。

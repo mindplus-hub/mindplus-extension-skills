@@ -27,7 +27,7 @@
   （见 [upload-mode.md](upload-mode.md)）。
 - 三种合法组合（按扩展类型选一种）：
   - **设备范围**：声明 supportDevices、省略 supportArch（espnow/ds1302/C4001）；
-  - **全架构**：省略 supportDevices、写 `supportArch: ["all"]`（BMP58X）；
+  - **全架构**：省略 supportDevices、写 `supportArch: ["all"]`（BMP58X），表示支持所有主板；这是合法声明，审核不能仅因使用 `"all"` 或未逐板枚举而报问题；
   - **架构族**（仅 upload 模式）：写 `supportArch: ["<platform>:<arch>"]`，架构取主板
     `boardConfig.board` 前两段如 `"arduino:avr"`（官方文档）。
 - 官方语义：supportArch 与 supportDevices 同时设置时 **supportArch 覆盖** supportDevices；

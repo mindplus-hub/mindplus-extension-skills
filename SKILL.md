@@ -11,7 +11,7 @@ Create, convert or upgrade an extension, review its artifact, then publish if au
 
 ## Entry and routing
 
-1. Every new task, including a simple question, starts with [skill-update.md](references/skill-update.md). Reuse the completed check within the active task; retain explicit offline/pinned exceptions. After updating, reload this entry. Questions then use only relevant references and receive a direct answer without a lifecycle run.
+1. Questions use only relevant references and receive a direct answer without updates or a lifecycle run. For project work, check [skill-update.md](references/skill-update.md) once per session; reuse the result across tasks and resumes. Explicit update requests or a user-reported newer release trigger another check. Offline/pinned use and local skill maintenance skip automatic updates. After an actual update, reload this entry only.
 2. For project work read [routing.md](references/routing.md). Fresh CREATE/CONVERT uses an absent or empty `ext2-<mode>-<name>` directory per [project-naming.md](references/project-naming.md). Start `scripts/mpa.py` with the known request and existing authorization. Invoke scripts by their documented CLI contracts and use the printed JSON as the result — do not read script sources to understand or verify behavior; `--help`, `reason_code` and `next_command` are the contract.
 3. Load only the selected leaf. At CREATE/CONVERT/UPGRADE entry, perform **Lite** [source discovery](references/official-repository-discovery.md) before source-dependent writes. Check the appropriate official JSON and Gitee repositories; within the same mode and type, matching config.author + config.id uses an existing base or authorized fork; an id-only collision adds the author suffix (Chinese in pinyin) to the new folder. A changed base/path requires a new immutable route request.
 4. Complete the producer, then **Basic** [pre-publication review](references/review-basic.md). The router also inserts Basic before standalone publication. Reuse current checks; do not repeat builds or observations with unchanged scope and artifacts. Follow `next_command`, `handoff`, `transition` and `resume`.
@@ -24,10 +24,19 @@ Create, convert or upgrade an extension, review its artifact, then publish if au
 | REVIEW_EXISTING | [review.md](references/workflows/review.md) |
 | PUBLISH_GITEE | [gitee-publish.md](references/workflows/gitee-publish.md) |
 
+## Minimal execution
+
+- Read the selected leaf and needed references once; revisit only changed material or a concrete unresolved failure. Use existing request/file facts; ask only for missing decisions or authorization.
+- Run each required check once at its owning stage. Reuse valid producer evidence in Basic and valid Basic evidence in publication; do not add a parallel manual verification of a successful script result.
+- Test changed behavior, realistic boundaries and representative retained behavior with the narrowest existing test or executable example. No default full suite, all-block input combinations, duplicate smoke tests, or new tests solely for workflow wiring. Broaden only for shared-core changes, a concrete failure, or explicit acceptance criteria.
+- Keep findings-only reviews on the report-first branch in [review.md](references/workflows/review.md); a repository URL alone does not request publication readiness.
+- Record actual scope/results once and reference them from required check IDs. Keep required checkpoints, handoffs and integrity gates; do not create extra plans, logs or evidence files just to restate them.
+
+
 ## Boundaries and completion
 
 - Basic requires source/config checks, malicious-code review, successful build, observed block display and representative behavior, and an actual extension ZIP no larger than **5,000,000 bytes**. Missing verification retains the project but blocks publication. See [review-basic.md](references/review-basic.md) for the evidence contract.
-- [P0/P1/P2](references/issue-levels.md) classify defects, not review levels. P0 blocks; P1 is advisory; P2 optional. Authorization, secrets, source integrity, fork ownership, artifact size and required verification remain independent gates.
+- [P0/P1/P2](references/issue-levels.md) classify defects, not review levels. P0 blocks approval and publication, not continued review: complete all reachable checks in the selected scope and report all findings together. P1 is advisory; P2 optional. Authorization, secrets, source integrity, fork ownership, artifact size and required verification remain independent gates.
 - Existing V2 feature work uses UPGRADE; fresh conversion never overwrites it. Verify an authorized personal fork before editing a non-owned repository. V1-to-existing-V2 synchronization remains unsupported.
 - Review does not modify extension source. Authorized builds and checks may write artifacts and evidence. Source fixes belong to development and require affected checks again. Build/push success does not prove physical device behavior.
 - Publishing requires authorization and token presence, then current Basic evidence, exact staged content, secret/target checks, fast-forward push, remote-ref, visibility and Topic verification. Never record credentials. Creating or converting alone does not authorize publication.

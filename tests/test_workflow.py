@@ -1433,6 +1433,30 @@ class DeviceDictionaryTests(unittest.TestCase):
             codes = [finding["code"] for finding in json.loads(completed.stdout)["findings"]]
             self.assertIn("CONFIG_SUPPORT_ARCH_FORMAT_INVALID", codes)
 
+    def test_all_support_arch_passes_dictionary_gate(self) -> None:
+        for support_devices in (None, {"dev-DFRobot-arduinoUno": "^0.0.1"}):
+            with self.subTest(support_devices=support_devices), tempfile.TemporaryDirectory() as directory:
+                project, inventory = self.mini_project(Path(directory), support_devices or {})
+                config_path = project / "extension" / "public" / "config.json"
+                config = json.loads(config_path.read_text(encoding="utf-8"))
+                if support_devices is None:
+                    del config["supportDevices"]
+                config["supportArch"] = ["all"]
+                write_json(config_path, config)
+                completed = run_switch_script(
+                    "check_converted_extension.py",
+                    "--project-root", str(project),
+                    "--inventory", str(inventory),
+                    "--mode", "UPLOAD",
+                )
+                findings = json.loads(completed.stdout)["findings"]
+                self.assertFalse(
+                    [finding for finding in findings if finding["code"].startswith("CONFIG_SUPPORT_ARCH_")
+                     or (finding["code"] == "V2_CONFIG_FIELD_TYPES_INVALID" and finding.get("mode") == "supportArch")
+                     or finding["code"] in {"CONFIG_DEVICE_ID_UNKNOWN", "CONFIG_DEVICE_VERSION_SPEC_INVALID"}],
+                    findings,
+                )
+
     def test_architecture_support_arch_passes_dictionary_gate(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             base = Path(directory)

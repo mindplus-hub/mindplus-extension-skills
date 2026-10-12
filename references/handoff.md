@@ -23,14 +23,14 @@ Do not use legacy `CONVERTED_HANDOFF` or `HANDED_OFF` as the universal state. An
 `input_provenance.sha256` identifies the V1/spec/upstream source. `project_sha256` identifies the exact V2 project content covered by this handoff; never substitute one for the other.
 - Missing Gitee token: state `WAITING_USER`, status `BLOCKED`, outcome `TOKEN_REQUIRED`, reason `AUTH.GITEE_TOKEN_MISSING`, and no Git/remote artifacts.
 
-Validate with:
+For hand-written handoffs or a concrete validation failure, use:
 
 ```text
 python scripts/validate_handoff.py --input <handoff.json>
 python scripts/validate_handoff.py --input <handoff.json> --require-outcome REVIEWED_BASIC --check-artifacts
 ```
 
-The wizard `scripts/mpa.py handoff` assembles this file from flags and enforces the evidence and user-confirmation rules at write time, refusing to write an invalid handoff; prefer it over hand-writing the JSON.
+The wizard `scripts/mpa.py handoff` assembles this file from flags and enforces the evidence and user-confirmation rules at write time, refusing to write an invalid handoff; prefer it over hand-writing the JSON. After it succeeds, follow the returned transition/resume command; do not add a separate `validate_handoff.py` call to repeat the same validation. Required transition and publication integrity checks still run.
 
 ## Secret boundary
 

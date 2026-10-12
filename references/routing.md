@@ -2,7 +2,7 @@
 
 Read this file before any leaf reference.
 
-Enter after the update check. Select the leaf from known request facts, then perform its Lite source check before project writes. If Lite changes the base or project path, create a new run; never rewrite the frozen request.
+Apply the [update policy](skill-update.md) only when a session check is due. Select the leaf from known request facts, then perform its Lite source check before project writes. If Lite changes the base or project path, create a new run; never rewrite the frozen request.
 
 ## Make a route request
 

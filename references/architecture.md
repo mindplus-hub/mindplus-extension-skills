@@ -2,7 +2,7 @@
 
 One self-contained skill contains five progressively loaded leaves. The router selects work; the leaves implement domain behavior; scripts enforce routing, handoffs and publication transport. No sibling skills or checkouts are required.
 
-Questions: version check -> relevant reference -> answer. Development: version check -> route -> selected leaf -> [Lite source selection](official-repository-discovery.md) -> production -> [Basic](review-basic.md) -> authorized publication. Existing-project review enters Basic directly; standalone publication also requires Basic.
+Questions: relevant reference -> answer, without updates or a lifecycle run. Development: session-level [update policy](skill-update.md) -> route -> selected leaf -> [Lite source selection](official-repository-discovery.md) -> production -> [Basic](review-basic.md) -> authorized publication. Existing-project review enters Basic directly; findings-only review uses the report-first branch. Standalone publication requires complete Basic.
 
 ## Instruction placement and maintenance
 

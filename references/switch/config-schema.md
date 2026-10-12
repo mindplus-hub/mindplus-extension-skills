@@ -35,7 +35,8 @@ supportDevices, supportArch
 
 固定值是 `mode: "upload"`、`isDevice: false`、`main: "main.js"`。没有外部全局 Arduino 库时
 `libraryConfig` 为 `[]`；本地复制到 `public/libraries/` 的库不能因此加入该数组。`supportArch`
-出现时会覆盖 `supportDevices`，两者的选择必须来自 V1 的板卡证据。
+出现时会覆盖 `supportDevices`，两者的选择必须来自 V1 的板卡证据。`supportArch: ["all"]`
+是支持所有主板的合法非空声明；审核现有库时不能将它当作空数组、非法架构或缺少主板列表。
 
 ### PYTHON_BLOCK
 

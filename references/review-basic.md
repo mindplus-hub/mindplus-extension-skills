@@ -31,7 +31,9 @@ Basic 是产物完成后、发布前的标准审查。创建、转换、升级�
 
 安全审查在执行 npm 生命周期脚本或加载扩展前先进行一次：重点追踪外部命令、动态执行／解码载荷、网络发送目的、凭据读取、文件删除／越界写入、持久化、安装钩子和来源不明依赖。网络、串口、文件操作可能是合法功能，不能仅凭关键词判恶意；结合需求、数据流和用户授权判断。构建后补查 ZIP 内产物与依赖，未解释风险不得 PASS。不要执行疑似恶意代码来“验证”它。审查结果只代表已记录的范围，不保证绝对无恶意代码。
 
-P1/P2 继续按 [issue-levels.md](issue-levels.md) 提醒，不把颜色、排版建议升级为阻断条件。按契约留空的必需字段（`compatibilityId`、`sku`、`meta.runtimeVersion` 等）是正确写法，不是缺陷，不列任何等级；“Empty compatibilityId”一类发现不要上报，`required_fields` 只校验字段是否存在、类型与固定值是否相符。Python 模式的 `public/requirements.txt` 缺库（含源码实际 import、但两个权威源都未声明的包）只作 P1 提醒：环境多数已预装，真缺库会在 `blocks_functional`／自测阶段暴露，不阻断发布。八项必需检查、大小限制和授权／秘密／目标门槛不能降为 P1/P2。
+P1/P2 继续按 [issue-levels.md](issue-levels.md) 提醒，不把颜色、排版建议升级为阻断条件。按契约留空的必需字段（`compatibilityId`、`sku`、`meta.runtimeVersion` 等）是正确写法，不是缺陷，不列任何等级；“Empty compatibilityId”一类发现不要上报，`required_fields` 只校验字段是否存在、类型与固定值是否相符。八项必需检查、大小限制和授权／秘密／目标门槛不能降为 P1/P2。
+
+Python 标准库和目标环境内置库无需额外 `requirements.txt` 声明；行空板 M10 内置的 `unihiker` 属于此类，不因未声明而列 P0/P1/P2。仅需额外安装的第三方库缺依赖声明时提醒 P1，不单凭缺声明阻断；运行时实际 import 错误按本次环境和错误证据另行判断。
 
 在 upload 模式中，`supportArch: ["all"]` 是合法的全主板支持声明，不是空配置或非法架构；不得仅因使用 `"all"`、范围广或未枚举 `supportDevices` 报任何等级的问题，也不要求改成逐板列表。它存在时覆盖 `supportDevices`。功能审核仍按实际源码和代表性验证判断；发现具体主板不兼容时，报告对应缺陷及证据。
 

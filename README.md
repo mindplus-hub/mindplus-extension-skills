@@ -154,6 +154,11 @@ git clone https://gitee.com/mind-plus/mindplus-extension-skills.git ".claude/ski
 
 ## 版本更新
 
+- V0.3.13
+   - 修复 Python 标准库及目标环境内置库（如 M10 的 `unihiker`）缺 requirements 声明的误报
+   - 统一 Basic、问题分级与转换流程的依赖判断，减少重复规则；仅需额外安装的第三方库缺声明时提醒 P1
+   - 保持最小验证与证据复用，发布必需检查和授权门槛不变
+
 - V0.3.12
    - 问答和 skill 本地维护不自动更新；项目任务按会话复用检查，显式更新或已知新版本仍可触发
    - 报告型审核按需构建，仓库 URL 不再被当作发布就绪请求

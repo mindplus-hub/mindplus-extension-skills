@@ -4,7 +4,7 @@
 
 - topic_id: `shared.field.imgpreview`
 - source_key: `mindplus.v2.extensions.common-field`
-- source_fingerprint: `652c8d1baccabf3134b40ed08fd45c382ec7e01fd16461eb5b6e2453cdcb9c61`
+- source_fingerprint: `050547d14bee11067551262ba4a3c451125b7793e672588e89faf30c408d5c9f`
 
 ## 19. 图片预览 (IMGPREVIEW)
 
@@ -46,9 +46,9 @@
 
 **参数说明:**
 
-| 参数 | 描述 |
-| :--- | :--- |
-| `type` | **必填**。参数的类型 |
+| 参数      | 描述                                                                                               |
+| :-------- | :------------------------------------------------------------------------------------------------- |
+| `type`  | **必填**。参数的类型                                                                         |
 | `color` | 可选。`block` 和 `field` 颜色。默认 `field` 颜色 `#87C482`, `block` 背景颜色 `#7FB57B` |
 
 > 使用该field时, 一定需要把坐标(属性名称必须是 `X` 和 `Y`)加上, 该坐标用于在图像预览时确定位置

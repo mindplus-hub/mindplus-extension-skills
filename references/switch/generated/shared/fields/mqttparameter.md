@@ -4,7 +4,7 @@
 
 - topic_id: `shared.field.mqttparameter`
 - source_key: `mindplus.v2.extensions.common-field`
-- source_fingerprint: `1015de064baf62fd759e014e2f2af994c228186e93f318179f50ab5270321bf3`
+- source_fingerprint: `b2bff4fa2cdf86bcf9530c55ae2b6d2612bb4e0ca4729b85a0d632223044d244`
 
 ## 16. MQTT初始化 (MQTTPARAMETER)
 
@@ -27,6 +27,6 @@
 
 **参数说明:**
 
-| 参数 | 描述 |
-| :--- | :--- |
+| 参数     | 描述                       |
+| :------- | :------------------------- |
 | `type` | **必填**。参数的类型 |

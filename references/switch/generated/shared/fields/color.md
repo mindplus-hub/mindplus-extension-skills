@@ -4,7 +4,7 @@
 
 - topic_id: `shared.field.color`
 - source_key: `mindplus.v2.extensions.common-field`
-- source_fingerprint: `b277ca8ffbed24f67ec7709d0d6167d45d133b5772cd5565d98b0e576036689e`
+- source_fingerprint: `7bc88d65904c0c2c7f5e4d9af84c4a912913b7b5e4757a7825e641aa3748dbd1`
 
 ## 8. 取色器 (COLOR)
 
@@ -30,7 +30,7 @@
 
 **参数说明:**
 
-| 参数 | 描述 |
-| :--- | :--- |
-| `type` | **必填**。参数的类型 |
+| 参数      | 描述                                     |
+| :-------- | :--------------------------------------- |
+| `type`  | **必填**。参数的类型               |
 | `color` | 可选。默认显示颜色, 不填默认随机显示颜色 |

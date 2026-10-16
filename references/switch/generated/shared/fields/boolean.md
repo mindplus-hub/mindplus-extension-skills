@@ -4,7 +4,7 @@
 
 - topic_id: `shared.field.boolean`
 - source_key: `mindplus.v2.extensions.common-field`
-- source_fingerprint: `55f54eae4e96f2ed1b00d1b76acffff991c9d3200e2428cd0e882ada9ca3fec0`
+- source_fingerprint: `122ea5fd137a371c8302b2788d3408fe3b946648855bf90084c6db54ab46532f`
 
 ## 5. 布尔值 (BOOLEAN)
 
@@ -27,6 +27,6 @@
 
 **参数说明:**
 
-| 参数 | 描述 |
-| :--- | :--- |
+| 参数     | 描述                       |
+| :------- | :------------------------- |
 | `type` | **必填**。参数的类型 |

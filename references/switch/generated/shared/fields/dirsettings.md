@@ -4,7 +4,7 @@
 
 - topic_id: `shared.field.dirsettings`
 - source_key: `mindplus.v2.extensions.common-field`
-- source_fingerprint: `da5fce63954709533fca279bea8f13190f1a0d15619298e33e2d23859621e8ff`
+- source_fingerprint: `eef18366877162394af1747790fe07e3cc487ff19dd0e194d677c068811c43a7`
 
 ## 14. 路径设置 (DIRSETTINGS)
 
@@ -31,8 +31,8 @@
 
 **参数说明:**
 
-| 参数 | 描述 |
-| :--- | :--- |
-| `type` | **必填**。参数的类型 |
-| `color1` | 可选。`field` 颜色, 默认 `#8b92e8` |
+| 参数       | 描述                                               |
+| :--------- | :------------------------------------------------- |
+| `type`   | **必填**。参数的类型                         |
+| `color1` | 可选。`field` 颜色, 默认 `#8b92e8`             |
 | `color2` | 可选。`block` 上显示的背景颜色, 默认 `#8b92e8` |

@@ -4,7 +4,7 @@
 
 - topic_id: `shared.field.string`
 - source_key: `mindplus.v2.extensions.common-field`
-- source_fingerprint: `6b46a31f470aa49e95522132d78bf9dbc67f49c70cb5ff4ea0afe78b8fbf6c58`
+- source_fingerprint: `f8a748533bde75ac60a22cbfde4e5cdadcd93d6174ccc873e39438bab2b27dcf`
 
 ## 2. 文本输入框 (STRING)
 
@@ -28,7 +28,7 @@
 
 **参数说明:**
 
-| 参数 | 描述 |
-| :--- | :--- |
-| `type` | **必填**。参数的类型 |
+| 参数             | 描述                                 |
+| :--------------- | :----------------------------------- |
+| `type`         | **必填**。参数的类型           |
 | `defaultValue` | 可选。默认显示内容，不填默认空字符串 |

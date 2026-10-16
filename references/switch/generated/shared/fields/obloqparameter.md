@@ -4,7 +4,7 @@
 
 - topic_id: `shared.field.obloqparameter`
 - source_key: `mindplus.v2.extensions.common-field`
-- source_fingerprint: `b5ca660279ea277400ec0acc519aac0c022fd6c418d322a5e7da48044a6f6f83`
+- source_fingerprint: `e09d68b34ddd5de419033073eadeda09479275be9b06af11cef6a54dc3b1c435`
 
 ## 15. OBLOQ初始化 (OBLOQPARAMETER)
 
@@ -33,8 +33,8 @@
 
 **参数说明:**
 
-| 参数 | 描述 |
-| :--- | :--- |
-| `type` | **必填**。参数的类型 |
-| `color` | 可选。`block` 和 `field` 颜色, 默认 `#5867D6` |
-| `validate` | 可选。自定义验证函数，用于限制输入 |
+| 参数         | 描述                                                |
+| :----------- | :-------------------------------------------------- |
+| `type`     | **必填**。参数的类型                          |
+| `color`    | 可选。`block` 和 `field` 颜色, 默认 `#5867D6` |
+| `validate` | 可选。自定义验证函数，用于限制输入                  |

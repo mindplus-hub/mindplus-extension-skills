@@ -4,7 +4,7 @@
 
 - topic_id: `shared.field.matrixicons`
 - source_key: `mindplus.v2.extensions.common-field`
-- source_fingerprint: `ce71fa8e65bf593662e017544d6309a10dd2d31d893f94e585ef5344b35150ef`
+- source_fingerprint: `d9ce9f0bb27f93efd6280bab3443ac67a02de506c769818a651f9ee92cd41065`
 
 ## 12. 点阵2 (MATRIXICONS)
 
@@ -47,16 +47,16 @@ const builtinMatrix = [
 
 **参数说明:**
 
-| 参数 | 类型 | 描述 | 示例 |
-| :--- | :--- | :--- | :--- |
-| `type` | string | **必填**。参数的类型 | |
-| `defaultValue` | string | 可选。默认显示的点阵值 | |
-| `colour` | string | 可选。在block中显示的点阵的背景颜色, 默认 `#F08080` | **颜色只能是十六进制** [visual example omitted] |
-| `row` | number | 可选。表示点阵的行数, 默认 `5`，最大值 `16` | |
-| `column` | number | 可选。表示点阵的列数, 默认 `5`，最大值 `32` | |
-| `isSplit` | boolean | 可选。是否启用分割模式，默认 `false` | [visual example omitted] |
-| `isRGB` | boolean | 可选。表示是否启用 `RGB` 模式 | |
-| `rgbColor` | string | 可选。用于指定点阵颜色<br>使用条件:<br>- 当 `isRGB` 为 `true` 时有效。<br>- 当 `isSwitch` 为 `false` 时有效。 | [visual example omitted] |
-| `isSwitch` | boolean | 可选。控制红绿蓝颜色的选择方式<br>- 当为 true 时，只能选择0 或 255；<br>- 当为 false 时，在 0 到 255 之间任意选择。<br>使用条件:<br>- 当 `isRGB` 为 `true` 时有效。 | [visual example omitted] |
-| `disabledChannel` | string[] | 可选。表示禁用的颜色选项<br>可选值: `green`, `blue`, `red`<br>使用条件:<br>- 当 `isRGB` 为 `true` 时有效。 | [visual example omitted] |
-| `builtinMatrixs` | string[] | 可选。内置点阵列表: 1表示点亮, 0表示熄灭 | |
+| 参数                | 类型     | 描述                                                                                                                                                                    | 示例                                                                                                                       |
+| :------------------ | :------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------- |
+| `type`            | string   | **必填**。参数的类型                                                                                                                                              |                                                                                                                            |
+| `defaultValue`    | string   | 可选。默认显示的点阵值                                                                                                                                                  |                                                                                                                            |
+| `colour`          | string   | 可选。在block中显示的点阵的背景颜色, 默认 `#F08080`                                                                                                                   | **颜色只能是十六进制** [visual example omitted] |
+| `row`             | number   | 可选。表示点阵的行数, 默认 `5`，最大值 `16`                                                                                                                         |                                                                                                                            |
+| `column`          | number   | 可选。表示点阵的列数, 默认 `5`，最大值 `32`                                                                                                                         |                                                                                                                            |
+| `isSplit`         | boolean  | 可选。是否启用分割模式，默认 `false`                                                                                                                                  | [visual example omitted]                              |
+| `isRGB`           | boolean  | 可选。表示是否启用 `RGB` 模式                                                                                                                                         |                                                                                                                            |
+| `rgbColor`        | string   | 可选。用于指定点阵颜色<br>使用条件:<br>- 当 `isRGB` 为 `true` 时有效。<br>- 当 `isSwitch` 为 `false` 时有效。                                                   | [visual example omitted]                              |
+| `isSwitch`        | boolean  | 可选。控制红绿蓝颜色的选择方式<br>- 当为 true 时，只能选择0 或 255；<br>- 当为 false 时，在 0 到 255 之间任意选择。<br>使用条件:<br>- 当 `isRGB` 为 `true` 时有效。 | [visual example omitted]                              |
+| `disabledChannel` | string[] | 可选。表示禁用的颜色选项<br>可选值: `green`, `blue`, `red`<br>使用条件:<br>- 当 `isRGB` 为 `true` 时有效。                                                    | [visual example omitted]                              |
+| `builtinMatrixs`  | string[] | 可选。内置点阵列表: 1表示点亮, 0表示熄灭                                                                                                                                |                                                                                                                            |

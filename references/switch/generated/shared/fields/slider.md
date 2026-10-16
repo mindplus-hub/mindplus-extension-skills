@@ -4,7 +4,7 @@
 
 - topic_id: `shared.field.slider`
 - source_key: `mindplus.v2.extensions.common-field`
-- source_fingerprint: `3536ac20182a4341e44faebd29fc275c395883908409a27d9239093e0520cf87`
+- source_fingerprint: `443fe06e0a1bb8732fdc1cf0372f7aa661aa4bccba24bde30ce3e8dc90d55469`
 
 ## 6. 滑动输入条 (SLIDER)
 
@@ -41,10 +41,10 @@
 
 **参数说明:**
 
-| 参数 | 描述 |
-| :--- | :--- |
-| `type` | **必填**。参数的类型 |
-| `defaultValue` | 可选。默认显示内容, 不填默认 `90` |
-| `rangeMin` | 可选。可拖动的最小值, 不填默认 `0` |
-| `rangeMax` | 可选。可拖动的最大值, 不填默认 `255` |
-| `step` | 可选。步长, 默认值为 `1` |
+| 参数             | 描述                                   |
+| :--------------- | :------------------------------------- |
+| `type`         | **必填**。参数的类型             |
+| `defaultValue` | 可选。默认显示内容, 不填默认 `90`    |
+| `rangeMin`     | 可选。可拖动的最小值, 不填默认 `0`   |
+| `rangeMax`     | 可选。可拖动的最大值, 不填默认 `255` |
+| `step`         | 可选。步长, 默认值为 `1`             |

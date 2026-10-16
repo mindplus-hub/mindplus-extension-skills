@@ -4,7 +4,7 @@
 
 - topic_id: `shared.field.onlineimgsetting`
 - source_key: `mindplus.v2.extensions.common-field`
-- source_fingerprint: `7fef48ba03ff8124253b43b42db4ec12d4300e303c36bdb4906492e60e90c576`
+- source_fingerprint: `da2d3a03f3a2a2a1d26c23c7710202c720a537c23064194bf897bf32c788c30d`
 
 ## 18. 在线图片设置 (ONLINEIMGSETTING)
 
@@ -27,6 +27,6 @@
 
 **参数说明:**
 
-| 参数 | 描述 |
-| :--- | :--- |
+| 参数     | 描述                       |
+| :------- | :------------------------- |
 | `type` | **必填**。参数的类型 |

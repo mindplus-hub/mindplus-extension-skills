@@ -1,11 +1,11 @@
 {
   "bundle_id": "mindplus-switch-references",
-  "content_sha256": "1dfc2efe046d3f7de8a1f932139e2bd884bf82f2c566a206bf3b7fd2f8f30287",
+  "content_sha256": "254c488ab26b4941e3c0790f17a36b591d0a721e8d74cdfc335ac82bccce1fd9",
   "files": [
     {
       "path": "index.json",
-      "sha256": "8e9300c25938a4d7f2f1fa120bfca762fe5055ae2a3087f8abae4685978997b2",
-      "size": 32378
+      "sha256": "8a17198bdea3b33e47f11364c4e7fec6c02d4b424ee5ed6beb209310c53df467",
+      "size": 32248
     },
     {
       "path": "index.md",
@@ -14,8 +14,8 @@
     },
     {
       "path": "python/config.md",
-      "sha256": "50e00450af50009e8a7d94bbbb463050700f9c2eae5253b0ef39a9b35ef83d64",
-      "size": 3645
+      "sha256": "51996f0ce650b4f00fe168903c66886ff48a989e8ec8bf27469d47ddaf833a3f",
+      "size": 4089
     },
     {
       "path": "python/generator/add-function.md",
@@ -109,128 +109,128 @@
     },
     {
       "path": "shared/config-identity.md",
-      "sha256": "5ac64c76483d153e2fb1a2256f34c1efb0f5303af699f834eebfc9a4f7779b36",
-      "size": 6232
+      "sha256": "d3e2d338dfaccc5186bed7c98d7e49faf7d5068b3203fad89c238f0315e51aae",
+      "size": 6900
     },
     {
       "path": "shared/fields/angle.md",
-      "sha256": "87510deb7c8beb38669195b55a9aeb89efa829f55628091c036ed0fc9991ac6c",
-      "size": 766
+      "sha256": "a0522da970336cf54ad4ef8830ac0624322fac9b19dcbca0680fd4e8931dafbf",
+      "size": 1071
     },
     {
       "path": "shared/fields/boolean.md",
-      "sha256": "0f9f72135dac92113b0183e70ce681a0068a21ca8e424af1be844c5de92284f1",
-      "size": 655
+      "sha256": "d670f7feffa2981e56fb1303ec9cbfdae70061b2eebbd82f1d96e1f7fc3ed6c7",
+      "size": 707
     },
     {
       "path": "shared/fields/builtinimg.md",
-      "sha256": "1070b4dd666ae3d0f3fd8181d5841dba4008f46b366d5d02c723a3df9efb0a55",
-      "size": 1019
+      "sha256": "428e8e874a9e8199ac3620fcf793b805863387b0bd62b17f371ffebc00c35b68",
+      "size": 1351
     },
     {
       "path": "shared/fields/color.md",
-      "sha256": "4542b85e0e1e9b2b369670972b863b5e9f64b04e4a0e3173765702c8d2f0f68e",
-      "size": 801
+      "sha256": "9b10100dc3818289c330c4689b263279036b27997780ed6c15558cd099373709",
+      "size": 898
     },
     {
       "path": "shared/fields/colorpalette.md",
-      "sha256": "a68ddef5e9bb151d04c69f39479c3583036460552a9bceb3874f6eddfb3b756e",
-      "size": 1438
+      "sha256": "d05b4bb011fa9bca12c95e2baf3c8df3cad8e2051f0fb1bf06e3bba07ce65aec",
+      "size": 1728
     },
     {
       "path": "shared/fields/dirsettings.md",
-      "sha256": "f5c3b0f787817801acdbcf66851e51dab0ee0e0b95705deb4e2b40bd6e34dcae",
-      "size": 960
+      "sha256": "eb06db98f37645601e7327d41b74d1d7a7ea81185b51102d5187085ed7858460",
+      "size": 1102
     },
     {
       "path": "shared/fields/dropdown.md",
-      "sha256": "6401a1cd7182cad56dc8a41427874d6dbe782dfc173a397a81d0a9c01e49ebcb",
-      "size": 3344
+      "sha256": "d58ee5eb6a490fd35822da80549a81763ce6a2f42173294af4437f6d820aa63c",
+      "size": 3532
     },
     {
       "path": "shared/fields/eventheadinner.md",
-      "sha256": "d0d338d2957558dba03a7be903c09cfd037bd4191f845efdfbd2e268edc24d15",
-      "size": 1589
+      "sha256": "44acd1dc537155990fbb3d6ac1401b304c4259d6a70a0566b9957f7b77d68e0a",
+      "size": 1714
     },
     {
       "path": "shared/fields/formsetting.md",
-      "sha256": "5c247c268c7de9519b10f23cf439cbbfb46a88550e55611063336fafee779e4b",
-      "size": 2963
+      "sha256": "3d54d33d1dccb7b595ca59d3234dc51d2ba8ea9af11dd8fc831b64ff32b19123",
+      "size": 4932
     },
     {
       "path": "shared/fields/imgpreview.md",
-      "sha256": "95c089ae5ac96c69f44531c21bc3dfb59cdb23fbe2723e3dc8a51d9ff6e6ea60",
-      "size": 1416
+      "sha256": "85f27aa794c5302df7042c516f5a91ae01cdce25358980a21d96651e93555d42",
+      "size": 1687
     },
     {
       "path": "shared/fields/imgsettings.md",
-      "sha256": "1a937666fe8b4a1da544c8143b40ce9e14270ae7ec4a77a8bbd6df8aa8d29067",
-      "size": 954
+      "sha256": "ee72c827e08949c4e656bc27b088ca9827a4877fda90f0033beb93fdb294a34c",
+      "size": 1096
     },
     {
       "path": "shared/fields/infraredtext.md",
-      "sha256": "db8b1deec2cb9dbcb92cecb14610be243c6c15f01a38109df12016a0468a953d",
-      "size": 836
+      "sha256": "e84f2810a0ed91398505b383f87b07437b69f79f189001c28b444073ebe8395b",
+      "size": 942
     },
     {
       "path": "shared/fields/matrix.md",
-      "sha256": "7c19bd74f18e483f3be4f98fb6f6c1be4db092cb0c7fce05e16fa351a7d55696",
-      "size": 652
+      "sha256": "ebe91aa48949ac316f58dbaf6c6f4a9b229f627695a486ce9845934ace61f34a",
+      "size": 704
     },
     {
       "path": "shared/fields/matrixicons.md",
-      "sha256": "1e0ba665f468340d0b75f2b856f3def9782bf536fc3c474847738d6365c01f54",
-      "size": 2897
+      "sha256": "127c1066bd6b84b45055e9d8cfb4965eae91df4c528dd9f82d97e83154960784",
+      "size": 5576
     },
     {
       "path": "shared/fields/mqttparameter.md",
-      "sha256": "80f823d864d40d1b60fd12cb1a4f2dbb266c468675d9b6a00bd2525d9ed1e2c8",
-      "size": 709
+      "sha256": "824f8410fb8f88b938c53a1fad769251f3c1eaef18286518603ff759b6b6dbdb",
+      "size": 761
     },
     {
       "path": "shared/fields/note.md",
-      "sha256": "915856ebd8f7c91572978afce50399f1cb6a5508b04c68cfef7cc15ac94629aa",
-      "size": 741
+      "sha256": "da4b176601506650e3cdffb077bb009816fc643f3af157c6247983c8499fa01c",
+      "size": 844
     },
     {
       "path": "shared/fields/number.md",
-      "sha256": "2ae8cb198dc85c9a310ec9bdf5b4f12d5e86d34ce5fb1214049ebe5965c1d646",
-      "size": 1517
+      "sha256": "6c5ada362e1edd1521f52564955fd9aa178b187ca1c10378d62ee4e1db02cdf4",
+      "size": 1681
     },
     {
       "path": "shared/fields/obloqparameter.md",
-      "sha256": "92a81e0109a2a343953f0a7190ab0387dac964454275d2ea068729d0afdad18b",
-      "size": 1010
+      "sha256": "b460fc10d020d2e1c61e6c464f65a3515e35d0862d5494f1f30cbaeb1a03cb98",
+      "size": 1169
     },
     {
       "path": "shared/fields/onlineimgsetting.md",
-      "sha256": "6cfc022afd522e1e72f9df06854ee86ba7b61be7db4b85175eddb423d4f993db",
-      "size": 734
+      "sha256": "dc96b0e66aa022a2fde1ffab6fef76f3d06b75a9d1e7365ba234c5253b8503b8",
+      "size": 786
     },
     {
       "path": "shared/fields/piano.md",
-      "sha256": "c2ba66b1843f1e0d4efeb23e8c3a7854de71905c5a3456f0c5a7c3322ab64e55",
-      "size": 759
+      "sha256": "f4ac67365bb2517f683cc040101b23e6b3910408106a7c5a1296efb0ecb15599",
+      "size": 865
     },
     {
       "path": "shared/fields/slider.md",
-      "sha256": "51fa3b4f727f669467a045421a888caddb10184889ff7bfff1fb8d9ce613a51b",
-      "size": 1284
+      "sha256": "fe40687f2c972ee837df2cee672c8c5f12ef2892939fc02eb2b6c36ae24c203d",
+      "size": 1429
     },
     {
       "path": "shared/fields/string.md",
-      "sha256": "6108230fce061e9509b4765b5c136de2435c7106d2f088525739f60a89b0a5b4",
-      "size": 785
+      "sha256": "3ed8924e2c9312a5503fb30e65e9227c0a218446ad04de0e9d84458a4f480872",
+      "size": 891
     },
     {
       "path": "shared/fields/textarea.md",
-      "sha256": "aac13fc80592f960899f5b8aab364433f352344c16aaeff03a230f5082836a15",
-      "size": 1038
+      "sha256": "9aee4aa258bf9cd8d8e0c161c201602bc61e70b8f939e5ef3205e46f2b9acb7b",
+      "size": 1193
     },
     {
       "path": "shared/fields/textpreview.md",
-      "sha256": "33770cd35f03ceb95487e16cf5b5ce5cbea5e0f16686879faf8ea4ab23fc9d8a",
-      "size": 1573
+      "sha256": "b4f1f785cb0164b056f702f96c058df70bb631a3f4573a28a8b3b716adc5b052",
+      "size": 1844
     },
     {
       "path": "shared/runtime.md",
@@ -244,8 +244,8 @@
     },
     {
       "path": "upload/config.md",
-      "sha256": "ddc6656f849ef39a3dff022bc217814391144c5d11a1ac4555729fd003c482dd",
-      "size": 6465
+      "sha256": "3420284460661ebd3984cc11a17f6d009f096d273c06a135a2283692277d0cb4",
+      "size": 7808
     },
     {
       "path": "upload/generator/add-const.md",
@@ -318,8 +318,8 @@
       "size": 1406
     }
   ],
-  "min_skill_version": "0.5.0",
-  "release_id": "refs-1dfc2efe046d",
+  "min_skill_version": "0.3.14",
+  "release_id": "refs-254c488ab26b",
   "schema_version": 1,
   "supported_modes": [
     "UPLOAD",

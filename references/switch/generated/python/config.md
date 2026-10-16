@@ -4,7 +4,7 @@
 
 - topic_id: `python.config`
 - source_key: `mindplus.v2.extensions.python`
-- source_fingerprint: `d9d986ba6882f0f288ee5464827470f4767b9160207024c3194c53344d9e3836`
+- source_fingerprint: `76d70407609e1b37177e8646320ef73607ce509ac08f58713b4d31acabc606a5`
 
 ## 2. 配置文件 (public/config.json)
 
@@ -37,18 +37,21 @@
 
 ### 关键字段说明
 
-| 字段                    | 类型    | 说明                                           |
-| :---------------------- | :------ | :--------------------------------------------- |
-| `id`                  | string  | 扩展唯一标识符。                               |
-| `author`              | string  | 与id一起组成扩展唯一标识。                     |
-| `version`             | string  | 版本号。                                       |
-| `name`                | object  | 多语言名称。                                   |
-| `description`         | object  | 多语言描述。                                   |
-| `cover`               | string  | 封面图片文件名，需位于 `public` 目录下。     |
-| `mode`                | string  | 模式，此处应为 `python-block`。              |
-| `isDevice`            | boolean | Python模式均为 `false`。                     |
-| `meta.runtimeVersion` | string  | 扩展 runtime 接口版本（用于控制 API 兼容性）。 |
-| `compatibilityId`     | string  | Mind+V1.x用户库兼容字段。                      |
+| 字段                    | 必填  | 类型    | 说明                                           |
+| :---------------------- | :-- | :------ | :--------------------------------------------- |
+| `id`                  | 必填  | string  | 扩展唯一标识符。                               |
+| `author`              | 必填  | string  | 与id一起组成扩展唯一标识。                     |
+| `version`             | 必填  | string  | 版本号。                                       |
+| `name`                | 必填  | object  | 多语言名称。                                   |
+| `description`         | 必填  | object  | 多语言描述。                                   |
+| `cover`               | 必填  | string  | 封面图片文件名，需位于 `public` 目录下。     |
+| `mode`                | 必填  | string  | 模式，此处应为 `python-block`。              |
+| `isDevice`            | 必填  | boolean | Python模式均为 `false`。                     |
+| `sku`                 | 可选  | string  | 硬件产品型号，多个型号用\|隔开；没有则留空，即写成 `"sku": ""`。 |
+| `meta.runtimeVersion` | 必填  | string  | 扩展 runtime 接口版本（用于控制 API 兼容性）。 |
+| `compatibilityId`     | 可选  | string  | Mind+V1.x用户库兼容字段；没有则留空，即写成 `"compatibilityId": ""`。 |
+
+> **注**：`sku` 和 `compatibilityId` 为可选字段，不需要填写时请保留为空字符串，即写成 `"sku": ""` 和 `"compatibilityId": ""`。
 
 #### meta.runtimeVersion
 

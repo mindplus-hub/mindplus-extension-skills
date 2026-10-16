@@ -4,7 +4,7 @@
 
 - topic_id: `shared.field.matrix`
 - source_key: `mindplus.v2.extensions.common-field`
-- source_fingerprint: `432d900cc8486fe7891a5e995ff737d152c12b0fd1fe1ff83aa350b5dfcf4b9e`
+- source_fingerprint: `b19e5a17abf1a50c0d73abec9f7b21e385082a24450d046308c6ed1473149c5c`
 
 ## 11. 点阵1 (MATRIX)
 
@@ -27,6 +27,6 @@
 
 **参数说明:**
 
-| 参数 | 描述 |
-| :--- | :--- |
+| 参数     | 描述                       |
+| :------- | :------------------------- |
 | `type` | **必填**。参数的类型 |

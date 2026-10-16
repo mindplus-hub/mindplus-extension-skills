@@ -4,7 +4,7 @@
 
 - topic_id: `shared.field.textarea`
 - source_key: `mindplus.v2.extensions.common-field`
-- source_fingerprint: `484e26fe58dda2d237db8c67d91157c87735cd474156c882953504fb53e0fa91`
+- source_fingerprint: `cf05e699cbe216c652c9aee6504821bb2dd10a9c78fbaa5fc2d7ff10dd1a7bb3`
 
 ## 23. 文本域 (TEXTAREA)
 
@@ -35,8 +35,8 @@
 
 **参数说明:**
 
-| 参数 | 描述 |
-| :--- | :--- |
-| `type` | **必填**。参数的类型 |
-| `inputValue` | 可选。默认文本内容 |
-| `color` | 可选。`block` 的背景颜色, 默认 `#a55b5b` |
+| 参数           | 描述                                         |
+| :------------- | :------------------------------------------- |
+| `type`       | **必填**。参数的类型                   |
+| `inputValue` | 可选。默认文本内容                           |
+| `color`      | 可选。`block` 的背景颜色, 默认 `#a55b5b` |

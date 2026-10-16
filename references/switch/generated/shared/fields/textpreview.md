@@ -4,7 +4,7 @@
 
 - topic_id: `shared.field.textpreview`
 - source_key: `mindplus.v2.extensions.common-field`
-- source_fingerprint: `2bc05d16f7269685f6b4ba368725d1901d74c1a410683073312958ce6e1d9a1a`
+- source_fingerprint: `bf7ba18c9494570592665cc55db2390524ed8f9858e49b67c71987485eba8004`
 
 ## 20. 文本预览 (TEXTPREVIEW)
 
@@ -50,9 +50,9 @@
 
 **参数说明:**
 
-| 参数 | 描述 |
-| :--- | :--- |
-| `type` | **必填**。参数的类型 |
+| 参数      | 描述                                                                                               |
+| :-------- | :------------------------------------------------------------------------------------------------- |
+| `type`  | **必填**。参数的类型                                                                         |
 | `color` | 可选。`block` 和 `field` 颜色。默认 `field` 颜色 `#87C482`, `block` 背景颜色 `#7FB57B` |
 
 > 使用该field时, 一定需要把文字和坐标(属性名称必须是 `TEXT`, `X` 和 `Y`)加上, 用于在预览时显示文字和确定文字位置

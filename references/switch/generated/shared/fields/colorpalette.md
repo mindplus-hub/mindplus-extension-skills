@@ -4,7 +4,7 @@
 
 - topic_id: `shared.field.colorpalette`
 - source_key: `mindplus.v2.extensions.common-field`
-- source_fingerprint: `44e30ff7d9a5c01cf431ee6c7ac8cadc214b2aedeb658369d3fc63aca5de2447`
+- source_fingerprint: `ea81f1d5ab5e9bcf0e1acb4845f6e295dbcd9d6ecfefbd01b578651693531f7d`
 
 ## 7. 色板 (COLORPALETTE)
 
@@ -37,13 +37,14 @@
 
 **参数说明:**
 
-| 参数 | 描述 |
-| :--- | :--- |
-| `type` | **必填**。参数的类型 |
-| `color` | 可选。默认显示颜色,不填默认 `#0000ff` (蓝色) |
+| 参数        | 描述                                                                        |
+| :---------- | :-------------------------------------------------------------------------- |
+| `type`    | **必填**。参数的类型                                                  |
+| `color`   | 可选。默认显示颜色,不填默认 `#0000ff` (蓝色)                              |
 | `colours` | 可选。可以选择的颜色数组，颜色格式为十六进制。默认为 `mind+` 提供的色块。 |
-| `columns` | 可选。每行显示的色块个数。 |
+| `columns` | 可选。每行显示的色块个数。                                                  |
 
 > **注意**:
+>
 > 1. 提供的颜色均为十六进制, 不能是rgb
 > 2. 提供颜色数组的属性是 `colours`, 不是 `colors` !

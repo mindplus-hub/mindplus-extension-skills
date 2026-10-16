@@ -4,7 +4,7 @@
 
 - topic_id: `shared.field.number`
 - source_key: `mindplus.v2.extensions.common-field`
-- source_fingerprint: `97a8700271344f0714a197fffe3f66877c9243e90790ad1bfdb0e45da66d74ea`
+- source_fingerprint: `6adac962df63ab2667aec2c696c73c861258bf9c1b61e51071a93166cfe8e02b`
 
 ## 1. 数值型 (NUMBER)
 
@@ -47,12 +47,12 @@ _validateNumber(text) { //非负数
 
 **参数说明:**
 
-| 参数 | 描述 |
-| :--- | :--- |
-| `type` | **必填**。参数的类型 |
-| `defaultValue` | 可选。默认显示内容, 不填默认 `0` |
-| `max` | 可选。最大值，不填默认无限制 |
-| `min` | 可选。最小值，不填默认无限制 |
-| `noLimit` | 可选。是否无限制，默认 `false` |
-| `validate` | 可选。自定义验证函数，用于限制输入 |
-| `isHex` | 可选。是否是十六进制，默认 `false` |
+| 参数             | 描述                                 |
+| :--------------- | :----------------------------------- |
+| `type`         | **必填**。参数的类型           |
+| `defaultValue` | 可选。默认显示内容, 不填默认 `0`   |
+| `max`          | 可选。最大值，不填默认无限制         |
+| `min`          | 可选。最小值，不填默认无限制         |
+| `noLimit`      | 可选。是否无限制，默认 `false`     |
+| `validate`     | 可选。自定义验证函数，用于限制输入   |
+| `isHex`        | 可选。是否是十六进制，默认 `false` |

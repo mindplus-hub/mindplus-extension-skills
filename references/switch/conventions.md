@@ -21,8 +21,10 @@
 
 ## supportDevices 与 supportArch（设备范围）
 
-- `supportDevices` 是对象：`{"dev-DFRobot-<board>": "^0.0.1", ...}`，键必须在
-  [device-ids.json](device-ids.json) 字典内，值统一 `^0.0.1`（官方文档示例与全部已验证项目一致）。
+- `supportDevices` 是对象：`{"dev-DFRobot-<board>": "^<版本>", ...}`，键必须在
+  [device-ids.json](device-ids.json) 字典内。适配 runtime `0.0.2` 时采用各板的
+  `official_runtime_version_specs["0.0.2"]`（来源：[官方配置语料](generated/upload/config.md)）；
+  `observed_version_specs` 中的 `^0.0.1` 是历史项目范围，不代表 runtime `0.0.2` 的最低版本。
 - 二者表达整体设备范围；单积木的 `board/boards` 是可见性条件，不能互相替代
   （见 [upload-mode.md](upload-mode.md)）。
 - 三种合法组合（按扩展类型选一种）：

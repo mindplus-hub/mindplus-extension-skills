@@ -4,7 +4,7 @@
 
 - topic_id: `shared.field.infraredtext`
 - source_key: `mindplus.v2.extensions.common-field`
-- source_fingerprint: `64e88d4240245ba4d6245641f22eef5d5d26e64bc273d9e04bbb76417392907e`
+- source_fingerprint: `01fab08a026c066448dbc260a1c72097bfaaa064d377da5e0473a36b03b92b6d`
 
 ## 22. 红外遥控器 (INFRAREDTEXT)
 
@@ -28,7 +28,7 @@
 
 **参数说明:**
 
-| 参数 | 描述 |
-| :--- | :--- |
-| `type` | **必填**。参数的类型 |
+| 参数             | 描述                                 |
+| :--------------- | :----------------------------------- |
+| `type`         | **必填**。参数的类型           |
 | `defaultValue` | 可选。展示的默认值, 默认 `"Power"` |

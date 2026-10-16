@@ -4,7 +4,7 @@
 
 - topic_id: `shared.field.imgsettings`
 - source_key: `mindplus.v2.extensions.common-field`
-- source_fingerprint: `cbb0a9c87887c387ba9549d838118722f152898dac75ae2ac8983df4afd9f7fe`
+- source_fingerprint: `c2a33a573d1ef2eaeda25b3468e5e2e793c66115a69866dabf43398fb7b4030b`
 
 ## 17. 图片设置 (IMGSETTINGS)
 
@@ -31,8 +31,8 @@
 
 **参数说明:**
 
-| 参数 | 描述 |
-| :--- | :--- |
-| `type` | **必填**。参数的类型 |
-| `color1` | 可选。`field` 颜色, 默认 `#8b92e8` |
+| 参数       | 描述                                               |
+| :--------- | :------------------------------------------------- |
+| `type`   | **必填**。参数的类型                         |
+| `color1` | 可选。`field` 颜色, 默认 `#8b92e8`             |
 | `color2` | 可选。`block` 上显示的背景颜色, 默认 `#8b92e8` |

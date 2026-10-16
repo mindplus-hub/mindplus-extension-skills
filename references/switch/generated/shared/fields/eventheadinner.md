@@ -4,7 +4,7 @@
 
 - topic_id: `shared.field.eventheadinner`
 - source_key: `mindplus.v2.extensions.common-field`
-- source_fingerprint: `c9b25062849e2e1fc53fbf76598eb09b9344d4118a6a5f098b79e84c91c33572`
+- source_fingerprint: `373eca71fd85b2c0369c15e11d9d138da1fe0ad657f72586e0b5b777d150e922`
 
 ## 24. 事件头内置积木 (EVENTHEADINNER)
 
@@ -40,12 +40,12 @@
 
 **参数说明:**
 
-| 参数 | 描述 | 示例 |
-| :--- | :--- | :--- |
-| `type` | **必填**。参数的类型 | |
-| `parent` | **必填**。父级block的 `opcode` | |
-| `block` | **必填**。子级block的 `opcode` | |
-| `noIcon` | 可选。是否有图标 默认 `false` (有图标) | |
+| 参数       | 描述                                     | 示例 |
+| :--------- | :--------------------------------------- | :--- |
+| `type`   | **必填**。参数的类型               |      |
+| `parent` | **必填**。父级block的 `opcode`   |      |
+| `block`  | **必填**。子级block的 `opcode`   |      |
+| `noIcon` | 可选。是否有图标 默认 `false` (有图标) |      |
 
 [visual example omitted]
 

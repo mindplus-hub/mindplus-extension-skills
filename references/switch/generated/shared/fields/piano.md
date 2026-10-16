@@ -4,7 +4,7 @@
 
 - topic_id: `shared.field.piano`
 - source_key: `mindplus.v2.extensions.common-field`
-- source_fingerprint: `fe53bdd035ae7bd4bc2941b78634cc1ac555820f33bff2c67d015f0eefb4d807`
+- source_fingerprint: `1e6b71fd72b0ad0c5f136b2d6c17126f3be7bfe06a622ee11d5914dde0371931`
 
 ## 9. 钢琴键 (PIANO)
 
@@ -28,7 +28,7 @@
 
 **参数说明:**
 
-| 参数 | 描述 |
-| :--- | :--- |
-| `type` | **必填**。参数的类型 |
+| 参数             | 描述                                 |
+| :--------------- | :----------------------------------- |
+| `type`         | **必填**。参数的类型           |
 | `defaultValue` | 可选。默认显示内容, 不填默认 `131` |

@@ -71,9 +71,6 @@
         "separator": [
           "shared.block.special"
         ],
-        "submenu": [
-          "shared.block.special"
-        ],
         "validation": [
           "shared.block.special",
           "python.generator.advanced"
@@ -154,9 +151,6 @@
         "separator": [
           "shared.block.special"
         ],
-        "submenu": [
-          "shared.block.special"
-        ],
         "validation": [
           "shared.block.special"
         ]
@@ -174,7 +168,7 @@
         "PYTHON_BLOCK"
       ],
       "path": "python/config.md",
-      "source_fingerprint": "d9d986ba6882f0f288ee5464827470f4767b9160207024c3194c53344d9e3836",
+      "source_fingerprint": "76d70407609e1b37177e8646320ef73607ce509ac08f58713b4d31acabc606a5",
       "source_key": "mindplus.v2.extensions.python",
       "title": "Python 积木模式 config.json",
       "topic_id": "python.config",
@@ -485,7 +479,7 @@
         "UPLOAD"
       ],
       "path": "shared/config-identity.md",
-      "source_fingerprint": "81bd08e69a20280e018c8f29287075497975c866e49f3725417b533a1dfa48c4",
+      "source_fingerprint": "ff1ad9fbf989e2dc1e52419130f6d108fe147d4511f4f4360c4d03b852e60a49",
       "source_key": "mindplus.v2.extensions.overview",
       "title": "扩展身份字段约束",
       "topic_id": "shared.config-identity",
@@ -502,7 +496,7 @@
         "UPLOAD"
       ],
       "path": "shared/fields/angle.md",
-      "source_fingerprint": "d37d86723bd42e508ac24132ccc849763fe38d1555c109919e4b9b34ff62a33d",
+      "source_fingerprint": "384a328768d2fe03686ee7235d43c86f0747b4647df14b8fab9e7517c16c1ae4",
       "source_key": "mindplus.v2.extensions.common-field",
       "title": "4. 角度 (ANGLE)",
       "topic_id": "shared.field.angle",
@@ -518,7 +512,7 @@
         "UPLOAD"
       ],
       "path": "shared/fields/boolean.md",
-      "source_fingerprint": "55f54eae4e96f2ed1b00d1b76acffff991c9d3200e2428cd0e882ada9ca3fec0",
+      "source_fingerprint": "122ea5fd137a371c8302b2788d3408fe3b946648855bf90084c6db54ab46532f",
       "source_key": "mindplus.v2.extensions.common-field",
       "title": "5. 布尔值 (BOOLEAN)",
       "topic_id": "shared.field.boolean",
@@ -534,7 +528,7 @@
         "UPLOAD"
       ],
       "path": "shared/fields/builtinimg.md",
-      "source_fingerprint": "4fe02f2d0ebfa347d89608abce6a4f11a0122a9098e088aae4cf03e6a6e456e8",
+      "source_fingerprint": "b471c6f556a446597e20fbd79edf6834433ea6fdbe5f8d0547e2ad46bb1e8385",
       "source_key": "mindplus.v2.extensions.common-field",
       "title": "21. 内置图像资源 (BUILTINIMG)",
       "topic_id": "shared.field.builtinimg",
@@ -550,7 +544,7 @@
         "UPLOAD"
       ],
       "path": "shared/fields/color.md",
-      "source_fingerprint": "b277ca8ffbed24f67ec7709d0d6167d45d133b5772cd5565d98b0e576036689e",
+      "source_fingerprint": "7bc88d65904c0c2c7f5e4d9af84c4a912913b7b5e4757a7825e641aa3748dbd1",
       "source_key": "mindplus.v2.extensions.common-field",
       "title": "8. 取色器 (COLOR)",
       "topic_id": "shared.field.color",
@@ -566,7 +560,7 @@
         "UPLOAD"
       ],
       "path": "shared/fields/colorpalette.md",
-      "source_fingerprint": "44e30ff7d9a5c01cf431ee6c7ac8cadc214b2aedeb658369d3fc63aca5de2447",
+      "source_fingerprint": "ea81f1d5ab5e9bcf0e1acb4845f6e295dbcd9d6ecfefbd01b578651693531f7d",
       "source_key": "mindplus.v2.extensions.common-field",
       "title": "7. 色板 (COLORPALETTE)",
       "topic_id": "shared.field.colorpalette",
@@ -582,7 +576,7 @@
         "UPLOAD"
       ],
       "path": "shared/fields/dirsettings.md",
-      "source_fingerprint": "da5fce63954709533fca279bea8f13190f1a0d15619298e33e2d23859621e8ff",
+      "source_fingerprint": "eef18366877162394af1747790fe07e3cc487ff19dd0e194d677c068811c43a7",
       "source_key": "mindplus.v2.extensions.common-field",
       "title": "14. 路径设置 (DIRSETTINGS)",
       "topic_id": "shared.field.dirsettings",
@@ -598,7 +592,7 @@
         "UPLOAD"
       ],
       "path": "shared/fields/dropdown.md",
-      "source_fingerprint": "3221b43ecf9f4ad2cac4e803e0cf6ef40eb9ec722e1ad406c0e212e90fcf4b9a",
+      "source_fingerprint": "2596a97eb78853365bb3ff0cb2466e8c0a904d8d728145d14463e48fc211059a",
       "source_key": "mindplus.v2.extensions.common-field",
       "title": "3. 下拉框",
       "topic_id": "shared.field.dropdown",
@@ -613,7 +607,7 @@
         "UPLOAD"
       ],
       "path": "shared/fields/eventheadinner.md",
-      "source_fingerprint": "c9b25062849e2e1fc53fbf76598eb09b9344d4118a6a5f098b79e84c91c33572",
+      "source_fingerprint": "373eca71fd85b2c0369c15e11d9d138da1fe0ad657f72586e0b5b777d150e922",
       "source_key": "mindplus.v2.extensions.common-field",
       "title": "24. 事件头内置积木 (EVENTHEADINNER)",
       "topic_id": "shared.field.eventheadinner",
@@ -629,7 +623,7 @@
         "UPLOAD"
       ],
       "path": "shared/fields/formsetting.md",
-      "source_fingerprint": "bed08d0636abf98d3f3f96fedfae4cafee566c175a67f81feecacc0cdc232599",
+      "source_fingerprint": "90cd06f008be95f09cfe5f1eb80ec7346402617c30654d8b1ceb8eeb0fa31d0c",
       "source_key": "mindplus.v2.extensions.common-field",
       "title": "13. 表单设置 (FORMSETTING)",
       "topic_id": "shared.field.formsetting",
@@ -645,7 +639,7 @@
         "UPLOAD"
       ],
       "path": "shared/fields/imgpreview.md",
-      "source_fingerprint": "652c8d1baccabf3134b40ed08fd45c382ec7e01fd16461eb5b6e2453cdcb9c61",
+      "source_fingerprint": "050547d14bee11067551262ba4a3c451125b7793e672588e89faf30c408d5c9f",
       "source_key": "mindplus.v2.extensions.common-field",
       "title": "19. 图片预览 (IMGPREVIEW)",
       "topic_id": "shared.field.imgpreview",
@@ -661,7 +655,7 @@
         "UPLOAD"
       ],
       "path": "shared/fields/imgsettings.md",
-      "source_fingerprint": "cbb0a9c87887c387ba9549d838118722f152898dac75ae2ac8983df4afd9f7fe",
+      "source_fingerprint": "c2a33a573d1ef2eaeda25b3468e5e2e793c66115a69866dabf43398fb7b4030b",
       "source_key": "mindplus.v2.extensions.common-field",
       "title": "17. 图片设置 (IMGSETTINGS)",
       "topic_id": "shared.field.imgsettings",
@@ -677,7 +671,7 @@
         "UPLOAD"
       ],
       "path": "shared/fields/infraredtext.md",
-      "source_fingerprint": "64e88d4240245ba4d6245641f22eef5d5d26e64bc273d9e04bbb76417392907e",
+      "source_fingerprint": "01fab08a026c066448dbc260a1c72097bfaaa064d377da5e0473a36b03b92b6d",
       "source_key": "mindplus.v2.extensions.common-field",
       "title": "22. 红外遥控器 (INFRAREDTEXT)",
       "topic_id": "shared.field.infraredtext",
@@ -693,7 +687,7 @@
         "UPLOAD"
       ],
       "path": "shared/fields/matrix.md",
-      "source_fingerprint": "432d900cc8486fe7891a5e995ff737d152c12b0fd1fe1ff83aa350b5dfcf4b9e",
+      "source_fingerprint": "b19e5a17abf1a50c0d73abec9f7b21e385082a24450d046308c6ed1473149c5c",
       "source_key": "mindplus.v2.extensions.common-field",
       "title": "11. 点阵1 (MATRIX)",
       "topic_id": "shared.field.matrix",
@@ -709,7 +703,7 @@
         "UPLOAD"
       ],
       "path": "shared/fields/matrixicons.md",
-      "source_fingerprint": "ce71fa8e65bf593662e017544d6309a10dd2d31d893f94e585ef5344b35150ef",
+      "source_fingerprint": "d9ce9f0bb27f93efd6280bab3443ac67a02de506c769818a651f9ee92cd41065",
       "source_key": "mindplus.v2.extensions.common-field",
       "title": "12. 点阵2 (MATRIXICONS)",
       "topic_id": "shared.field.matrixicons",
@@ -725,7 +719,7 @@
         "UPLOAD"
       ],
       "path": "shared/fields/mqttparameter.md",
-      "source_fingerprint": "1015de064baf62fd759e014e2f2af994c228186e93f318179f50ab5270321bf3",
+      "source_fingerprint": "b2bff4fa2cdf86bcf9530c55ae2b6d2612bb4e0ca4729b85a0d632223044d244",
       "source_key": "mindplus.v2.extensions.common-field",
       "title": "16. MQTT初始化 (MQTTPARAMETER)",
       "topic_id": "shared.field.mqttparameter",
@@ -741,7 +735,7 @@
         "UPLOAD"
       ],
       "path": "shared/fields/note.md",
-      "source_fingerprint": "c6b4bb7e09c67d0c0a804dab976d294a4ff6b97723df9fbc78e598b3beaaecba",
+      "source_fingerprint": "a98a58965e2edb2e30130fe782945061649d081399a1aaf050ad64537201a14e",
       "source_key": "mindplus.v2.extensions.common-field",
       "title": "10. 琴键 (NOTE)",
       "topic_id": "shared.field.note",
@@ -757,7 +751,7 @@
         "UPLOAD"
       ],
       "path": "shared/fields/number.md",
-      "source_fingerprint": "97a8700271344f0714a197fffe3f66877c9243e90790ad1bfdb0e45da66d74ea",
+      "source_fingerprint": "6adac962df63ab2667aec2c696c73c861258bf9c1b61e51071a93166cfe8e02b",
       "source_key": "mindplus.v2.extensions.common-field",
       "title": "1. 数值型 (NUMBER)",
       "topic_id": "shared.field.number",
@@ -773,7 +767,7 @@
         "UPLOAD"
       ],
       "path": "shared/fields/obloqparameter.md",
-      "source_fingerprint": "b5ca660279ea277400ec0acc519aac0c022fd6c418d322a5e7da48044a6f6f83",
+      "source_fingerprint": "e09d68b34ddd5de419033073eadeda09479275be9b06af11cef6a54dc3b1c435",
       "source_key": "mindplus.v2.extensions.common-field",
       "title": "15. OBLOQ初始化 (OBLOQPARAMETER)",
       "topic_id": "shared.field.obloqparameter",
@@ -789,7 +783,7 @@
         "UPLOAD"
       ],
       "path": "shared/fields/onlineimgsetting.md",
-      "source_fingerprint": "7fef48ba03ff8124253b43b42db4ec12d4300e303c36bdb4906492e60e90c576",
+      "source_fingerprint": "da2d3a03f3a2a2a1d26c23c7710202c720a537c23064194bf897bf32c788c30d",
       "source_key": "mindplus.v2.extensions.common-field",
       "title": "18. 在线图片设置 (ONLINEIMGSETTING)",
       "topic_id": "shared.field.onlineimgsetting",
@@ -805,7 +799,7 @@
         "UPLOAD"
       ],
       "path": "shared/fields/piano.md",
-      "source_fingerprint": "fe53bdd035ae7bd4bc2941b78634cc1ac555820f33bff2c67d015f0eefb4d807",
+      "source_fingerprint": "1e6b71fd72b0ad0c5f136b2d6c17126f3be7bfe06a622ee11d5914dde0371931",
       "source_key": "mindplus.v2.extensions.common-field",
       "title": "9. 钢琴键 (PIANO)",
       "topic_id": "shared.field.piano",
@@ -821,7 +815,7 @@
         "UPLOAD"
       ],
       "path": "shared/fields/slider.md",
-      "source_fingerprint": "3536ac20182a4341e44faebd29fc275c395883908409a27d9239093e0520cf87",
+      "source_fingerprint": "443fe06e0a1bb8732fdc1cf0372f7aa661aa4bccba24bde30ce3e8dc90d55469",
       "source_key": "mindplus.v2.extensions.common-field",
       "title": "6. 滑动输入条 (SLIDER)",
       "topic_id": "shared.field.slider",
@@ -837,7 +831,7 @@
         "UPLOAD"
       ],
       "path": "shared/fields/string.md",
-      "source_fingerprint": "6b46a31f470aa49e95522132d78bf9dbc67f49c70cb5ff4ea0afe78b8fbf6c58",
+      "source_fingerprint": "f8a748533bde75ac60a22cbfde4e5cdadcd93d6174ccc873e39438bab2b27dcf",
       "source_key": "mindplus.v2.extensions.common-field",
       "title": "2. 文本输入框 (STRING)",
       "topic_id": "shared.field.string",
@@ -853,7 +847,7 @@
         "UPLOAD"
       ],
       "path": "shared/fields/textarea.md",
-      "source_fingerprint": "484e26fe58dda2d237db8c67d91157c87735cd474156c882953504fb53e0fa91",
+      "source_fingerprint": "cf05e699cbe216c652c9aee6504821bb2dd10a9c78fbaa5fc2d7ff10dd1a7bb3",
       "source_key": "mindplus.v2.extensions.common-field",
       "title": "23. 文本域 (TEXTAREA)",
       "topic_id": "shared.field.textarea",
@@ -869,7 +863,7 @@
         "UPLOAD"
       ],
       "path": "shared/fields/textpreview.md",
-      "source_fingerprint": "2bc05d16f7269685f6b4ba368725d1901d74c1a410683073312958ce6e1d9a1a",
+      "source_fingerprint": "bf7ba18c9494570592665cc55db2390524ed8f9858e49b67c71987485eba8004",
       "source_key": "mindplus.v2.extensions.common-field",
       "title": "20. 文本预览 (TEXTPREVIEW)",
       "topic_id": "shared.field.textpreview",
@@ -920,7 +914,7 @@
         "UPLOAD"
       ],
       "path": "upload/config.md",
-      "source_fingerprint": "2512c82d6fd7d67d2ca1a73a82abb5d5365b4000eee714b9713c38786bd8d951",
+      "source_fingerprint": "c101314e6cf7a50dd7a8ff9af920a7aa89f6f0f935f4aeba940ea9bf3d3696a2",
       "source_key": "mindplus.v2.extensions.upload",
       "title": "上传模式 config.json",
       "topic_id": "upload.config",

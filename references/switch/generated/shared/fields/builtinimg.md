@@ -4,7 +4,7 @@
 
 - topic_id: `shared.field.builtinimg`
 - source_key: `mindplus.v2.extensions.common-field`
-- source_fingerprint: `4fe02f2d0ebfa347d89608abce6a4f11a0122a9098e088aae4cf03e6a6e456e8`
+- source_fingerprint: `b471c6f556a446597e20fbd79edf6834433ea6fdbe5f8d0547e2ad46bb1e8385`
 
 ## 21. 内置图像资源 (BUILTINIMG)
 
@@ -31,8 +31,8 @@
 
 **参数说明:**
 
-| 参数 | 描述 |
-| :--- | :--- |
-| `type` | **必填**。参数的类型 |
+| 参数      | 描述                                                                                               |
+| :-------- | :------------------------------------------------------------------------------------------------- |
+| `type`  | **必填**。参数的类型                                                                         |
 | `color` | 可选。`block` 和 `field` 颜色。默认 `field` 颜色 `#87C482`, `block` 背景颜色 `#7FB57B` |
-| `value` | 可选。显示图片, 默认 `"face/1.pbm"` |
+| `value` | 可选。显示图片, 默认 `"face/1.pbm"`                                                              |

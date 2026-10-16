@@ -4,7 +4,7 @@
 
 - topic_id: `shared.field.angle`
 - source_key: `mindplus.v2.extensions.common-field`
-- source_fingerprint: `d37d86723bd42e508ac24132ccc849763fe38d1555c109919e4b9b34ff62a33d`
+- source_fingerprint: `384a328768d2fe03686ee7235d43c86f0747b4647df14b8fab9e7517c16c1ae4`
 
 ## 4. 角度 (ANGLE)
 
@@ -20,6 +20,9 @@
     arguments: {
         DEGREE: {
             type: ArgumentType.ANGLE,
+            inputParams: {
+                 edge: 180
+            },
             defaultValue: 90,
         }
     }
@@ -28,7 +31,8 @@
 
 **参数说明:**
 
-| 参数 | 描述 |
-| :--- | :--- |
-| `type` | **必填**。参数的类型 |
-| `defaultValue` | 可选。默认显示内容, 不填默认 `0` |
+| 参数             | 描述                                           |
+| :--------------- | :--------------------------------------------- |
+| `type`         | **必填**。参数的类型                     |
+| `defaultValue` | 可选。默认显示内容, 不填默认 `0`             |
+| `edge`         | 可选。默认180，表示取绝对值，填360可选择负值。 |

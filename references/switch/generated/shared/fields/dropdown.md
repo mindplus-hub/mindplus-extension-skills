@@ -4,7 +4,7 @@
 
 - topic_id: `shared.field.dropdown`
 - source_key: `mindplus.v2.extensions.common-field`
-- source_fingerprint: `3221b43ecf9f4ad2cac4e803e0cf6ef40eb9ec722e1ad406c0e212e90fcf4b9a`
+- source_fingerprint: `2596a97eb78853365bb3ff0cb2466e8c0a904d8d728145d14463e48fc211059a`
 
 ## 3. 下拉框
 
@@ -143,8 +143,8 @@ getInfo() {
 
 **参数说明:**
 
-| 参数 | 描述 |
-| :--- | :--- |
-| `type` | **必填**。参数的类型 |
-| `menu` | **必填**。下拉框的菜单名称，需在 `menus` 中定义 |
-| `defaultValue` | 可选。默认显示内容，不填默认第一个选项 |
+| 参数             | 描述                                                    |
+| :--------------- | :------------------------------------------------------ |
+| `type`         | **必填**。参数的类型                              |
+| `menu`         | **必填**。下拉框的菜单名称，需在 `menus` 中定义 |
+| `defaultValue` | 可选。默认显示内容，不填默认第一个选项                  |

@@ -3,7 +3,8 @@
   "purpose": "Mind+ V2 supportDevices dictionary shared by creation and conversion. The skill is self-contained: this embedded dictionary plus the generated corpus are all a first-time author needs. Local example projects are never required.",
   "evidence_policy": "Two evidence sources, both embedded at build time: official development docs (C1, mindplus2-docs-cn upload-mode guide, mirrored in generated/upload/config.md) and verified working ext2 projects (C2, maintainer corpus). New entries require one of these and must record the source here.",
   "runtime_independence": "Nothing in this file assumes example projects exist on the user machine. Provenance below records where each entry was learned, not a runtime dependency.",
-  "harvested_at": "2026-10-16",
+  "runtime_compatibility_policy": "For meta.runtimeVersion == 0.0.2, supportDevices may include only the 15 boards with official_runtime_version_specs[0.0.2], as listed in generated/upload/config.md. Other boards are not yet adapted; historical observed_version_specs do not establish runtime 0.0.2 compatibility.",
+  "harvested_at": "2026-10-17",
   "device_ids": {
     "dev-DFRobot-arduinoLeonardo": {"observed_version_specs": ["^0.0.1", "^0.0.3"], "evidence": {"verified_projects": ["ext2-ds1302", "ext2-mpu6050"], "official_docs": true}, "official_runtime_version_specs": {"0.0.2": "^0.0.3"}},
     "dev-DFRobot-arduinoMega2560": {"observed_version_specs": ["^0.0.1", "^0.0.3"], "evidence": {"verified_projects": ["ext2-ds1302", "ext2-mpu6050"], "official_docs": true}, "official_runtime_version_specs": {"0.0.2": "^0.0.3"}},

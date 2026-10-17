@@ -4,7 +4,7 @@
 
 - topic_id: `upload.config`
 - source_key: `mindplus.v2.extensions.upload`
-- source_fingerprint: `c101314e6cf7a50dd7a8ff9af920a7aa89f6f0f935f4aeba940ea9bf3d3696a2`
+- source_fingerprint: `dccbf798729f9675a841e397f17a247ee2bcc8cd0d8432d7380ac53bbefa1b44`
 
 ## 2. 配置文件 (public/config.json)
 
@@ -98,6 +98,8 @@
   "dev-DFRobot-Esp32S3": "^0.0.2"
 }
 ```
+
+其余主板暂未适配 Runtime 0.0.2，因此在 `runtime == 0.0.2` 对应的 `config` 配置中，不应将这些主板添加至兼容主板字段。
 
 #### compatibilityId（仅需兼容V1.x库时使用）
 

@@ -24,6 +24,8 @@
 - `supportDevices` 是对象：`{"dev-DFRobot-<board>": "^<版本>", ...}`，键必须在
   [device-ids.json](device-ids.json) 字典内。适配 runtime `0.0.2` 时采用各板的
   `official_runtime_version_specs["0.0.2"]`（来源：[官方配置语料](generated/upload/config.md)）；
+  当 `meta.runtimeVersion == "0.0.2"` 时，只能列入该官方清单中的 15 款主板，
+  其余主板尚未适配，不得加入兼容列表。
   `observed_version_specs` 中的 `^0.0.1` 是历史项目范围，不代表 runtime `0.0.2` 的最低版本。
 - 二者表达整体设备范围；单积木的 `board/boards` 是可见性条件，不能互相替代
   （见 [upload-mode.md](upload-mode.md)）。

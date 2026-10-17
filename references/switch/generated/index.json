@@ -914,7 +914,7 @@
         "UPLOAD"
       ],
       "path": "upload/config.md",
-      "source_fingerprint": "c101314e6cf7a50dd7a8ff9af920a7aa89f6f0f935f4aeba940ea9bf3d3696a2",
+      "source_fingerprint": "dccbf798729f9675a841e397f17a247ee2bcc8cd0d8432d7380ac53bbefa1b44",
       "source_key": "mindplus.v2.extensions.upload",
       "title": "上传模式 config.json",
       "topic_id": "upload.config",

@@ -1,7 +1,7 @@
 ---
 name: mindplus-extension-skills
 metadata:
-  version: "0.3.14"
+  version: "0.3.15"
 description: Create, upgrade or freshly convert Mind+ V2 extensions, check existing sources with Lite duplicate discovery, perform Basic pre-publication review, and publish authorized projects to Gitee.
 ---
 

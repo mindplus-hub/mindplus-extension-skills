@@ -154,6 +154,9 @@ git clone https://gitee.com/mind-plus/mindplus-extension-skills.git ".claude/ski
 
 ## 版本更新
 
+- V0.3.15
+   - 更新语料库
+
 - V0.3.14
    - 更新语料库
 

@@ -1,10 +1,10 @@
 {
   "bundle_id": "mindplus-switch-references",
-  "content_sha256": "254c488ab26b4941e3c0790f17a36b591d0a721e8d74cdfc335ac82bccce1fd9",
+  "content_sha256": "87564d7a24dcd66205a47dfcd31ad9b3740ee854df26d8dd0c1c552dd20f593a",
   "files": [
     {
       "path": "index.json",
-      "sha256": "8a17198bdea3b33e47f11364c4e7fec6c02d4b424ee5ed6beb209310c53df467",
+      "sha256": "dad7c5691a1d30bcbd2b0a60d48dec57b0dc0d588f3965f598fc3179e2c4c374",
       "size": 32248
     },
     {
@@ -244,8 +244,8 @@
     },
     {
       "path": "upload/config.md",
-      "sha256": "3420284460661ebd3984cc11a17f6d009f096d273c06a135a2283692277d0cb4",
-      "size": 7808
+      "sha256": "8b7c0d0065147565e7bb7be4ca0ac092b010d8e89ecd239563a215106cb60496",
+      "size": 7962
     },
     {
       "path": "upload/generator/add-const.md",
@@ -318,8 +318,8 @@
       "size": 1406
     }
   ],
-  "min_skill_version": "0.3.14",
-  "release_id": "refs-254c488ab26b",
+  "min_skill_version": "0.3.15",
+  "release_id": "refs-87564d7a24dc",
   "schema_version": 1,
   "supported_modes": [
     "UPLOAD",

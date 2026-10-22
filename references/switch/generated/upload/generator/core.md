@@ -4,7 +4,7 @@
 
 - topic_id: `upload.generator.core`
 - source_key: `mindplus.v2.extensions.upload`
-- source_fingerprint: `35d4d48d9844ec7d57ea482d99b3ca3ee74b91b23d4e4a812c18627cb0773fdf`
+- source_fingerprint: `b03ae18706a777ada79a35c2ea9758b473a46140d0a8c5931607fa48e255b42f`
 
 ## 核心结构
 
@@ -15,6 +15,9 @@ class Func {
 
     // 对应 index.js 中定义的 opcode: 'begin'
     begin(generator, block, parameter) {
+	    // generator: 代码生成器，提供 addImport / addInit 等 API
+	    // block: 积木实例
+	    // parameter: 积木参数，通过 parameter.XXX.code 取值
         let addr = parameter.ADDR.code;
 
         // 添加头文件引用

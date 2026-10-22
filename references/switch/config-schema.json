@@ -4,7 +4,9 @@
     "shared.config-identity",
     "shared.v1-compatibility",
     "upload.config",
-    "python.config"
+    "python.config",
+    "micropython.config",
+    "realtime.config"
   ],
   "purpose": "Exact top-level config.json contract for the currently supported V1-to-V2 routes.",
   "missing_value_policy": {
@@ -165,7 +167,150 @@
           }
         }
       }
+    },
+    "MICROPYTHON": {
+      "v2_mode": "micropython-block",
+      "allowed_fields": [
+        "id",
+        "version",
+        "name",
+        "description",
+        "author",
+        "compatibilityId",
+        "cover",
+        "isDevice",
+        "sku",
+        "main",
+        "mode",
+        "meta",
+        "supportDevices"
+      ],
+      "required_fields": [
+        "id",
+        "version",
+        "name",
+        "description",
+        "author",
+        "compatibilityId",
+        "cover",
+        "isDevice",
+        "sku",
+        "main",
+        "mode",
+        "meta",
+        "supportDevices"
+      ],
+      "optional_fields": [],
+      "non_empty_if_present": [
+        "supportDevices"
+      ],
+      "types": {
+        "id": "string",
+        "version": "string",
+        "name": "locale_map",
+        "description": "locale_map",
+        "author": "string",
+        "compatibilityId": "string",
+        "cover": "string",
+        "isDevice": "boolean",
+        "sku": "string",
+        "main": "string",
+        "mode": "string",
+        "meta": "meta",
+        "supportDevices": "object"
+      },
+      "fixed_values": {
+        "mode": "micropython-block",
+        "isDevice": false,
+        "main": "main.js"
+      },
+      "nested_fields": {
+        "meta": {
+          "allowed_fields": [
+            "runtimeVersion"
+          ],
+          "required_fields": [
+            "runtimeVersion"
+          ],
+          "types": {
+            "runtimeVersion": "string"
+          }
+        }
+      }
+    },
+    "REALTIME": {
+      "v2_mode": "realtime",
+      "allowed_fields": [
+        "id",
+        "version",
+        "name",
+        "description",
+        "author",
+        "compatibilityId",
+        "cover",
+        "isDevice",
+        "sku",
+        "main",
+        "mode",
+        "meta",
+        "supportDevices",
+        "isSupportStage"
+      ],
+      "required_fields": [
+        "id",
+        "version",
+        "name",
+        "description",
+        "author",
+        "compatibilityId",
+        "cover",
+        "isDevice",
+        "sku",
+        "main",
+        "mode",
+        "meta"
+      ],
+      "optional_fields": [
+        "supportDevices",
+        "isSupportStage"
+      ],
+      "non_empty_if_present": [
+        "supportDevices"
+      ],
+      "types": {
+        "id": "string",
+        "version": "string",
+        "name": "locale_map",
+        "description": "locale_map",
+        "author": "string",
+        "compatibilityId": "string",
+        "cover": "string",
+        "isDevice": "boolean",
+        "sku": "string",
+        "main": "string",
+        "mode": "string",
+        "meta": "meta",
+        "supportDevices": "object",
+        "isSupportStage": "boolean"
+      },
+      "fixed_values": {
+        "mode": "realtime",
+        "isDevice": false,
+        "main": "main.js"
+      },
+      "nested_fields": {
+        "meta": {
+          "allowed_fields": [
+            "runtimeVersion"
+          ],
+          "required_fields": [
+            "runtimeVersion"
+          ],
+          "types": {
+            "runtimeVersion": "string"
+          }
+        }
+      }
     }
   }
 }
-

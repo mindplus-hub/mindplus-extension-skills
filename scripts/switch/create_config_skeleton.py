@@ -80,14 +80,21 @@ def build_config(source_config: dict, inventory: dict, mode: str, schema: dict) 
             "main": fixed.get("main", "main.js"),
         }
     )
-    return {field: values[field] for field in required}
+    result = {field: values[field] for field in required}
+    if mode in {"MICROPYTHON", "REALTIME"} and isinstance(source_config.get("supportDevices"), dict):
+        result["supportDevices"] = source_config["supportDevices"]
+    if mode == "REALTIME" and isinstance(source_config.get("isSupportStage"), bool):
+        result["isSupportStage"] = source_config["isSupportStage"]
+        if result["isSupportStage"]:
+            result.pop("supportDevices", None)
+    return result
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", required=True, type=Path)
     parser.add_argument("--inventory", required=True, type=Path)
-    parser.add_argument("--mode", choices=["UPLOAD", "PYTHON_BLOCK"], required=True)
+    parser.add_argument("--mode", choices=["UPLOAD", "PYTHON_BLOCK", "MICROPYTHON", "REALTIME"], required=True)
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
 

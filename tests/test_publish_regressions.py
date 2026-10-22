@@ -160,3 +160,11 @@ class PublicationRegressions(unittest.TestCase):
             write_json(config, {"mode": "python-block"})
             with self.assertRaises(pub.StageBlocked):
                 pub.validate_new_repository_name(project, "ext2-ul-sensor")
+            project = Path(tmp) / "legacy"
+            config = project / "extension/public/config.json"
+            config.parent.mkdir(parents=True)
+            for mode, prefix in (("micropython-block", "mpy"), ("realtime", "rt")):
+                write_json(config, {"mode": mode})
+                pub.validate_new_repository_name(project, f"ext2-{prefix}-sensor")
+                with self.assertRaises(pub.StageBlocked):
+                    pub.validate_new_repository_name(project, "ext2-ul-sensor")

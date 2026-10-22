@@ -2,8 +2,7 @@
 
 本文件是当前 MindPlus-Switch 的配置生成约束，和机器检查用的
 [`config-schema.json`](config-schema.json)保持一致。它只覆盖目前支持的
-`UPLOAD` 与 `PYTHON_BLOCK` 两条 V1→V2 路由；新增模式时必须先增加独立 profile，不能把
-未来模式的字段混入当前配置。
+`UPLOAD`、`PYTHON_BLOCK`、`MICROPYTHON`、`REALTIME` 四种 V2 模式，创建、转换、升级与审核均按选定模式使用。每种模式使用独立 profile，不能混用字段。
 
 ## 规则
 
@@ -51,7 +50,15 @@ isDevice, sku, main, mode, meta
 `config.json`，只按 Python Reference 中的两个权威 V1 来源生成 `public/requirements.txt`；因此
 `libraryConfig`、`supportDevices`、`supportArch` 都不能添加。
 
-## 值的来源顺序
+## MICROPYTHON 与 REALTIME
+
+两者沿用 PYTHON_BLOCK 的基础字段、`isDevice: false` 和 `main: "main.js"`，但分别固定
+`mode: "micropython-block"`、`mode: "realtime"`，不允许 `libraryConfig` 或 `supportArch`。
+
+- MICROPYTHON：额外必需 `supportDevices`，必须是非空对象。本地库与可选 requirements 按 MicroPython 资料处理，不使用 Python V1 的依赖来源规则。
+- REALTIME：允许布尔值 `isSupportStage`，省略时按 false。模块扩展必需非空 `supportDevices`；舞台扩展必须 `isSupportStage: true` 并省略 `supportDevices`。检查器按这两个分支校验，不把主控设备扩展混入此模式。
+
+## 值的来源顺序（创建与转换）
 
 以下旧身份来源规则适用于 CONVERT；CREATE 使用已冻结规格，作者按 [author-identity.md](author-identity.md) 选定和规范化。UPGRADE 保留已有作者，除非本次明确要求修改署名。
 

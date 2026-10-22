@@ -4,17 +4,17 @@
 
 - topic_id: `python.config`
 - source_key: `mindplus.v2.extensions.python`
-- source_fingerprint: `76d70407609e1b37177e8646320ef73607ce509ac08f58713b4d31acabc606a5`
+- source_fingerprint: `969aa6c7bc904a1aa6753c0862ac5b978b18fb239b93fbc360f55824c8b59310`
 
 ## 2. 配置文件 (public/config.json)
 
-`config.json` 是扩展的核心配置文件。
-
+`config.json` 是扩展的核心配置文件，定义了扩展的基本信息、支持的设备以及依赖库。
 ### 示例配置
 
 ```json
 {
     "id": "pinpongBase",
+    "author": "DFRobotTest",
     "version": "0.0.1",
     "name": {
         "zh-cn": "pinpong初始化",
@@ -24,38 +24,50 @@
         "zh-cn": "pinpong库初始化选择主控板功能和gpio",
         "en": "initialize pinpong library select board function and GPIO"
     },
-    "author": "DFRobotTest",
     "cover": "cover.png",
-    "main": "main.js",
     "isDevice": false,
     "mode": "python-block",
+    "main": "main.js",
     "meta": {
-        "runtimeVersion": "0.0.2"
-    }
+        "runtimeVersion": "0.0.1"
+    },
+    "sku": "",
+    "compatibilityId": ""
 }
 ```
 
 ### 关键字段说明
 
-| 字段                    | 必填  | 类型    | 说明                                           |
-| :---------------------- | :-- | :------ | :--------------------------------------------- |
-| `id`                  | 必填  | string  | 扩展唯一标识符。                               |
-| `author`              | 必填  | string  | 与id一起组成扩展唯一标识。                     |
-| `version`             | 必填  | string  | 版本号。                                       |
-| `name`                | 必填  | object  | 多语言名称。                                   |
-| `description`         | 必填  | object  | 多语言描述。                                   |
-| `cover`               | 必填  | string  | 封面图片文件名，需位于 `public` 目录下。     |
-| `mode`                | 必填  | string  | 模式，此处应为 `python-block`。              |
-| `isDevice`            | 必填  | boolean | Python模式均为 `false`。                     |
-| `sku`                 | 可选  | string  | 硬件产品型号，多个型号用\|隔开；没有则留空，即写成 `"sku": ""`。 |
-| `meta.runtimeVersion` | 必填  | string  | 扩展 runtime 接口版本（用于控制 API 兼容性）。 |
-| `compatibilityId`     | 可选  | string  | Mind+V1.x用户库兼容字段；没有则留空，即写成 `"compatibilityId": ""`。 |
+| 字段                    | 必填  | 类型      | 说明                            |
+| :-------------------- | :-- | :------ | :---------------------------- |
+| `id`                  | 必填  | string  | 扩展唯一标识符                       |
+| `author`              | 必填  | string  | 与id一起组成扩展唯一标识                 |
+| `version`             | 必填  | string  | 版本号                           |
+| `name`                | 必填  | object  | 多语言名称                         |
+| `description`         | 必填  | object  | 多语言描述                         |
+| `cover`               | 必填  | string  | 封面图片文件名，需位于 `public` 目录下      |
+| `isDevice`            | 必填  | boolean | Python模式均为 `false`            |
+| `mode`                | 必填  | string  | 模式，此处应为 `python-block`        |
+| `main`                | 必填  | string  | 入口文件路径，一般为编译后的 `main.js`      |
+| `meta.runtimeVersion` | 必填  | string  | 扩展 runtime 接口版本（用于控制 API 兼容性） |
+| `sku`                 | 可选  | string  | 硬件产品型号，多个型号用\|隔开；没有则留空        |
+| `compatibilityId`     | 可选  | string  | Mind+V1.x用户库兼容字段；没有则留空        |
 
-> **注**：`sku` 和 `compatibilityId` 为可选字段，不需要填写时请保留为空字符串，即写成 `"sku": ""` 和 `"compatibilityId": ""`。
+>不需要使用可选字段时，`sku`、`compatibilityId` 写空字符串：
+>
+> ```
+> {
+> 	...
+> 	"sku": "",
+> 	"compatibilityId": ""
+> }
+> ```
 
 #### meta.runtimeVersion
 
-`runtimeVersion` 表示开发扩展时依赖的 runtime API 最低版本。应按实际使用的 API 能力填写最小版本，避免随意填写过大导致扩展只能在高版本 Mind+ 中加载。
+`runtimeVersion` 表示开发扩展时依赖的 runtime API 最低版本，以 通用参考-Runtime接口参考 为准
+
+不可随意设置一个很大的版本号，否则扩展只能在高版本中加载，兼容性会变差
 
 #### compatibilityId（仅需兼容V1.x库时使用）
 

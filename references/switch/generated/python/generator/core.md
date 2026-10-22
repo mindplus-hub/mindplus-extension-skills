@@ -4,7 +4,7 @@
 
 - topic_id: `python.generator.core`
 - source_key: `mindplus.v2.extensions.python`
-- source_fingerprint: `399472b50c09dabb32f28f5b91e815b9dbd58b86dec35804a3c56eb7d5a23112`
+- source_fingerprint: `fdb94b4973b3ec0ea5075b3f7239a6f16dd60ad08bdc09331d50a36d7cd42fe3`
 
 ## 核心结构
 
@@ -15,8 +15,9 @@ class Func {
     }
 
     pinpongInit(generator, block, parameter) {
-        // 生成 Python 代码逻辑
-        // 示例：导入库
+        // generator: 代码生成器，提供 addImport / addInit 等 API
+	    // block: 积木实例
+	    // parameter: 积木参数，通过 parameter.XXX.code 取值
         generator.addImport('import time');
         return `print("Hello Python Mode")`;
     }

@@ -10,7 +10,7 @@ import sys
 from pathlib import Path, PurePosixPath
 
 
-SUPPORTED_MODES = {"UPLOAD", "PYTHON_BLOCK"}
+SUPPORTED_MODES = {"UPLOAD", "PYTHON_BLOCK", "MICROPYTHON", "REALTIME"}
 
 
 class SelectionError(RuntimeError):

@@ -1,21 +1,96 @@
 {
   "bundle_id": "mindplus-switch-references",
-  "content_sha256": "87564d7a24dcd66205a47dfcd31ad9b3740ee854df26d8dd0c1c552dd20f593a",
+  "content_sha256": "974b83199ebf1ad9a0e063cfb317f92ba6be143dafc43868842f3c567a62ff37",
   "files": [
     {
       "path": "index.json",
-      "sha256": "dad7c5691a1d30bcbd2b0a60d48dec57b0dc0d588f3965f598fc3179e2c4c374",
-      "size": 32248
+      "sha256": "b62d93312e10a22503c4d243a8495d686511336a5807e47a9f46a2d0f850d655",
+      "size": 47554
     },
     {
       "path": "index.md",
-      "sha256": "cc5735e25b0fecba5dff9e52cb95ed56425002ff39652fed92ef72fd6c99d946",
-      "size": 9568
+      "sha256": "d1d3a0bead137ef9d911cb112c3beaffe50d7b8ae801e1ff445fdde3e216e665",
+      "size": 13632
+    },
+    {
+      "path": "micropython/config.md",
+      "sha256": "f80c75287533cd166c2cfa728340a823dc3802982fae84e60b5d0481d5e6d57b",
+      "size": 4361
+    },
+    {
+      "path": "micropython/generator/add-function.md",
+      "sha256": "9a16c9c7becb56a380e6e00ad73688eec87a4b4adb06b54751841412e5159b11",
+      "size": 1062
+    },
+    {
+      "path": "micropython/generator/add-import.md",
+      "sha256": "8f13642520e83d0f5188a511c9c6963e1942b6c6ebf19eb1a90eba6889a45e6a",
+      "size": 746
+    },
+    {
+      "path": "micropython/generator/add-init.md",
+      "sha256": "f151e5c58ddea2b9c99de0497146d45d0caf85c925a4e2e0f81faa44228ea5f7",
+      "size": 880
+    },
+    {
+      "path": "micropython/generator/add-variable.md",
+      "sha256": "7720345d316289eeadd3c1cdc66962371f8ae965d4cffde96ec7f5972ab99f3b",
+      "size": 763
+    },
+    {
+      "path": "micropython/generator/add-while.md",
+      "sha256": "8f90c4fe71acbf76e8884d04e699fe650d66c36d1a5f15b485b963b123a7c336",
+      "size": 860
+    },
+    {
+      "path": "micropython/generator/advanced.md",
+      "sha256": "91e0b00353fc0d1f4d403b370c2abee250445c0fc289d6ce74913ee6b152fef9",
+      "size": 865
+    },
+    {
+      "path": "micropython/generator/core.md",
+      "sha256": "3a86f0fe7d6dd0267098d6c7bccac8cb26f0c72e911cd8713b0e0e2ea92049d3",
+      "size": 898
+    },
+    {
+      "path": "micropython/generator/event-callback.md",
+      "sha256": "a8fb3890ac1b8b9d1315c6a280eddc25541ca53b74d89f3756baa64f06446f73",
+      "size": 559
+    },
+    {
+      "path": "micropython/generator/get-setup.md",
+      "sha256": "125e8f89da104cd7fa1a4e125252f59557b9c1cbc0e473d85c0204f462d0101e",
+      "size": 706
+    },
+    {
+      "path": "micropython/generator/get-static-function.md",
+      "sha256": "42f40a79fc7e98c649ec85de7c36aef3ed246c8ba56d09c8a1c52c6e7b9c91de",
+      "size": 740
+    },
+    {
+      "path": "micropython/generator/inline-code.md",
+      "sha256": "25b6a144cce5d9d80deafe589d47cf724daecd0540de824bb516b6b61436b312",
+      "size": 712
+    },
+    {
+      "path": "micropython/index-js.md",
+      "sha256": "6d0870bbdf176a309a75fa9e635fa472942c6ffeb454d0da11d0dbade136844a",
+      "size": 2734
+    },
+    {
+      "path": "micropython/locales.md",
+      "sha256": "3b63052748616c9e0b105f9b9b122268dc52eb3156b6687261b401b5d62ad69d",
+      "size": 459
+    },
+    {
+      "path": "micropython/structure.md",
+      "sha256": "2ff9456cc43741bc6b3e764f0f46df5a8a3b4dca833e3c0eba77a386366ceabe",
+      "size": 2112
     },
     {
       "path": "python/config.md",
-      "sha256": "51996f0ce650b4f00fe168903c66886ff48a989e8ec8bf27469d47ddaf833a3f",
-      "size": 4089
+      "sha256": "6e79c2c52e6dff401126c25e7e30b9639c15b54390f36fdfd6c0965eae94b10d",
+      "size": 4148
     },
     {
       "path": "python/generator/add-function.md",
@@ -24,8 +99,8 @@
     },
     {
       "path": "python/generator/add-import.md",
-      "sha256": "f319aa5ce7696eda711c1ad77cda7292f8f74d05fca120bfec57bd56363ed10e",
-      "size": 766
+      "sha256": "fd1ebf6523ec15cf49dee035d4197669dcc0bb0833deebdb3e13fdfbaf7cbecc",
+      "size": 761
     },
     {
       "path": "python/generator/add-init.md",
@@ -44,8 +119,8 @@
     },
     {
       "path": "python/generator/core.md",
-      "sha256": "503eb59786d8f59e43650788d55d324f3232b958433746268253a92b0fb9ae4f",
-      "size": 650
+      "sha256": "95c8f2177eff204bc314a011b8f88e50759d73584df256b0ac6dc240e9f87811",
+      "size": 752
     },
     {
       "path": "python/generator/event-callback.md",
@@ -59,8 +134,8 @@
     },
     {
       "path": "python/index-js.md",
-      "sha256": "ac542bf8d76f726b82db00c4b40b556ffc101531404561b24674427ef1cc7ad8",
-      "size": 1865
+      "sha256": "459f0ed28c02f95417defb675608996066dea1455b5057a1976ac4e38115a6a4",
+      "size": 2431
     },
     {
       "path": "python/locales.md",
@@ -74,8 +149,43 @@
     },
     {
       "path": "python/structure.md",
-      "sha256": "70b37db177be55605a2a59a2c0be41d9acc1ff303652a3ce60a3563c9e23c735",
-      "size": 1452
+      "sha256": "20ed7da841f39f3fec12f734028b5f51094f7618177d2bdcc39c722b31fdf5f5",
+      "size": 2087
+    },
+    {
+      "path": "realtime/config.md",
+      "sha256": "c0db10b9122f5ef7cd088d95b72e7dd6919a7c9d998cfeb727208a60091c1ea7",
+      "size": 5446
+    },
+    {
+      "path": "realtime/execution.md",
+      "sha256": "a24e28fe02d67f5ef1d568cdf45c38a8d3959dba43552c7b443db41ca7b25baf",
+      "size": 2506
+    },
+    {
+      "path": "realtime/firmata.md",
+      "sha256": "fd776d4f883082590df480451592de6df7bdead89f1e58d6e6694d8b573be8bf",
+      "size": 3688
+    },
+    {
+      "path": "realtime/index-js.md",
+      "sha256": "2e2b50b9eb59a7d53784ed0c31104ba8fc05c1bc76f9506245e650deeb2d7cd7",
+      "size": 3624
+    },
+    {
+      "path": "realtime/locales.md",
+      "sha256": "ce928a759dacb902d1024347c28bd4c174618f00a613e97d732bd9bebd2316ad",
+      "size": 535
+    },
+    {
+      "path": "realtime/stage.md",
+      "sha256": "274fa10eddeac48045aea390affaff4400bcef39bd2b82165077e8b8b24a9e0b",
+      "size": 1170
+    },
+    {
+      "path": "realtime/structure.md",
+      "sha256": "e49db8dbf67320943327b474a91408efabca997ccaf31970a8767b22761402bc",
+      "size": 1896
     },
     {
       "path": "shared/block/core.md",
@@ -244,8 +354,8 @@
     },
     {
       "path": "upload/config.md",
-      "sha256": "8b7c0d0065147565e7bb7be4ca0ac092b010d8e89ecd239563a215106cb60496",
-      "size": 7962
+      "sha256": "798598a9b2be923935fed680014994b31b554c609ddd76b7b492280aa8d1b579",
+      "size": 8070
     },
     {
       "path": "upload/generator/add-const.md",
@@ -289,8 +399,8 @@
     },
     {
       "path": "upload/generator/core.md",
-      "sha256": "e072790d0e5d9b3017f834db78aee192992817bfa5d47a8676dbbfa43f2714d5",
-      "size": 1509
+      "sha256": "fe3bc84a0af4179eb5289a93383fde19716e70abf992799ec57d7760c8eb3ac3",
+      "size": 1676
     },
     {
       "path": "upload/generator/inline-code.md",
@@ -299,8 +409,8 @@
     },
     {
       "path": "upload/index-js.md",
-      "sha256": "5ae135ecf0493d1219d638c0b8f9ae75cc7948e589cc51fbe752481e7af91957",
-      "size": 3067
+      "sha256": "8b91ac741a2dac745b123e9e16ab8476167afa3a104ced43b8fed7539f7c08c8",
+      "size": 3182
     },
     {
       "path": "upload/locales.md",
@@ -314,15 +424,17 @@
     },
     {
       "path": "upload/structure.md",
-      "sha256": "872def8b8a714bed539b607100001c386995116856f0b7a1a1abbf06ae4e6870",
-      "size": 1406
+      "sha256": "fa08760d545d1756b8a315bc40d50890ec7e9428bdbf301b466898dedc7cc9bb",
+      "size": 1974
     }
   ],
-  "min_skill_version": "0.3.15",
-  "release_id": "refs-87564d7a24dc",
+  "min_skill_version": "0.4.0",
+  "release_id": "refs-974b83199ebf",
   "schema_version": 1,
   "supported_modes": [
     "UPLOAD",
-    "PYTHON_BLOCK"
+    "PYTHON_BLOCK",
+    "MICROPYTHON",
+    "REALTIME"
   ]
 }

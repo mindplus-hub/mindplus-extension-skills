@@ -370,16 +370,33 @@ def smoke(zip_path: Path) -> list[dict]:
         state = run("scripts/switch__check_reference_release.py", "--offline", "--cache-root", base / "cache")
         if Path(state["active_root"]) != package / "assets":
             raise PackageError("Offline reference check did not select packaged assets")
-        for mode in ("UPLOAD", "PYTHON_BLOCK"):
+        for mode in ("UPLOAD", "PYTHON_BLOCK", "MICROPYTHON", "REALTIME"):
             spec = base / (mode + "-spec.json")
             write_json(spec, {"schema_version": "mindplus-agent.extension-spec/v1", "identity": {"id": "demo", "author": "tester", "version": "1.0.0", "compatibility_id": "tester-demo-thirdex"},
-                              "mode": mode, "blocks": [{"opcode": "hello", "block_type": "COMMAND", "message_id": "gui.blocklyText.demo.hello", "parameters": [], "generator_claim": "generator.addCode(...)"}],
-                              "dependencies": [], "devices": [], "assets": [], "style": {"color1": "#00B0F0"}, "readme_claims": []})
+                              "mode": mode, "blocks": [{"opcode": "hello", "block_type": "COMMAND", "message_id": "gui.blocklyText.demo.hello", "parameters": [], "generator_claim": "return args.VALUE" if mode == "REALTIME" else "return code"}],
+                              "dependencies": [], "devices": [{"id": "dev-DFRobot-unihikerK10", "version": "^0.0.1"}] if mode in {"MICROPYTHON", "REALTIME"} else [], "assets": [], "style": {"color1": "#00B0F0"}, "readme_claims": []})
             inventory = base / (mode + "-inventory.json")
             run("scripts/switch__spec_to_inventory.py", "--spec", spec, "--output", inventory)
             selection = run("scripts/switch__select_reference_topics.py", "--inventory", inventory, "--active-root", package / "assets", "--mode", mode)
             if not selection["topics"] or any(not Path(x["path"]).is_file() for x in selection["topics"]):
                 raise PackageError("Selected reference topics do not resolve")
+            if mode in {"MICROPYTHON", "REALTIME"}:
+                source = base / (mode + "-v1")
+                language = "micropython" if mode == "MICROPYTHON" else "javascript"
+                (source / language).mkdir(parents=True)
+                write_json(source / "config.json", {"id": "demo", "author": "tester", "version": "1.0.0",
+                                                    "asset": {language: {"dir": language, "main": "main.ts" if mode == "MICROPYTHON" else "main.js"}}})
+                entry = source / language / ("main.ts" if mode == "MICROPYTHON" else "index.js")
+                entry.write_text("export function hello(parameter, block) {}" if mode == "MICROPYTHON"
+                                 else "class OldExtension { getInfo() { return {blocks: [{opcode: 'hello'}]}; } }", encoding="utf-8")
+                v1_inventory = base / (mode + "-v1-inventory.json")
+                run("scripts/switch__inventory_v1.py", "--source", source, "--output", v1_inventory)
+                run("scripts/switch__select_reference_topics.py", "--inventory", v1_inventory, "--active-root", package / "assets", "--mode", mode)
+                config = run("scripts/switch__create_config_skeleton.py", "--source", source, "--inventory", v1_inventory,
+                             "--mode", mode, "--output", base / (mode + "-config.json"))
+                if config["status"] != "PASS":
+                    raise PackageError("V1 conversion config skeleton failed")
+                run("scripts/switch__init_run.py", "--work-root", base, "--v1-source", source, "--mode", mode)
         project = base / "ext2-ul-project"
         project.mkdir()
         (project / "config.json").write_text("{}")

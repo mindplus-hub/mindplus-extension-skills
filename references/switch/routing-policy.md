@@ -1,24 +1,26 @@
 # MindPlus-Switch 路由与敏感节点
 
-本文件是第一版 Mode Registry。它只决定是否进入某个转换分支，不定义积木转换细节。
+本文件是转换 Mode Registry。它只决定是否进入某个转换分支，不定义积木转换细节。
 
-## Mode Registry
+## V1 转换 Mode Registry
+
+V2 创建、升级和审核已覆盖四种模式；本表仅登记 V1 自动转换的源结构，不限制 V2 语料与功能支持。
 
 | mode_id | status | V1 结构特征 | V2 `config.mode` | 资料入口 |
 | --- | --- | --- | --- | --- |
 | `UPLOAD` | `SUPPORTED` | `arduinoC/main.ts` | `upload` | `upload-mode.md` |
 | `PYTHON_BLOCK` | `SUPPORTED` | `python/main.ts` | `python-block` | `python-block-mode.md` |
-| `REALTIME` | `PLANNED` | 未注册的实时模式特征 | — | — |
-| `MICROPYTHON` | `PLANNED` | 未注册的 MicroPython 特征 | — | — |
+| `REALTIME` | `SUPPORTED` | `javascript/index.js` 或 `asset.javascript.dir/main` 实际入口 | `realtime` | `realtime-mode.md` |
+| `MICROPYTHON` | `SUPPORTED` | `micropython/main.ts` 或 `asset.micropython.dir/main` 实际入口 | `micropython-block` | `micropython-block-mode.md` |
 
-目录名相似不能代替注册表特征。`isDevice: true` 主控扩展、纯 Python 包和 MicroPython 库不进入当前两个分支。
+入口必须存在于源目录内部；配置中的 dir/main 优先于默认入口。实时官方开发模板声明的是构建后的 main.js，缺少它但存在同目录 index.js 时使用该源码。目录名相似不能代替源文件证据；主控扩展、纯 Python／MicroPython 包不进入模块转换。动态计算或从其它模块导入的 realtime blocks 必须继续只读追踪并补齐 opcode 盘点，不能以空列表交接。
 
 ## 路由顺序
 
 1. 先读取 V1 根目录的 `config.json` 和已注册的入口特征，不先加载模式教程。
 2. 记录每个候选的相对路径和确定性结果：`C3` 为实际文件/字段或脚本结果，`C2` 为打包行为/截图/Builder 实例，`C1` 为已校验资料，`C0` 为推断。
 3. 只有一个 `SUPPORTED` 候选且没有强制审核标记时继续。用户明确给出的模式必须与源事实一致。
-4. 两个候选都是 C3 时属于并列，不因 `AUTO` 而猜测；写入日志并等待用户选择。两种模式需要两个独立 run。
+4. 多个候选都是 C3 时不因 `AUTO` 而猜测；已有明确模式选择且与候选一致时使用该模式，否则记录并等待选择。每种模式使用独立 run。
 5. 命中 `PLANNED` 或未知结构时停止为 `BLOCKED/UNSUPPORTED_MODE`，不能降级到上传或 Python。
 
 任务策略：

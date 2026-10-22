@@ -4,15 +4,14 @@
 
 - topic_id: `python.generator.add-import`
 - source_key: `mindplus.v2.extensions.python`
-- source_fingerprint: `cf0c2c965f9e83a851bc325a643d104b6daebc2cf00168291a428811811c3c9b`
+- source_fingerprint: `ea7d357abbbe0b88fc7f86eda8905f4cf3c3488a60ff0c27dbd4650587b5d1bc`
 
 ## 1. 导入库模块 addImport
 
 `addImport(code: string)`
 
 * **功能**：导入 Python 库模块
-* **参数**：
-  * `code` - 实际生成代码（code 去掉空格作为 id）
+* **参数**：`code` - 实际生成代码（code 去掉空格作为 id）
 * **覆盖规则**：相同 id 时覆盖旧代码
 * **示例**：
   ```javascript

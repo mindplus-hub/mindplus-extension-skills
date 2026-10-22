@@ -1,13 +1,15 @@
 ---
 name: mindplus-extension-skills
 metadata:
-  version: "0.3.15"
-description: Create, upgrade or freshly convert Mind+ V2 extensions, check existing sources with Lite duplicate discovery, perform Basic pre-publication review, and publish authorized projects to Gitee.
+  version: "0.4.0"
+description: Create, upgrade and convert Mind+ extensions across upload, Python, MicroPython (mpy) and realtime modes, with Lite source discovery, Basic review and authorized Gitee publishing.
 ---
 
 # MindPlus Extension Skills
 
 Create, convert or upgrade an extension, review its artifact, then publish if authorized. Lite selects the development source; Basic checks publication readiness. The five leaves belong to this one self-contained skill. For maintenance read [architecture.md](references/architecture.md).
+
+V2 creation, upgrade and review cover UPLOAD, PYTHON_BLOCK, MICROPYTHON and REALTIME (module/stage). Mode contracts: [upload](references/switch/upload-mode.md), [Python](references/switch/python-block-mode.md), [MicroPython](references/switch/micropython-block-mode.md), [realtime](references/switch/realtime-mode.md). Fresh V1 conversion covers all four registered modes; device extensions are outside producer profiles.
 
 ## Entry and routing
 
@@ -28,7 +30,7 @@ Create, convert or upgrade an extension, review its artifact, then publish if au
 
 - Read the selected leaf and needed references once; revisit only changed material or a concrete unresolved failure. Use existing request/file facts; ask only for missing decisions or authorization.
 - Run each required check once at its owning stage. Reuse valid producer evidence in Basic and valid Basic evidence in publication; do not add a parallel manual verification of a successful script result.
-- Test changed behavior, realistic boundaries and representative retained behavior with the narrowest existing test or executable example. No default full suite, all-block input combinations, duplicate smoke tests, or new tests solely for workflow wiring. Broaden only for shared-core changes, a concrete failure, or explicit acceptance criteria.
+- Choose verification by the change: wording, metadata and deterministic edits need only a diff; logic changes use the narrowest relevant existing test or reproduction. Reuse passing checks until their inputs change, and stop once the requirement is verified. No default full suite, all-block combinations, duplicate smoke tests or new tests solely for workflow wiring. Broaden only for shared-core impact, a concrete failure or explicit acceptance criteria. Required Basic gates for publication are unchanged.
 - Keep findings-only reviews on the report-first branch in [review.md](references/workflows/review.md); a repository URL alone does not request publication readiness.
 - Record actual scope/results once and reference them from required check IDs. Keep required checkpoints, handoffs and integrity gates; do not create extra plans, logs or evidence files just to restate them.
 

@@ -48,7 +48,7 @@ PARAMETER_FIELD_FEATURES = {
     "dynamic-menu": "dynamic-menu",
 }
 RUNTIME_RE = re.compile(r"\b(getCurrentDeviceId|getBoardPinsByType|getDevice|runtime)\b")
-SUPPORTED_MODES = {"UPLOAD", "PYTHON_BLOCK"}
+SUPPORTED_MODES = {"UPLOAD", "PYTHON_BLOCK", "MICROPYTHON", "REALTIME"}
 
 
 class SpecError(RuntimeError):
@@ -93,7 +93,18 @@ def derive_features(spec: dict[str, Any], mode: str, anomalies: list[dict[str, A
             raise SpecError("SPEC_FIELD_INVALID: reference_features must be a list of feature ids")
         features.update(explicit)
 
-    generator_calls = PYTHON_GENERATOR_CALLS if mode == "PYTHON_BLOCK" else UPLOAD_GENERATOR_CALLS
+    if mode in {"PYTHON_BLOCK", "MICROPYTHON"}:
+        generator_calls = PYTHON_GENERATOR_CALLS
+        if mode == "MICROPYTHON":
+            generator_calls = dict(generator_calls, addWhile="add-while", getSetup="get-setup", getStaticFunction="get-static-function")
+    else:
+        generator_calls = UPLOAD_GENERATOR_CALLS if mode == "UPLOAD" else {}
+    if mode == "REALTIME" and spec.get("is_support_stage") is True:
+        features.add("stage")
+    if mode in {"MICROPYTHON", "REALTIME"} and spec.get("devices"):
+        features.add("board-condition")
+    if mode == "MICROPYTHON" and spec.get("dependencies"):
+        features.add("dependencies")
     for block in spec.get("blocks", []):
         if not isinstance(block, dict):
             continue
@@ -131,6 +142,8 @@ def derive_features(spec: dict[str, Any], mode: str, anomalies: list[dict[str, A
 
         claim = block.get("generator_claim")
         if isinstance(claim, str):
+            if mode == "REALTIME" and re.search(r"\b(firmata|pinMode|digitalRead|digitalWrite|analogRead|pwmWrite|i2c\w*|serial\w*)\b", claim):
+                features.add("firmata")
             for method, feature in generator_calls.items():
                 if re.search(rf"\b{re.escape(method)}\s*\(", claim):
                     features.add(feature)
@@ -147,6 +160,12 @@ def build_inventory(spec: dict[str, Any], spec_path: Path, explicit_mode: str | 
         raise SpecError(f"SPEC_FIELD_INVALID: spec.mode must be one of {sorted(SUPPORTED_MODES)}, got {mode}")
     if explicit_mode and explicit_mode.upper() != mode:
         raise SpecError(f"SPEC_FIELD_INVALID: explicit mode {explicit_mode} conflicts with spec.mode {mode}")
+    if "is_support_stage" in spec and (mode != "REALTIME" or not isinstance(spec["is_support_stage"], bool)):
+        raise SpecError("SPEC_FIELD_INVALID: is_support_stage is a boolean for REALTIME only")
+    if (mode == "MICROPYTHON" or (mode == "REALTIME" and not spec.get("is_support_stage", False))) and not spec.get("devices"):
+        raise SpecError("SPEC_FIELD_MISSING: devices are required for MicroPython and realtime hardware modules")
+    if mode == "REALTIME" and spec.get("is_support_stage") and spec.get("devices"):
+        raise SpecError("SPEC_FIELD_INVALID: realtime stage extensions omit devices")
     blocks = require(spec, "blocks", "spec")
     if not isinstance(blocks, list) or any(not isinstance(block, dict) for block in blocks):
         raise SpecError("SPEC_FIELD_INVALID: spec.blocks must be a list of objects")
@@ -194,16 +213,18 @@ def build_inventory(spec: dict[str, Any], spec_path: Path, explicit_mode: str | 
 
     if isinstance(spec.get("devices"), list):
         inventory["spec_devices"] = spec["devices"]
+    if mode == "REALTIME":
+        inventory["spec_is_support_stage"] = spec.get("is_support_stage", False)
 
-    if mode == "PYTHON_BLOCK":
+    if mode in {"PYTHON_BLOCK", "MICROPYTHON"}:
         expected_lines = []
         for index, dependency in enumerate(spec.get("dependencies", []) or []):
             if not isinstance(dependency, dict) or not isinstance(dependency.get("requirement"), str) or not dependency["requirement"].strip():
                 raise SpecError(
-                    f"SPEC_FIELD_MISSING: spec.dependencies[{index}].requirement (exact requirements.txt line) is required for PYTHON_BLOCK"
+                    f"SPEC_FIELD_MISSING: spec.dependencies[{index}].requirement (exact requirements.txt line) is required for {mode}"
                 )
             expected_lines.append(dependency["requirement"].strip())
-        inventory["python_dependency_inventory"] = {
+        inventory["python_dependency_inventory" if mode == "PYTHON_BLOCK" else "micropython_dependency_inventory"] = {
             "authoritative_sources": ["extension-spec:dependencies"],
             "config_dependencies": [],
             "requirements_files": [],

@@ -6,6 +6,21 @@ Only load the topics required by the selected route and observed V1 features.
 
 | Topic | Modes | Triggers | File |
 | --- | --- | --- | --- |
+| `micropython.config` | MICROPYTHON | micropython, 2. 配置文件 (public/config.json) | [micropython/config.md](micropython/config.md) |
+| `micropython.generator.add-function` | MICROPYTHON | 4. 添加全局函数 addFunction | [micropython/generator/add-function.md](micropython/generator/add-function.md) |
+| `micropython.generator.add-import` | MICROPYTHON | 1. 导入库模块 addImport | [micropython/generator/add-import.md](micropython/generator/add-import.md) |
+| `micropython.generator.add-init` | MICROPYTHON | 3. 添加初始化区域代码 addInit | [micropython/generator/add-init.md](micropython/generator/add-init.md) |
+| `micropython.generator.add-variable` | MICROPYTHON | 2. 添加全局变量 addVariable | [micropython/generator/add-variable.md](micropython/generator/add-variable.md) |
+| `micropython.generator.add-while` | MICROPYTHON | 5. 添加 while True 头部代码 addWhile （无效果/废弃） | [micropython/generator/add-while.md](micropython/generator/add-while.md) |
+| `micropython.generator.advanced` | MICROPYTHON | 10. 进阶用法 | [micropython/generator/advanced.md](micropython/generator/advanced.md) |
+| `micropython.generator.core` | MICROPYTHON | micropython, 4. 代码生成文件 (func.js) | [micropython/generator/core.md](micropython/generator/core.md) |
+| `micropython.generator.event-callback` | MICROPYTHON | 6. 创建事件回调函数 | [micropython/generator/event-callback.md](micropython/generator/event-callback.md) |
+| `micropython.generator.get-setup` | MICROPYTHON | 8. 获取已生成的初始化代码 getSetup | [micropython/generator/get-setup.md](micropython/generator/get-setup.md) |
+| `micropython.generator.get-static-function` | MICROPYTHON | 9. 获取已生成的静态函数 getStaticFunction | [micropython/generator/get-static-function.md](micropython/generator/get-static-function.md) |
+| `micropython.generator.inline-code` | MICROPYTHON | 7. 在积木位置生成 code | [micropython/generator/inline-code.md](micropython/generator/inline-code.md) |
+| `micropython.index-js` | MICROPYTHON | micropython, 3. 图形块描述文件 (index.js) | [micropython/index-js.md](micropython/index-js.md) |
+| `micropython.locales` | MICROPYTHON | micropython, 5. 翻译资源文件 (locales) | [micropython/locales.md](micropython/locales.md) |
+| `micropython.structure` | MICROPYTHON | micropython, 1. 扩展包文件结构 | [micropython/structure.md](micropython/structure.md) |
 | `python.config` | PYTHON_BLOCK | config.json, python-block, isDevice, runtimeVersion | [python/config.md](python/config.md) |
 | `python.generator.add-function` | PYTHON_BLOCK | addFunction, 全局函数, 辅助函数 | [python/generator/add-function.md](python/generator/add-function.md) |
 | `python.generator.add-import` | PYTHON_BLOCK | addImport, import, 导入库模块 | [python/generator/add-import.md](python/generator/add-import.md) |
@@ -19,39 +34,46 @@ Only load the topics required by the selected route and observed V1 features.
 | `python.locales` | PYTHON_BLOCK | locales, translation, setLocale, 多语言 | [python/locales.md](python/locales.md) |
 | `python.requirements` | PYTHON_BLOCK | requirements.txt, asset.python.dependencies, pip, 依赖 | [python/requirements.md](python/requirements.md) |
 | `python.structure` | PYTHON_BLOCK | 目录, public, requirements.txt, libraries, python-block | [python/structure.md](python/structure.md) |
-| `shared.block.core` | PYTHON_BLOCK, UPLOAD | getInfo, blocks, menus, 颜色, 图标 | [shared/block/core.md](shared/block/core.md) |
-| `shared.block.definition` | PYTHON_BLOCK, UPLOAD | opcode, blockType, text, group, arguments | [shared/block/definition.md](shared/block/definition.md) |
-| `shared.block.examples` | PYTHON_BLOCK, UPLOAD | 下拉框, 输入校验, 数值范围, 模板 | [shared/block/examples.md](shared/block/examples.md) |
-| `shared.block.menus` | PYTHON_BLOCK, UPLOAD | menu, menus, 动态菜单, acceptReporters | [shared/block/menus.md](shared/block/menus.md) |
-| `shared.block.special` | PYTHON_BLOCK, UPLOAD | 联动, 校验, field 符号, 二级菜单 | [shared/block/special.md](shared/block/special.md) |
-| `shared.builder-workspace` | PYTHON_BLOCK, UPLOAD | Builder, extension/, README.md, npm install, npm run build | [shared/builder-workspace.md](shared/builder-workspace.md) |
-| `shared.config-identity` | PYTHON_BLOCK, UPLOAD | config.json, id, author, 身份 | [shared/config-identity.md](shared/config-identity.md) |
-| `shared.field.angle` | PYTHON_BLOCK, UPLOAD | 4. 角度 (ANGLE), angle, ANGLE | [shared/fields/angle.md](shared/fields/angle.md) |
-| `shared.field.boolean` | PYTHON_BLOCK, UPLOAD | 5. 布尔值 (BOOLEAN), boolean, BOOLEAN | [shared/fields/boolean.md](shared/fields/boolean.md) |
-| `shared.field.builtinimg` | PYTHON_BLOCK, UPLOAD | 21. 内置图像资源 (BUILTINIMG), builtinimg, BUILTINIMG | [shared/fields/builtinimg.md](shared/fields/builtinimg.md) |
-| `shared.field.color` | PYTHON_BLOCK, UPLOAD | 8. 取色器 (COLOR), color, COLOR | [shared/fields/color.md](shared/fields/color.md) |
-| `shared.field.colorpalette` | PYTHON_BLOCK, UPLOAD | 7. 色板 (COLORPALETTE), colorpalette, COLORPALETTE | [shared/fields/colorpalette.md](shared/fields/colorpalette.md) |
-| `shared.field.dirsettings` | PYTHON_BLOCK, UPLOAD | 14. 路径设置 (DIRSETTINGS), dirsettings, DIRSETTINGS | [shared/fields/dirsettings.md](shared/fields/dirsettings.md) |
-| `shared.field.dropdown` | PYTHON_BLOCK, UPLOAD | 3. 下拉框, dropdown | [shared/fields/dropdown.md](shared/fields/dropdown.md) |
-| `shared.field.eventheadinner` | PYTHON_BLOCK, UPLOAD | 24. 事件头内置积木 (EVENTHEADINNER), eventheadinner, EVENTHEADINNER | [shared/fields/eventheadinner.md](shared/fields/eventheadinner.md) |
-| `shared.field.formsetting` | PYTHON_BLOCK, UPLOAD | 13. 表单设置 (FORMSETTING), formsetting, FORMSETTING | [shared/fields/formsetting.md](shared/fields/formsetting.md) |
-| `shared.field.imgpreview` | PYTHON_BLOCK, UPLOAD | 19. 图片预览 (IMGPREVIEW), imgpreview, IMGPREVIEW | [shared/fields/imgpreview.md](shared/fields/imgpreview.md) |
-| `shared.field.imgsettings` | PYTHON_BLOCK, UPLOAD | 17. 图片设置 (IMGSETTINGS), imgsettings, IMGSETTINGS | [shared/fields/imgsettings.md](shared/fields/imgsettings.md) |
-| `shared.field.infraredtext` | PYTHON_BLOCK, UPLOAD | 22. 红外遥控器 (INFRAREDTEXT), infraredtext, INFRAREDTEXT | [shared/fields/infraredtext.md](shared/fields/infraredtext.md) |
-| `shared.field.matrix` | PYTHON_BLOCK, UPLOAD | 11. 点阵1 (MATRIX), matrix, MATRIX | [shared/fields/matrix.md](shared/fields/matrix.md) |
-| `shared.field.matrixicons` | PYTHON_BLOCK, UPLOAD | 12. 点阵2 (MATRIXICONS), matrixicons, MATRIXICONS | [shared/fields/matrixicons.md](shared/fields/matrixicons.md) |
-| `shared.field.mqttparameter` | PYTHON_BLOCK, UPLOAD | 16. MQTT初始化 (MQTTPARAMETER), mqttparameter, MQTTPARAMETER | [shared/fields/mqttparameter.md](shared/fields/mqttparameter.md) |
-| `shared.field.note` | PYTHON_BLOCK, UPLOAD | 10. 琴键 (NOTE), note, NOTE | [shared/fields/note.md](shared/fields/note.md) |
-| `shared.field.number` | PYTHON_BLOCK, UPLOAD | 1. 数值型 (NUMBER), number, NUMBER | [shared/fields/number.md](shared/fields/number.md) |
-| `shared.field.obloqparameter` | PYTHON_BLOCK, UPLOAD | 15. OBLOQ初始化 (OBLOQPARAMETER), obloqparameter, OBLOQPARAMETER | [shared/fields/obloqparameter.md](shared/fields/obloqparameter.md) |
-| `shared.field.onlineimgsetting` | PYTHON_BLOCK, UPLOAD | 18. 在线图片设置 (ONLINEIMGSETTING), onlineimgsetting, ONLINEIMGSETTING | [shared/fields/onlineimgsetting.md](shared/fields/onlineimgsetting.md) |
-| `shared.field.piano` | PYTHON_BLOCK, UPLOAD | 9. 钢琴键 (PIANO), piano, PIANO | [shared/fields/piano.md](shared/fields/piano.md) |
-| `shared.field.slider` | PYTHON_BLOCK, UPLOAD | 6. 滑动输入条 (SLIDER), slider, SLIDER | [shared/fields/slider.md](shared/fields/slider.md) |
-| `shared.field.string` | PYTHON_BLOCK, UPLOAD | 2. 文本输入框 (STRING), string, STRING | [shared/fields/string.md](shared/fields/string.md) |
-| `shared.field.textarea` | PYTHON_BLOCK, UPLOAD | 23. 文本域 (TEXTAREA), textarea, TEXTAREA | [shared/fields/textarea.md](shared/fields/textarea.md) |
-| `shared.field.textpreview` | PYTHON_BLOCK, UPLOAD | 20. 文本预览 (TEXTPREVIEW), textpreview, TEXTPREVIEW | [shared/fields/textpreview.md](shared/fields/textpreview.md) |
-| `shared.runtime` | PYTHON_BLOCK, UPLOAD | runtime, getCurrentDeviceId, getDevice, getBoardPinsByType, setLocale, getInfo | [shared/runtime.md](shared/runtime.md) |
-| `shared.v1-compatibility` | PYTHON_BLOCK, UPLOAD | V1, compatibilityId, opcode, function | [shared/v1-compatibility.md](shared/v1-compatibility.md) |
+| `realtime.config` | REALTIME | realtime, 2. 配置文件 (public/config.json) | [realtime/config.md](realtime/config.md) |
+| `realtime.execution` | REALTIME | realtime, 4. 积木执行文件 (func.js) | [realtime/execution.md](realtime/execution.md) |
+| `realtime.firmata` | REALTIME | realtime, 6. Firmata 相关 API | [realtime/firmata.md](realtime/firmata.md) |
+| `realtime.index-js` | REALTIME | realtime, 3. 图形块描述文件 (index.js) | [realtime/index-js.md](realtime/index-js.md) |
+| `realtime.locales` | REALTIME | realtime, 5. 翻译资源文件 (locales) | [realtime/locales.md](realtime/locales.md) |
+| `realtime.stage` | REALTIME | realtime, 7. 舞台扩展补充说明 | [realtime/stage.md](realtime/stage.md) |
+| `realtime.structure` | REALTIME | realtime, 1. 扩展包文件结构 | [realtime/structure.md](realtime/structure.md) |
+| `shared.block.core` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | getInfo, blocks, menus, 颜色, 图标 | [shared/block/core.md](shared/block/core.md) |
+| `shared.block.definition` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | opcode, blockType, text, group, arguments | [shared/block/definition.md](shared/block/definition.md) |
+| `shared.block.examples` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | 下拉框, 输入校验, 数值范围, 模板 | [shared/block/examples.md](shared/block/examples.md) |
+| `shared.block.menus` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | menu, menus, 动态菜单, acceptReporters | [shared/block/menus.md](shared/block/menus.md) |
+| `shared.block.special` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | 联动, 校验, field 符号, 二级菜单 | [shared/block/special.md](shared/block/special.md) |
+| `shared.builder-workspace` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | Builder, extension/, README.md, npm install, npm run build | [shared/builder-workspace.md](shared/builder-workspace.md) |
+| `shared.config-identity` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | config.json, id, author, 身份 | [shared/config-identity.md](shared/config-identity.md) |
+| `shared.field.angle` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | 4. 角度 (ANGLE), angle, ANGLE | [shared/fields/angle.md](shared/fields/angle.md) |
+| `shared.field.boolean` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | 5. 布尔值 (BOOLEAN), boolean, BOOLEAN | [shared/fields/boolean.md](shared/fields/boolean.md) |
+| `shared.field.builtinimg` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | 21. 内置图像资源 (BUILTINIMG), builtinimg, BUILTINIMG | [shared/fields/builtinimg.md](shared/fields/builtinimg.md) |
+| `shared.field.color` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | 8. 取色器 (COLOR), color, COLOR | [shared/fields/color.md](shared/fields/color.md) |
+| `shared.field.colorpalette` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | 7. 色板 (COLORPALETTE), colorpalette, COLORPALETTE | [shared/fields/colorpalette.md](shared/fields/colorpalette.md) |
+| `shared.field.dirsettings` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | 14. 路径设置 (DIRSETTINGS), dirsettings, DIRSETTINGS | [shared/fields/dirsettings.md](shared/fields/dirsettings.md) |
+| `shared.field.dropdown` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | 3. 下拉框, dropdown | [shared/fields/dropdown.md](shared/fields/dropdown.md) |
+| `shared.field.eventheadinner` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | 24. 事件头内置积木 (EVENTHEADINNER), eventheadinner, EVENTHEADINNER | [shared/fields/eventheadinner.md](shared/fields/eventheadinner.md) |
+| `shared.field.formsetting` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | 13. 表单设置 (FORMSETTING), formsetting, FORMSETTING | [shared/fields/formsetting.md](shared/fields/formsetting.md) |
+| `shared.field.imgpreview` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | 19. 图片预览 (IMGPREVIEW), imgpreview, IMGPREVIEW | [shared/fields/imgpreview.md](shared/fields/imgpreview.md) |
+| `shared.field.imgsettings` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | 17. 图片设置 (IMGSETTINGS), imgsettings, IMGSETTINGS | [shared/fields/imgsettings.md](shared/fields/imgsettings.md) |
+| `shared.field.infraredtext` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | 22. 红外遥控器 (INFRAREDTEXT), infraredtext, INFRAREDTEXT | [shared/fields/infraredtext.md](shared/fields/infraredtext.md) |
+| `shared.field.matrix` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | 11. 点阵1 (MATRIX), matrix, MATRIX | [shared/fields/matrix.md](shared/fields/matrix.md) |
+| `shared.field.matrixicons` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | 12. 点阵2 (MATRIXICONS), matrixicons, MATRIXICONS | [shared/fields/matrixicons.md](shared/fields/matrixicons.md) |
+| `shared.field.mqttparameter` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | 16. MQTT初始化 (MQTTPARAMETER), mqttparameter, MQTTPARAMETER | [shared/fields/mqttparameter.md](shared/fields/mqttparameter.md) |
+| `shared.field.note` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | 10. 琴键 (NOTE), note, NOTE | [shared/fields/note.md](shared/fields/note.md) |
+| `shared.field.number` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | 1. 数值型 (NUMBER), number, NUMBER | [shared/fields/number.md](shared/fields/number.md) |
+| `shared.field.obloqparameter` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | 15. OBLOQ初始化 (OBLOQPARAMETER), obloqparameter, OBLOQPARAMETER | [shared/fields/obloqparameter.md](shared/fields/obloqparameter.md) |
+| `shared.field.onlineimgsetting` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | 18. 在线图片设置 (ONLINEIMGSETTING), onlineimgsetting, ONLINEIMGSETTING | [shared/fields/onlineimgsetting.md](shared/fields/onlineimgsetting.md) |
+| `shared.field.piano` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | 9. 钢琴键 (PIANO), piano, PIANO | [shared/fields/piano.md](shared/fields/piano.md) |
+| `shared.field.slider` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | 6. 滑动输入条 (SLIDER), slider, SLIDER | [shared/fields/slider.md](shared/fields/slider.md) |
+| `shared.field.string` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | 2. 文本输入框 (STRING), string, STRING | [shared/fields/string.md](shared/fields/string.md) |
+| `shared.field.textarea` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | 23. 文本域 (TEXTAREA), textarea, TEXTAREA | [shared/fields/textarea.md](shared/fields/textarea.md) |
+| `shared.field.textpreview` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | 20. 文本预览 (TEXTPREVIEW), textpreview, TEXTPREVIEW | [shared/fields/textpreview.md](shared/fields/textpreview.md) |
+| `shared.runtime` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | runtime, getCurrentDeviceId, getDevice, getBoardPinsByType, setLocale, getInfo | [shared/runtime.md](shared/runtime.md) |
+| `shared.v1-compatibility` | MICROPYTHON, PYTHON_BLOCK, REALTIME, UPLOAD | V1, compatibilityId, opcode, function | [shared/v1-compatibility.md](shared/v1-compatibility.md) |
 | `upload.config` | UPLOAD | config.json, supportDevices, supportArch, libraryConfig, runtimeVersion, isDevice | [upload/config.md](upload/config.md) |
 | `upload.generator.add-const` | UPLOAD | addConst, 静态常量, PROGMEM | [upload/generator/add-const.md](upload/generator/add-const.md) |
 | `upload.generator.add-define` | UPLOAD | addDefine, define, 宏 | [upload/generator/add-define.md](upload/generator/add-define.md) |

@@ -4,29 +4,35 @@
 
 - topic_id: `upload.structure`
 - source_key: `mindplus.v2.extensions.upload`
-- source_fingerprint: `64b533d73f427d519ead6419596dc07c38b0aeda749359e3601e3f165cc5b94f`
+- source_fingerprint: `b5388eb8835469f808d7abeb4fd2c5dffe80b2eae94337e782011d06addf84eb`
 
 ## 1. 扩展包文件结构
 
-一个标准的扩展包目录结构如下：
+Mind+ V2 扩展库基于模板仓库 [mindplus-ext2-builder](https://gitee.com/mind-plus/mindplus-ext2-builder) 开发，克隆或下载该仓库得到的目录既是开发工程，也是最终提交收录的仓库，结构如下：
 
 ```
-extensionName/                  # 扩展库根目录
-├── func.js                     # 生成代码
-├── index.js                    # 图形块定义主文件
-├── public/                     # 静态资源目录
-│   ├── cover.png               # 扩展封面图
-│   └── config.json             # 扩展配置文件（元数据）
-│   ├── libraries/              # Arduino 库文件目录 (可选)
-│   │   └── DFRobot_xxxx        # Arduino 库文件
-│   │   │   └── library.properties           # 库配置文件
-├── icon/                       # 图标资源目录
-│   ├── blockIcon.svg           # 积木图标 (建议使用白色)
-│   └── menuIcon.svg            # 分类菜单图标 (建议使用积木颜色)
-├── locales/                    # 国际化语言包
-│   ├── zh-cn.json              # 简体中文翻译
-│   ├── en.json                 # 英文翻译
-│   └── index.js                # 翻译入口文件
+ext2-ul-name/                               # 仓库名称可参考，以ext2-ul-为前缀
+├── extension/                              # 扩展库源码目录
+│   ├── func.js                             # 生成代码
+│   ├── index.js                            # 图形块定义主文件
+│   ├── public/                             # 静态资源目录
+│   │   ├── cover.png                       # 封面图
+│   │   ├── config.json                     # 配置文件
+│   │   └── libraries/                      # 库文件目录 (可选)
+│   │       └── DFRobot_xxxx/               # 库文件
+│   ├── icon/                               # 图标资源目录
+│   │   ├── blockIcon.svg                   # 积木图标 (建议使用白色)
+│   │   └── menuIcon.svg                    # 分类菜单图标 (建议使用积木颜色)
+│   └── locales/                            # 国际化语言包
+│       ├── zh-cn.json                      # 简体中文翻译
+│       ├── en.json                         # 英文翻译
+│       └── index.js                        # 翻译入口文件 (构建时自动生成)
+├── scripts/
+├── utils/
+├── ...
+└── README.md
 ```
+
+> `extension/` 及 `README.md` 需要自己编写，其余部分是固定的构建环境，无需修改
 
 ---

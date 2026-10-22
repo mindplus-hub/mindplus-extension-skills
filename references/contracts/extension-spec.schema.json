@@ -17,7 +17,8 @@
         "compatibility_id": {"type": ["string", "null"], "default": "", "description": "Empty unless an existing V1 compatibility target has been confirmed; never derive from the new author/id alone."}
       }
     },
-    "mode": {"enum": ["UPLOAD", "PYTHON_BLOCK"]},
+    "mode": {"enum": ["UPLOAD", "PYTHON_BLOCK", "MICROPYTHON", "REALTIME"]},
+    "is_support_stage": {"type": "boolean", "description": "REALTIME only: true for a stage extension; defaults to false for a hardware module."},
     "blocks": {
       "type": "array",
       "minItems": 1,

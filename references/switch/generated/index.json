@@ -1,6 +1,98 @@
 {
   "bundle_id": "mindplus-switch-references",
   "route_profiles": {
+    "MICROPYTHON": {
+      "always": [
+        "shared.builder-workspace",
+        "shared.config-identity",
+        "shared.v1-compatibility",
+        "shared.block.core",
+        "shared.block.definition",
+        "micropython.structure",
+        "micropython.config",
+        "micropython.index-js",
+        "micropython.generator.core",
+        "micropython.locales"
+      ],
+      "features": {
+        "add-function": [
+          "micropython.generator.add-function"
+        ],
+        "add-import": [
+          "micropython.generator.add-import"
+        ],
+        "add-init": [
+          "micropython.generator.add-init"
+        ],
+        "add-variable": [
+          "micropython.generator.add-variable"
+        ],
+        "add-while": [
+          "micropython.generator.add-while"
+        ],
+        "advanced": [
+          "micropython.generator.advanced"
+        ],
+        "board-condition": [
+          "shared.runtime",
+          "micropython.config"
+        ],
+        "dependencies": [
+          "micropython.structure"
+        ],
+        "dynamic-menu": [
+          "shared.block.menus",
+          "shared.block.special",
+          "shared.field.dropdown"
+        ],
+        "event-callback": [
+          "micropython.generator.event-callback"
+        ],
+        "examples": [
+          "shared.block.examples"
+        ],
+        "field-dropdown": [
+          "shared.field.dropdown"
+        ],
+        "field-number": [
+          "shared.field.number"
+        ],
+        "field-slider": [
+          "shared.field.slider"
+        ],
+        "field-string": [
+          "shared.field.string"
+        ],
+        "get-setup": [
+          "micropython.generator.get-setup"
+        ],
+        "get-static-function": [
+          "micropython.generator.get-static-function"
+        ],
+        "inline-code": [
+          "micropython.generator.inline-code"
+        ],
+        "local-library": [
+          "micropython.structure"
+        ],
+        "menu": [
+          "shared.block.menus"
+        ],
+        "runtime": [
+          "shared.runtime"
+        ],
+        "separator": [
+          "shared.block.special"
+        ],
+        "submenu": [
+          "shared.block.special"
+        ],
+        "validation": [
+          "shared.block.special",
+          "micropython.generator.advanced"
+        ]
+      }
+    },
     "PYTHON_BLOCK": {
       "always": [
         "shared.builder-workspace",
@@ -74,6 +166,73 @@
         "validation": [
           "shared.block.special",
           "python.generator.advanced"
+        ]
+      }
+    },
+    "REALTIME": {
+      "always": [
+        "shared.builder-workspace",
+        "shared.config-identity",
+        "shared.v1-compatibility",
+        "shared.block.core",
+        "shared.block.definition",
+        "realtime.structure",
+        "realtime.config",
+        "realtime.index-js",
+        "realtime.execution",
+        "realtime.locales"
+      ],
+      "features": {
+        "advanced": [
+          "shared.runtime",
+          "realtime.execution"
+        ],
+        "board-condition": [
+          "shared.runtime",
+          "realtime.config",
+          "realtime.firmata"
+        ],
+        "dynamic-menu": [
+          "shared.block.menus",
+          "shared.block.special",
+          "shared.field.dropdown"
+        ],
+        "examples": [
+          "shared.block.examples"
+        ],
+        "field-dropdown": [
+          "shared.field.dropdown"
+        ],
+        "field-number": [
+          "shared.field.number"
+        ],
+        "field-slider": [
+          "shared.field.slider"
+        ],
+        "field-string": [
+          "shared.field.string"
+        ],
+        "firmata": [
+          "realtime.firmata",
+          "realtime.execution"
+        ],
+        "local-library": [
+          "realtime.structure"
+        ],
+        "menu": [
+          "shared.block.menus"
+        ],
+        "runtime": [
+          "shared.runtime"
+        ],
+        "separator": [
+          "shared.block.special"
+        ],
+        "stage": [
+          "realtime.stage"
+        ],
+        "submenu": [
+          "shared.block.special"
         ]
       }
     },
@@ -160,15 +319,217 @@
   "schema_version": 1,
   "supported_modes": [
     "UPLOAD",
-    "PYTHON_BLOCK"
+    "PYTHON_BLOCK",
+    "MICROPYTHON",
+    "REALTIME"
   ],
   "topics": [
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/config.md",
+      "source_fingerprint": "3d1a0758ca9325dcf3610e0448f0bc820c96e3094199fae8efe5ef8392094db2",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "micropython 2. 配置文件 (public/config.json)",
+      "topic_id": "micropython.config",
+      "triggers": [
+        "micropython",
+        "2. 配置文件 (public/config.json)"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/generator/add-function.md",
+      "source_fingerprint": "0542d042e3aadfd35cf7bfd02ba62c8706c2d9c238339d710ac71fda0431b944",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "MicroPython 4. 添加全局函数 addFunction",
+      "topic_id": "micropython.generator.add-function",
+      "triggers": [
+        "4. 添加全局函数 addFunction"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/generator/add-import.md",
+      "source_fingerprint": "2ebb115e71e201290e938a2195cec3375fe82e7c2b9882742d68f6293a4350c1",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "MicroPython 1. 导入库模块 addImport",
+      "topic_id": "micropython.generator.add-import",
+      "triggers": [
+        "1. 导入库模块 addImport"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/generator/add-init.md",
+      "source_fingerprint": "058763febd8c0b6a0488f7c9af6e062cb3e88880c7162a7f5b73604a763121fb",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "MicroPython 3. 添加初始化区域代码 addInit",
+      "topic_id": "micropython.generator.add-init",
+      "triggers": [
+        "3. 添加初始化区域代码 addInit"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/generator/add-variable.md",
+      "source_fingerprint": "7fbe1d5a2af2837eea0f4debd2b1e61a0dc930d44ea44e7be7c9a1d3f078022d",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "MicroPython 2. 添加全局变量 addVariable",
+      "topic_id": "micropython.generator.add-variable",
+      "triggers": [
+        "2. 添加全局变量 addVariable"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/generator/add-while.md",
+      "source_fingerprint": "cdc5d44dac96c5d0cb9f7a87b433b58ac47cd87608394f306aa2592c96c66d9a",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "MicroPython 5. 添加 while True 头部代码 addWhile （无效果/废弃）",
+      "topic_id": "micropython.generator.add-while",
+      "triggers": [
+        "5. 添加 while True 头部代码 addWhile （无效果/废弃）"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/generator/advanced.md",
+      "source_fingerprint": "5dc0b6b7b0ff0f838d936f7e820288dbfa5f14628b8bc280fe689f263f967d51",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "MicroPython 10. 进阶用法",
+      "topic_id": "micropython.generator.advanced",
+      "triggers": [
+        "10. 进阶用法"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/generator/core.md",
+      "source_fingerprint": "5cdcd793de79709615fe23a9ea77eeb2525c83c519392679fa089041540ead4e",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "micropython 4. 代码生成文件 (func.js)",
+      "topic_id": "micropython.generator.core",
+      "triggers": [
+        "micropython",
+        "4. 代码生成文件 (func.js)"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/generator/event-callback.md",
+      "source_fingerprint": "6aee74a1a713f8008ae40a4bc8163999238658c3d5454602052785520800b65b",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "MicroPython 6. 创建事件回调函数",
+      "topic_id": "micropython.generator.event-callback",
+      "triggers": [
+        "6. 创建事件回调函数"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/generator/get-setup.md",
+      "source_fingerprint": "4bb9c93531dec96b9d7e71d0950c791a8e0722118bfbc8c765f6d4dafdaea36d",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "MicroPython 8. 获取已生成的初始化代码 getSetup",
+      "topic_id": "micropython.generator.get-setup",
+      "triggers": [
+        "8. 获取已生成的初始化代码 getSetup"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/generator/get-static-function.md",
+      "source_fingerprint": "8505745aa4431383a50f6a470047c40e0394f1b3deb8e24db1e41a32847a9255",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "MicroPython 9. 获取已生成的静态函数 getStaticFunction",
+      "topic_id": "micropython.generator.get-static-function",
+      "triggers": [
+        "9. 获取已生成的静态函数 getStaticFunction"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/generator/inline-code.md",
+      "source_fingerprint": "1fa45f1e610b1cb1482d9578f76fae0a940319ae0b08b3e8369cd27e91553204",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "MicroPython 7. 在积木位置生成 code",
+      "topic_id": "micropython.generator.inline-code",
+      "triggers": [
+        "7. 在积木位置生成 code"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/index-js.md",
+      "source_fingerprint": "0ce8ce367026424b5a1ff5062c26c82be63cd9f1630bfddc010187eba059c762",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "micropython 3. 图形块描述文件 (index.js)",
+      "topic_id": "micropython.index-js",
+      "triggers": [
+        "micropython",
+        "3. 图形块描述文件 (index.js)"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/locales.md",
+      "source_fingerprint": "7833060432a8cf71702f9bec004329161a4db2fd02dff6ba80bf0a681a0627b9",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "micropython 5. 翻译资源文件 (locales)",
+      "topic_id": "micropython.locales",
+      "triggers": [
+        "micropython",
+        "5. 翻译资源文件 (locales)"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/structure.md",
+      "source_fingerprint": "ddece67d2f857020adccc14868bb757dbc09439b71cca2e4711cbecbc0d08b66",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "micropython 1. 扩展包文件结构",
+      "topic_id": "micropython.structure",
+      "triggers": [
+        "micropython",
+        "1. 扩展包文件结构"
+      ]
+    },
     {
       "modes": [
         "PYTHON_BLOCK"
       ],
       "path": "python/config.md",
-      "source_fingerprint": "76d70407609e1b37177e8646320ef73607ce509ac08f58713b4d31acabc606a5",
+      "source_fingerprint": "969aa6c7bc904a1aa6753c0862ac5b978b18fb239b93fbc360f55824c8b59310",
       "source_key": "mindplus.v2.extensions.python",
       "title": "Python 积木模式 config.json",
       "topic_id": "python.config",
@@ -199,7 +560,7 @@
         "PYTHON_BLOCK"
       ],
       "path": "python/generator/add-import.md",
-      "source_fingerprint": "cf0c2c965f9e83a851bc325a643d104b6daebc2cf00168291a428811811c3c9b",
+      "source_fingerprint": "ea7d357abbbe0b88fc7f86eda8905f4cf3c3488a60ff0c27dbd4650587b5d1bc",
       "source_key": "mindplus.v2.extensions.python",
       "title": "Python Generator addImport",
       "topic_id": "python.generator.add-import",
@@ -260,7 +621,7 @@
         "PYTHON_BLOCK"
       ],
       "path": "python/generator/core.md",
-      "source_fingerprint": "399472b50c09dabb32f28f5b91e815b9dbd58b86dec35804a3c56eb7d5a23112",
+      "source_fingerprint": "fdb94b4973b3ec0ea5075b3f7239a6f16dd60ad08bdc09331d50a36d7cd42fe3",
       "source_key": "mindplus.v2.extensions.python",
       "title": "Python func.js 核心结构",
       "topic_id": "python.generator.core",
@@ -307,7 +668,7 @@
         "PYTHON_BLOCK"
       ],
       "path": "python/index-js.md",
-      "source_fingerprint": "d5dbb405a6614cd4b68a925525001cb729f5ac0902775f7b8300b8bfb8c6b8b6",
+      "source_fingerprint": "76f5ead4ff9252357c365ac567ad9e9dd59c6245a4de6bf4ec24141bbecfee2e",
       "source_key": "mindplus.v2.extensions.python",
       "title": "Python 积木模式 index.js",
       "topic_id": "python.index-js",
@@ -356,7 +717,7 @@
         "PYTHON_BLOCK"
       ],
       "path": "python/structure.md",
-      "source_fingerprint": "2044ac6e2fe5cfa015915e5fe83b3ea0834eb0414853bd934ad1934627c187f5",
+      "source_fingerprint": "4488537bdc360f2bc5b024cfe76c67d250624de15695f0e60b1a611f0fccabdd",
       "source_key": "mindplus.v2.extensions.python",
       "title": "Python 积木模式扩展目录结构",
       "topic_id": "python.structure",
@@ -370,7 +731,107 @@
     },
     {
       "modes": [
+        "REALTIME"
+      ],
+      "path": "realtime/config.md",
+      "source_fingerprint": "8218b3185368216f4d64c14b3072aab7114fd25e3ecb37534082fbd5718be7ba",
+      "source_key": "mindplus.v2.extensions.realtime",
+      "title": "realtime 2. 配置文件 (public/config.json)",
+      "topic_id": "realtime.config",
+      "triggers": [
+        "realtime",
+        "2. 配置文件 (public/config.json)"
+      ]
+    },
+    {
+      "modes": [
+        "REALTIME"
+      ],
+      "path": "realtime/execution.md",
+      "source_fingerprint": "9cda2f4159e325e2dadff2faa4b250ac7ae9244c65e3192a5ab50292f69232a8",
+      "source_key": "mindplus.v2.extensions.realtime",
+      "title": "realtime 4. 积木执行文件 (func.js)",
+      "topic_id": "realtime.execution",
+      "triggers": [
+        "realtime",
+        "4. 积木执行文件 (func.js)"
+      ]
+    },
+    {
+      "modes": [
+        "REALTIME"
+      ],
+      "path": "realtime/firmata.md",
+      "source_fingerprint": "4ceaeec6a5bfc30c8330dcfc4aa67b4e64b3c6824e4ca94260f112feddb6267b",
+      "source_key": "mindplus.v2.extensions.realtime",
+      "title": "realtime 6. Firmata 相关 API",
+      "topic_id": "realtime.firmata",
+      "triggers": [
+        "realtime",
+        "6. Firmata 相关 API"
+      ]
+    },
+    {
+      "modes": [
+        "REALTIME"
+      ],
+      "path": "realtime/index-js.md",
+      "source_fingerprint": "8b5ed02b89277bbc33f07b493ffacf79390d9eb5b9106a84ab66e18f61c1bd39",
+      "source_key": "mindplus.v2.extensions.realtime",
+      "title": "realtime 3. 图形块描述文件 (index.js)",
+      "topic_id": "realtime.index-js",
+      "triggers": [
+        "realtime",
+        "3. 图形块描述文件 (index.js)"
+      ]
+    },
+    {
+      "modes": [
+        "REALTIME"
+      ],
+      "path": "realtime/locales.md",
+      "source_fingerprint": "581cadddd9eaa9b4904d7c6237845a0b85f61c78a9aa962754edf18ec0712260",
+      "source_key": "mindplus.v2.extensions.realtime",
+      "title": "realtime 5. 翻译资源文件 (locales)",
+      "topic_id": "realtime.locales",
+      "triggers": [
+        "realtime",
+        "5. 翻译资源文件 (locales)"
+      ]
+    },
+    {
+      "modes": [
+        "REALTIME"
+      ],
+      "path": "realtime/stage.md",
+      "source_fingerprint": "cd056ae555a963b64379bd3d96ad307355dae767486b1ec326afd74efcf8a15a",
+      "source_key": "mindplus.v2.extensions.realtime",
+      "title": "realtime 7. 舞台扩展补充说明",
+      "topic_id": "realtime.stage",
+      "triggers": [
+        "realtime",
+        "7. 舞台扩展补充说明"
+      ]
+    },
+    {
+      "modes": [
+        "REALTIME"
+      ],
+      "path": "realtime/structure.md",
+      "source_fingerprint": "dbcf4655c4efc2a2b95937f518a6a6905e53922faf4bbc7ff51d4c144129c4d4",
+      "source_key": "mindplus.v2.extensions.realtime",
+      "title": "realtime 1. 扩展包文件结构",
+      "topic_id": "realtime.structure",
+      "triggers": [
+        "realtime",
+        "1. 扩展包文件结构"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/block/core.md",
@@ -388,7 +849,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/block/definition.md",
@@ -406,7 +869,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/block/examples.md",
@@ -423,7 +888,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/block/menus.md",
@@ -440,7 +907,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/block/special.md",
@@ -457,7 +926,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/builder-workspace.md",
@@ -475,7 +946,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/config-identity.md",
@@ -492,7 +965,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/fields/angle.md",
@@ -508,7 +983,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/fields/boolean.md",
@@ -524,7 +1001,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/fields/builtinimg.md",
@@ -540,7 +1019,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/fields/color.md",
@@ -556,7 +1037,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/fields/colorpalette.md",
@@ -572,7 +1055,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/fields/dirsettings.md",
@@ -588,7 +1073,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/fields/dropdown.md",
@@ -603,7 +1090,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/fields/eventheadinner.md",
@@ -619,7 +1108,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/fields/formsetting.md",
@@ -635,7 +1126,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/fields/imgpreview.md",
@@ -651,7 +1144,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/fields/imgsettings.md",
@@ -667,7 +1162,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/fields/infraredtext.md",
@@ -683,7 +1180,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/fields/matrix.md",
@@ -699,7 +1198,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/fields/matrixicons.md",
@@ -715,7 +1216,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/fields/mqttparameter.md",
@@ -731,7 +1234,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/fields/note.md",
@@ -747,7 +1252,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/fields/number.md",
@@ -763,7 +1270,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/fields/obloqparameter.md",
@@ -779,7 +1288,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/fields/onlineimgsetting.md",
@@ -795,7 +1306,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/fields/piano.md",
@@ -811,7 +1324,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/fields/slider.md",
@@ -827,7 +1342,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/fields/string.md",
@@ -843,7 +1360,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/fields/textarea.md",
@@ -859,7 +1378,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/fields/textpreview.md",
@@ -875,7 +1396,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/runtime.md",
@@ -894,7 +1417,9 @@
     },
     {
       "modes": [
+        "MICROPYTHON",
         "PYTHON_BLOCK",
+        "REALTIME",
         "UPLOAD"
       ],
       "path": "shared/v1-compatibility.md",
@@ -914,7 +1439,7 @@
         "UPLOAD"
       ],
       "path": "upload/config.md",
-      "source_fingerprint": "dccbf798729f9675a841e397f17a247ee2bcc8cd0d8432d7380ac53bbefa1b44",
+      "source_fingerprint": "22cdaf0c7df3297c8227979b4811820096332d637e60c809e658abe806775348",
       "source_key": "mindplus.v2.extensions.upload",
       "title": "上传模式 config.json",
       "topic_id": "upload.config",
@@ -1050,7 +1575,7 @@
         "UPLOAD"
       ],
       "path": "upload/generator/core.md",
-      "source_fingerprint": "35d4d48d9844ec7d57ea482d99b3ca3ee74b91b23d4e4a812c18627cb0773fdf",
+      "source_fingerprint": "b03ae18706a777ada79a35c2ea9758b473a46140d0a8c5931607fa48e255b42f",
       "source_key": "mindplus.v2.extensions.upload",
       "title": "上传模式 func.js 核心结构",
       "topic_id": "upload.generator.core",
@@ -1082,7 +1607,7 @@
         "UPLOAD"
       ],
       "path": "upload/index-js.md",
-      "source_fingerprint": "5a559c24c0a98695711e858470c0edb9b8b40cad6d1bcc398f7b1e91024f68c7",
+      "source_fingerprint": "136f20c29cd47fe353bb0bd12fdb05ff7ff719b0d588436e30e53df5ae181424",
       "source_key": "mindplus.v2.extensions.upload",
       "title": "上传模式 index.js",
       "topic_id": "upload.index-js",
@@ -1133,7 +1658,7 @@
         "UPLOAD"
       ],
       "path": "upload/structure.md",
-      "source_fingerprint": "64b533d73f427d519ead6419596dc07c38b0aeda749359e3601e3f165cc5b94f",
+      "source_fingerprint": "b5388eb8835469f808d7abeb4fd2c5dffe80b2eae94337e782011d06addf84eb",
       "source_key": "mindplus.v2.extensions.upload",
       "title": "上传模式扩展目录结构",
       "topic_id": "upload.structure",

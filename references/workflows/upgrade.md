@@ -30,7 +30,7 @@ When adding blocks or explicitly reorganizing the palette, use [block-organizati
 
 ## Verify and hand off
 
-Run the relevant config, entry/resource, locale and generator checks against the final source, reusing the BASIC scope described in [review.md](review.md) without inserting a separate review workflow. Use project tests or focused regression examples to verify each changed behavior and representative existing behavior, including parameter order, defaults and generated source. Do not invent a V1 inventory to run the conversion checker. Validate README changes with the existing README checker where applicable.
+Run the relevant config, entry/resource, locale and generator checks against the final source, reusing the BASIC scope described in [review.md](review.md) without inserting a separate review workflow. Use the narrowest existing test or a representative regression example for the changed behavior and one relevant retained path, including parameter order, defaults and generated source where affected; expand only for a concrete failure or wider shared impact. Do not invent a V1 inventory to run the conversion checker. Validate README changes with the existing README checker where applicable.
 
 Use the existing build setup when available and authorized. Keep installation/build attempts bounded as in other producers; record a skipped build as optional `NOT_RUN` with a reason, never PASS. Resolve failures in the required checks. Producer completion proceeds to Basic for required build/display/behavior and ZIP checks; skipped verification blocks publication. Device acceptance is outside this skill.
 

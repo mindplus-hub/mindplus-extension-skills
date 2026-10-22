@@ -138,7 +138,7 @@ def main() -> int:
     parser.add_argument("--v1-source", required=True, type=Path)
     parser.add_argument("--project-root", type=Path)
     parser.add_argument("--parent-run-id", help="Bind conversion records to an existing parent task")
-    parser.add_argument("--mode", default="UNKNOWN", choices=["UNKNOWN", "UPLOAD", "PYTHON_BLOCK"])
+    parser.add_argument("--mode", default="UNKNOWN", choices=["UNKNOWN", "UPLOAD", "PYTHON_BLOCK", "MICROPYTHON", "REALTIME"])
     parser.add_argument("--review-policy", default="AUTO", choices=["AUTO", "SENSITIVE_REVIEW"])
     args = parser.parse_args()
 

@@ -4,11 +4,11 @@
 
 - topic_id: `python.index-js`
 - source_key: `mindplus.v2.extensions.python`
-- source_fingerprint: `d5dbb405a6614cd4b68a925525001cb729f5ac0902775f7b8300b8bfb8c6b8b6`
+- source_fingerprint: `76f5ead4ff9252357c365ac567ad9e9dd59c6245a4de6bf4ec24141bbecfee2e`
 
 ## 4. 图形块描述文件 (index.js)
 
-`index.js` 是扩展的入口文件。
+`index.js` 是扩展的入口文件，负责定义图形块（Block）的外观、参数以及与 Mind+ 运行时的交互。
 
 ### 类结构定义
 
@@ -64,5 +64,13 @@ class Extension {
 
 export default Extension;
 ```
+
+### 关键方法说明
+
+| 方法                    | 作用                               | 是否必须 |
+| :-------------------- | :------------------------------- | :--- |
+| `getCodePrimitives()` | 返回积木代码生成方法对象（`Func` 实例）          | 必须   |
+| `getInfo()`           | 返回扩展积木元信息（名称、图标、颜色、blocks、menus） | 必须   |
+| `setLocale(locale)`   | 响应 IDE 语言切换                      | 必须   |
 
 ---

@@ -32,7 +32,30 @@ UPLOAD_GENERATOR_CALLS = {
     "addSetup": "add-setup",
     "addCode": "inline-code",
 }
-PYTHON_REQUIREMENTS_PATH = ("python", "libraries", "requirements.txt")
+MODE_SOURCES = {
+    "UPLOAD": ("arduinoC", "main.ts"),
+    "PYTHON_BLOCK": ("python", "main.ts"),
+    "MICROPYTHON": ("micropython", "main.ts"),
+    "REALTIME": ("javascript", "index.js"),
+}
+
+
+def mode_entries(source: Path, config: object) -> dict[str, Path]:
+    asset = config.get("asset", {}) if isinstance(config, dict) else {}
+    result = {}
+    for mode, (language, filename) in MODE_SOURCES.items():
+        declaration = asset.get(language, {}) if isinstance(asset, dict) else {}
+        directory = declaration.get("dir", language) if isinstance(declaration, dict) else language
+        main = declaration.get("main", filename) if isinstance(declaration, dict) else filename
+        entry = (source / directory / main).resolve()
+        # The official realtime development template declares built main.js,
+        # but supplies javascript/index.js as its source entry.
+        if mode == "REALTIME" and not entry.is_file() and main == "main.js":
+            entry = (source / directory / "index.js").resolve()
+        if not entry.is_relative_to(source) or not (source / directory).resolve().is_relative_to(source):
+            raise ValueError(f"V1 {language} entry is outside source")
+        result[mode] = entry
+    return result
 
 
 def digest(path: Path) -> str:
@@ -70,13 +93,13 @@ def has_generator_call(text: str, method: str) -> bool:
     return re.search(rf"\bGenerator\s*\.\s*{re.escape(method)}\s*\(", text) is not None
 
 
-def config_python(config: object) -> dict:
+def config_python(config: object, language: str = "python") -> dict:
     if not isinstance(config, dict):
         return {}
     asset = config.get("asset")
     if not isinstance(asset, dict):
         return {}
-    python = asset.get("python")
+    python = asset.get(language)
     return python if isinstance(python, dict) else {}
 
 
@@ -89,8 +112,10 @@ def config_dependency_line(name: str, version_spec: str) -> str:
     return f"{name}=={version_spec}"
 
 
-def dependency_inventory(source: Path, config: object, relative_files: list[Path]) -> dict:
-    python = config_python(config)
+def dependency_inventory(source: Path, config: object, relative_files: list[Path], language: str = "python", directory: Path | None = None) -> dict:
+    python = config_python(config, language)
+    library_root = (directory or Path(language)) / "libraries"
+    requirements_path = library_root / "requirements.txt"
     raw_dependencies = python.get("dependencies")
     config_dependencies = []
     if isinstance(raw_dependencies, dict):
@@ -101,7 +126,7 @@ def dependency_inventory(source: Path, config: object, relative_files: list[Path
                     "name": str(name),
                     "version_spec": spec,
                     "has_version_spec": bool(spec),
-                    "source": "config.json:asset.python.dependencies",
+                    "source": f"config.json:asset.{language}.dependencies",
                 }
             )
 
@@ -111,7 +136,7 @@ def dependency_inventory(source: Path, config: object, relative_files: list[Path
         if relative.name.casefold() != "requirements.txt":
             continue
         path_parts = tuple(part.casefold() for part in relative.parts)
-        if path_parts != PYTHON_REQUIREMENTS_PATH:
+        if path_parts != tuple(part.casefold() for part in requirements_path.parts):
             ignored_requirement_files.append(relative.as_posix())
             continue
         text = read_text(source / relative)
@@ -125,7 +150,7 @@ def dependency_inventory(source: Path, config: object, relative_files: list[Path
                 "path": relative.as_posix(),
                 "specs": specs,
                 "sha256": digest(source / relative),
-                "source": "python/libraries/requirements.txt",
+                "source": requirements_path.as_posix(),
             }
         )
 
@@ -133,9 +158,7 @@ def dependency_inventory(source: Path, config: object, relative_files: list[Path
         relative.as_posix()
         for relative in relative_files
         if relative.suffix.casefold() == ".py"
-        and len(relative.parts) >= 3
-        and relative.parts[0].casefold() == "python"
-        and relative.parts[1].casefold() == "libraries"
+        and relative.is_relative_to(library_root)
     )
     expected_requirement_lines = []
     for dependency in config_dependencies:
@@ -147,8 +170,8 @@ def dependency_inventory(source: Path, config: object, relative_files: list[Path
     expected_requirement_lines = list(dict.fromkeys(expected_requirement_lines))
     return {
         "authoritative_sources": [
-            "config.json:asset.python.dependencies",
-            "python/libraries/requirements.txt",
+            f"config.json:asset.{language}.dependencies",
+            requirements_path.as_posix(),
         ],
         "config_dependencies": config_dependencies,
         "requirements_files": requirement_files,
@@ -303,11 +326,15 @@ def entry_inventory(signatures: dict[str, Path]) -> dict[str, dict]:
             set(re.findall(r"\bexport\s+function\s+([A-Za-z_$][\w$]*)\s*\(", text))
             | set(re.findall(r"\bexport\s+(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(", text))
         )
+        if mode == "REALTIME":
+            functions = sorted(set(re.findall(r"\bopcode\s*:\s*['\"]([^'\"]+)['\"]", active_typescript(text))))
         labels = secondary_labels(text)
         layout_functions = {item["function"] for item in labels if item["empty_body"] and item["text"]}
         functions = [name for name in functions if name not in layout_functions]
         namespaces = sorted(set(re.findall(r"\bnamespace\s+([A-Za-z_$][\w$]*)\s*\{", text)))
         color_match = re.search(r"//%[^\r\n]*\bcolor\s*=\s*[\"'](#?[0-9A-Fa-f]{6})[\"']", text)
+        if mode == "REALTIME":
+            color_match = re.search(r"\bcolor1\s*:\s*['\"](#?[0-9A-Fa-f]{6})['\"]", text)
         result[mode] = {
             "entry": str(entry),
             "block_functions": functions,
@@ -315,6 +342,12 @@ def entry_inventory(signatures: dict[str, Path]) -> dict[str, dict]:
             "source_namespaces": namespaces,
             "declared_color1": color_match.group(1).lower() if color_match else None,
         }
+        if mode == "REALTIME":
+            result[mode]["execution_methods"] = sorted(set(re.findall(
+                r"^\s+(?:async\s+)?([A-Za-z_$][\w$]*)\s*\([^)]*\)\s*\{", text, re.MULTILINE
+            )) - {"constructor", "getInfo", "if", "for", "while", "switch", "catch"})
+            result[mode]["imports"] = sorted(set(re.findall(r"\brequire\s*\(\s*['\"]([^'\"]+)['\"]", text))
+                                              | set(re.findall(r"\bfrom\s+['\"]([^'\"]+)['\"]", text)))
     return result
 
 
@@ -379,6 +412,7 @@ def features_by_mode(
     signatures: dict[str, Path],
     relative_files: list[Path],
     dependencies: dict,
+    micropython_dependencies: dict | None = None,
 ) -> dict[str, list[str]]:
     result: dict[str, list[str]] = {}
     for mode, entry in signatures.items():
@@ -388,12 +422,13 @@ def features_by_mode(
         active = active_typescript(raw)
         features = common_features(raw, active, relative_files)
 
-        if mode == "PYTHON_BLOCK":
-            if dependencies["config_dependencies"] or any(
-                item["specs"] for item in dependencies["requirements_files"]
+        if mode in {"PYTHON_BLOCK", "MICROPYTHON"}:
+            mode_dependencies = dependencies if mode == "PYTHON_BLOCK" else micropython_dependencies
+            if mode_dependencies["config_dependencies"] or any(
+                item["specs"] for item in mode_dependencies["requirements_files"]
             ):
                 features.add("dependencies")
-            if dependencies["local_libraries"]:
+            if mode_dependencies["local_libraries"]:
                 features.add("local-library")
             for method, feature in GENERATOR_CALLS.items():
                 if has_generator_call(active, method):
@@ -404,6 +439,22 @@ def features_by_mode(
                 r"\bget_asset_path_by_name\s*\(", active
             ):
                 features.add("advanced")
+            if mode == "MICROPYTHON":
+                features.add("board-condition")
+                for method, feature in {"addWhile": "add-while", "getSetup": "get-setup", "getStaticFunction": "get-static-function"}.items():
+                    if has_generator_call(active, method):
+                        features.add(feature)
+        elif mode == "REALTIME":
+            if re.search(r"\bmenus\s*:", active):
+                features.add("menu")
+            if re.search(r"\bitems\s*:\s*['\"]", active):
+                features.add("dynamic-menu")
+            if re.search(r"\bfirmata\b", active):
+                features.add("firmata")
+            if isinstance(config, dict) and config.get("isSupportStage") is True:
+                features.add("stage")
+            else:
+                features.add("board-condition")
         elif mode == "UPLOAD":
             for method, feature in UPLOAD_GENERATOR_CALLS.items():
                 if has_generator_call(active, method):
@@ -448,10 +499,11 @@ def main() -> int:
             config = None
 
     candidates = []
-    signatures = {
-        "UPLOAD": source / "arduinoC" / "main.ts",
-        "PYTHON_BLOCK": source / "python" / "main.ts",
-    }
+    try:
+        signatures = mode_entries(source, config)
+    except (TypeError, ValueError) as exc:
+        print(json.dumps({"status": "BLOCKED", "reason_code": "INPUT", "error": str(exc)}))
+        return 2
     for mode, entry in signatures.items():
         if entry.is_file():
             candidates.append({"mode": mode, "entry": str(entry.relative_to(source)), "confidence": "C3"})
@@ -463,12 +515,24 @@ def main() -> int:
         files.append({"path": relative.as_posix(), "size": path.stat().st_size, "sha256": digest(path)})
 
     dependencies = dependency_inventory(source, config, relative_files)
+    micropython_dependencies = dependency_inventory(source, config, relative_files, "micropython", signatures["MICROPYTHON"].parent.relative_to(source))
     package_identities = legacy_package_identities(source)
     localization = localization_inventory(source, relative_files)
     entry_facts = entry_inventory(signatures)
-    mode_features = features_by_mode(config, signatures, relative_files, dependencies)
+    for mode in ("MICROPYTHON", "REALTIME"):
+        if mode in entry_facts:
+            language = MODE_SOURCES[mode][0]
+            entry_facts[mode]["asset_key"] = language
+            entry_facts[mode]["source_asset"] = config_python(config, language)
+    mode_features = features_by_mode(config, signatures, relative_files, dependencies, micropython_dependencies)
     reference_features = sorted({feature for values in mode_features.values() for feature in values})
     findings = source_anomalies(signatures, dependencies, config, package_identities)
+    if signatures["REALTIME"].is_file() and not entry_facts["REALTIME"]["block_functions"]:
+        findings.append({"code": "REALTIME_BLOCKS_UNRESOLVED", "mode": "REALTIME", "entry": str(signatures["REALTIME"]),
+                         "message": "Trace imported/computed block definitions and record their opcodes before conversion; do not treat an empty literal scan as complete."})
+    if signatures["MICROPYTHON"].is_file() and micropython_dependencies["ignored_requirement_files"]:
+        findings.append({"code": "MICROPYTHON_REQUIREMENTS_OUTSIDE_AUTHORITY", "mode": "MICROPYTHON",
+                         "paths": micropython_dependencies["ignored_requirement_files"]})
 
     fallback_compatibility = config_package_identity(config)
     expected_compatibility = package_identities[0] if len(package_identities) == 1 else fallback_compatibility
@@ -495,6 +559,7 @@ def main() -> int:
         "reference_features_by_mode": mode_features,
         "source_anomalies": findings,
         "python_dependency_inventory": dependencies,
+        "micropython_dependency_inventory": micropython_dependencies,
         "localization_inventory": localization,
         "v1_entry_inventory": entry_facts,
         "file_count": len(files),

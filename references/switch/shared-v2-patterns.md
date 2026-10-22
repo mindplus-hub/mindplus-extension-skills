@@ -41,7 +41,7 @@ V1 注解中 `.defl="..."` 外层引号是注解语法，不是默认值本身�
 - 不把默认值改成含额外引号的 `defaultValue: '"mind+"'` 来模拟显示效果。
 - `symbol` 是 field 显示配置，不凭它推断生成代码会自动带引号。继续对照 V1 生成器及 V2 `parameter.NAME.code` 的实际约定，保留标识符/表达式与字符串字面量的差异；不要再无条件包一层引号。
 
-语义矩阵应记录 shadow 类型、默认值、field 引号显示、生成代码引号处理。此规则同时适用于 UPLOAD 和 PYTHON_BLOCK。
+语义矩阵应记录 shadow 类型、默认值、field 引号显示、生成代码引号处理。此规则适用于 UPLOAD、PYTHON_BLOCK 和 MICROPYTHON；REALTIME 保留原有 arguments/defaultValue 与实际值。
 
 ## opcode 与生成函数映射
 
@@ -75,7 +75,7 @@ V1 注解中 `.defl="..."` 外层引号是注解语法，不是默认值本身�
 
 ## `config.json` 字段契约
 
-- 生成前读取 [`config-schema.md`](config-schema.md)；它是当前两个迁移路由的顶层字段白名单和必需字段清单。V1 `email`、`license`、`isBoard`、`platform`、`asset` 不得进入 V2 配置。
+- 生成前读取 [`config-schema.md`](config-schema.md)；它是四种 V2 模式的顶层字段白名单和必需字段清单；V1 自动转换覆盖四种模式的已注册入口。V1 `email`、`license`、`isBoard`、`platform`、`asset` 不得进入 V2 配置。
 - 字符串元数据没有可验证描述时写 `""`；`meta.runtimeVersion` 没有实际 Runtime API 证据时写 `""`。`libraryConfig` 等必需数组使用 schema 的空数组默认值；`supportDevices`、`supportArch` 等结构型可选字段没有证据时省略，不能写一个会改变语义的空结构。
 - `config.json` 的严格字段、JSON 类型和固定值检查必须在唯一一次 Builder build 之前完成；检查失败时先修正或记录敏感节点，不用构建成功掩盖配置错误。
 

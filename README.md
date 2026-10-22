@@ -154,6 +154,10 @@ git clone https://gitee.com/mind-plus/mindplus-extension-skills.git ".claude/ski
 
 ## 版本更新
 
+- V0.4.0
+   - 新增 MicroPython（mpy）与实时（模块／舞台）模式支持，覆盖 V1 自动转换、V2 创建、升级与审核
+   - 同步两种模式的语料、入口识别、依赖／资源迁移与静态校验
+
 - V0.3.15
    - 更新语料库
 

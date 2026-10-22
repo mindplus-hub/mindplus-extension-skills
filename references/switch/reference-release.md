@@ -6,11 +6,11 @@
 ## 当前资料范围
 
 - `references/switch/generated/` 是随 Skill 发布的已验证基线。
-- 当前 HIR Release 同时覆盖 `UPLOAD` 与 `PYTHON_BLOCK`。
+- 当前 HIR Release 覆盖 `UPLOAD`、`PYTHON_BLOCK`、`MICROPYTHON` 与 `REALTIME`。
 - reference bundle 已随 `mindplus-extension-skills` 内置；稳定公开清单地址尚未确定前，
   `references/switch/release-channel.json` 保持禁用且不配置独立 switch 仓库回退。
 - 若旧缓存缺少当前 bundled 已提供的模式，检查器优先使用 bundled，避免旧的仅上传资料阻断
-  Python 路由；覆盖模式不减少的已验证缓存仍可使用。
+  当前模式的路由；覆盖模式不减少的已验证缓存仍可使用。
 
 ## 启动命令
 
@@ -21,7 +21,7 @@ python scripts/switch/check_reference_release.py --skill-root <skill_root> --out
 脚本输出的 `active_root` 是本次唯一可用的生成资料根目录。路由后运行：
 
 ```text
-python scripts/switch/select_reference_topics.py --inventory <run_root>/record/v1-inventory.initial.json --reference-state <run_root>/record/reference-state.json --mode <UPLOAD-or-PYTHON_BLOCK> --output <run_root>/record/reference-selection.json
+python scripts/switch/select_reference_topics.py --inventory <run_root>/record/v1-inventory.initial.json --reference-state <run_root>/record/reference-state.json --mode <selected_mode> --output <run_root>/record/reference-selection.json
 ```
 
 只加载 `reference-selection.json` 返回的 Topic 路径，不一次读取全部 Field/API 文档。选择器会
@@ -55,7 +55,7 @@ python scripts/switch/select_reference_topics.py --inventory <run_root>/record/v
   "bundle_url": "https://gitee.com/<owner>/<repo>/releases/download/<tag>/<zip>",
   "bundle_sha256": "<sha256>",
   "content_sha256": "<manifest content hash>",
-  "supported_modes": ["UPLOAD", "PYTHON_BLOCK"],
+  "supported_modes": ["UPLOAD", "PYTHON_BLOCK", "MICROPYTHON", "REALTIME"],
   "min_skill_version": "0.5.0"
 }
 ```

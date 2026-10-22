@@ -4,7 +4,7 @@
 
 - topic_id: `upload.config`
 - source_key: `mindplus.v2.extensions.upload`
-- source_fingerprint: `dccbf798729f9675a841e397f17a247ee2bcc8cd0d8432d7380ac53bbefa1b44`
+- source_fingerprint: `22cdaf0c7df3297c8227979b4811820096332d637e60c809e658abe806775348`
 
 ## 2. 配置文件 (public/config.json)
 
@@ -14,70 +14,73 @@
 
 ```json
 {
-	"id": "test",
-	"author": "yourUserId",
-	"mode": "upload",
-	"version": "0.0.1",
-	"name": {
-		"zh-cn": "I2C级联扩展器",
-		"en": "I2C cascade extender"
-	},
-	"description": {
-		"zh-cn": "用于解决I2C器件地址的冲突",
-		"en": "Used to resolve I2C device address conflicts"
-	},
-	"cover": "cover.png",
-	"isDevice": false,
-	"main": "main.js",
-	"libraryConfig": ["DFRobot_Mindplus_Multiplexer@1.0.0"],
-	"supportDevices": {
-		"dev-DFRobot-dfrobotKitRob0135": "^0.0.1",
-		"dev-DFRobot-arduinoUno": "^0.0.1",
-		"dev-DFRobot-microbitV2": "^0.0.1"
-	},
-	"supportArch": ["arduino:avr"],
-	"meta": {
-		"runtimeVersion": "0.0.2"
-	}
+  "id": "test",
+  "author": "yourUserId",
+  "version": "0.0.1",
+  "name": {
+    "zh-cn": "I2C级联扩展器",
+    "en": "I2C cascade extender"
+  },
+  "description": {
+    "zh-cn": "用于解决I2C器件地址的冲突",
+    "en": "Used to resolve I2C device address conflicts"
+  },
+  "cover": "cover.png",
+  "isDevice": false,
+  "mode": "upload",
+  "main": "main.js",
+  "supportDevices": {
+    "dev-DFRobot-arduinoUno": "^0.0.1",
+    "dev-DFRobot-microbitV2": "^0.0.1"
+  },
+  "meta": {
+    "runtimeVersion": "0.0.1"
+  },
+  "sku": "",
+  "libraryConfig": [
+    "DFRobot_Mindplus_Multiplexer@1.0.0"
+  ],
+  "supportArch": [
+    "mindplus:avr"
+  ],
+  "compatibilityId": ""
 }
 ```
 
 ### 关键字段说明
 
-| 字段                    | 必填  | 类型    | 说明                                                                                                                                                         |
-| :---------------------- | :-- | :------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`                  | 必填  | string  | 扩展唯一标识符，仅包含字母和数字，勿使用空格或特殊符号。                                                                                                     |
-| `author`              | 必填  | string  | 开发者名称，仅包含字母和数字，勿使用空格或特殊符号，与id一起组成扩展唯一标识。。                                                                             |
-| `version`             | 必填  | string  | 扩展版本号，三段数字形式。                                                                                                                                   |
-| `name`                | 必填  | object  | 扩展库卡片标题，需多语言支持。                                                                                                                               |
-| `description`         | 必填  | object  | 扩展库卡片描述，需多语言支持。                                                                                                                               |
-| `cover`               | 必填  | string  | 封面图片文件名，需位于 `public` 目录下。                                                                                                                   |
-| `isDevice`            | 必填  | boolean | `false` 表示这是一个功能扩展，`true` 表示这是主控板扩展。                                                                                                |
-| `sku`                 | 可选  | string  | 硬件产品型号，多个型号用\|隔开；没有则留空，即写成 `"sku": ""`。                                                                                      |
-| `libraryConfig`       | 可选  | array   | 依赖的 Arduino 库列表，格式为 `库名称@版本号`；没有依赖时写空数组 `[]`。                                                                                      |
-| `supportDevices`      | 必填  | object  | 支持的主控板列表及其版本要求。                                                                                                                               |
-| `supportArch`         | 可选  | array   | 仅 upload 模式：支持的主板架构列表。如 `["arduino:avr","arduino:samd"]`，配置后会覆盖 `supportDevices`。谨慎设置，一般使用指定主板方式设置兼容。 |
-| `mode`                | 必填  | string  | 模式，此处应为 `upload`。                                                                                                                                  |
-| `meta.runtimeVersion` | 必填  | string  | 扩展 runtime 接口版本（用于控制 API 兼容性）。                                                                                                               |
-| `compatibilityId`     | 可选  | string  | Mind+V1.x用户库兼容字段；没有则留空，即写成 `"compatibilityId": ""`。                                                                                          |
+| 字段                    | 必填  | 类型      | 说明                                                                    |
+| :-------------------- | :-- | :------ | :-------------------------------------------------------------------- |
+| `id`                  | 必填  | string  | 扩展唯一标识符，仅包含字母和数字，**不可使用空格或特殊符号**                                      |
+| `author`              | 必填  | string  | 开发者名称，仅包含字母和数字，**勿使用空格或特殊符号**，与id一起组成扩展唯一标识                           |
+| `version`             | 必填  | string  | 扩展版本号，三段数字形式                                                          |
+| `name`                | 必填  | object  | 扩展库卡片标题，需多语言支持                                                        |
+| `description`         | 必填  | object  | 扩展库卡片描述，需多语言支持                                                        |
+| `cover`               | 必填  | string  | 封面图片文件名，需位于 `public` 目录下                                              |
+| `isDevice`            | 必填  | boolean | `false` 表示这是一个功能扩展，`true` 表示这是主控板扩展                                   |
+| `mode`                | 必填  | string  | 模式，此处应为 `upload`                                                      |
+| `supportDevices`      | 必填  | object  | 支持的主控板列表及其版本要求                                                        |
+| `meta.runtimeVersion` | 必填  | string  | 扩展 runtime 接口版本（用于控制 API 兼容性）                                         |
+| `sku`                 | 可选  | string  | 硬件产品型号，多个型号用\|隔开；没有则留空                                                |
+| `libraryConfig`       | 可选  | array   | 依赖的 Arduino 库列表，格式为 `库名称@版本号`；没有则留空                                   |
+| `supportArch`         | 可选  | array   | 仅 upload 模式：支持的主板架构列表，配置后会覆盖 `supportDevices`，**谨慎设置，一般使用指定主板方式设置兼容** |
+| `compatibilityId`     | 可选  | string  | Mind+V1.x用户库兼容字段；没有则留空                                                |
 
-> **注**：`sku` 和 `compatibilityId` 为可选字段，不需要填写时请保留为空字符串，即写成 `"sku": ""` 和 `"compatibilityId": ""`。
+> 不需要使用可选字段时，`sku`、`compatibilityId` 写空字符串，`libraryConfig`、`supportArch` 写空数组：
+>
+> ```
+> {
+> 	...
+> 	"sku": "",
+> 	"supportArch": [],
+> 	"libraryConfig": [],
+> 	"compatibilityId": ""
+> }
+> ```
 
-#### meta.runtimeVersion
+#### supportDevices
 
-`runtimeVersion` 表示开发扩展时依赖的 runtime API 最低版本。比如 `runtime.getBoardPinsByType` 在 `0.0.2` 才支持，则使用该 API 的扩展不能在 runtime `0.0.1` 的 Mind+ 中加载；但也不应随意设置一个很大的版本号，否则扩展只能在高版本中加载，兼容性会变差。
-
-#### supportArch（仅 upload + isDevice: false）
-
-`supportArch` 用于按“主板架构”声明兼容范围，方便小模块扩展一次适配一类主板，而不是枚举所有 `supportDevices`。
-
-- 架构取自主板 `boardConfig.board` 的前两段：例如 `"arduino:avr:uno"` 的架构为 `"arduino:avr"`
-- 当 `supportArch` 存在时，会覆盖 `supportDevices`
-- 谨慎设置，一般使用指定主板方式设置兼容。
-
-#### supportDevices（适配 runtime 0.0.2）
-
-`supportDevices` 用「主板 ID → 版本范围」声明扩展支持哪些主板。适配 runtime `0.0.2` 时可用的主板及最低版本如下：
+`supportDevices` 用「主板 ID → 版本范围」声明扩展支持哪些主板，适配 runtime `0.0.2` 时可用的主板及最低版本如下：
 
 ```json
 {
@@ -99,7 +102,54 @@
 }
 ```
 
-其余主板暂未适配 Runtime 0.0.2，因此在 `runtime == 0.0.2` 对应的 `config` 配置中，不应将这些主板添加至兼容主板字段。
+其余主板暂未适配 `0.0.2`，因此在 runtime为 `0.0.2` 对应的 `config` 配置中，不应将这些主板添加至兼容主板字段。
+
+runtime为 `0.0.1` 则无以上要求，均可填写为`"dev-DFRobot-xxx": "^0.0.1"`
+
+#### meta.runtimeVersion
+
+`runtimeVersion` 表示开发扩展时依赖的 runtime API 最低版本，以 通用参考-Runtime接口参考 为准
+
+比如 `runtime.getBoardPinsByType` 在 `0.0.2` 才支持，则使用该 API 的扩展不能在 runtime `0.0.1` 的 Mind+ 中加载；
+
+不可随意设置一个很大的版本号，否则扩展只能在高版本中加载，兼容性会变差
+
+#### libraryConfig
+
+该字段可使用的库文件可参见 `%localappdata%\mind+\Arduino\user\libraries` ，非官方库请放置于项目目录的 `.\extension\public\libraries`
+#### supportArch
+
+`supportArch` 仅适用于 `mode: "upload"` 且 `isDevice: false` 的功能扩展，用于按主板架构声明兼容范围，方便一次适配一类主板。
+
+架构取自主板 `boardConfig.board` 的前两段，区分大小写。例如，`"mindplus:avr:uno"` 对应 `"mindplus:avr"`。
+
+| 架构值 | 对应主板 |
+| --- | --- |
+| `mindplus:avr` | Arduino Uno、Nano、Mega2560、Leonardo 等 |
+| `mindplus:esp32` | 掌控板 ESP32、FireBeetle ESP32 / ESP32-E、RoboMaster TT |
+| `mindplus:esp32s3` | 行空板 K10 |
+| `mindplus:esp8266` | FireBeetle ESP8266 |
+| `mindplus:nRF52` | micro:bit V2、麦昆、酷跑小车 |
+| `mindplus:rp2040` | Raspberry Pi Pico |
+| `mpython:esp32` | 掌控板 ESP32-S3 |
+| `esp32:esp32` | 通用 ESP32 |
+| `esp32:esp32c3` | 通用 ESP32-C3 |
+| `esp32:esp32s3` | 通用 ESP32-S3 |
+
+例如，支持 AVR 和 K10 两类主板时可写为：
+
+```json
+"supportArch": ["mindplus:avr", "mindplus:esp32s3"]
+```
+
+如支持所有架构可写为：
+```json
+"supportArch": ["all"]
+```
+
+**当 `supportArch` 非空时，会覆盖 `supportDevices`，两者不会取交集。** 若只支持指定主板或需要限制主板版本，应使用 `supportDevices`。
+
+该字段谨慎设置，一般使用指定主板方式设置兼容。
 
 #### compatibilityId（仅需兼容V1.x库时使用）
 

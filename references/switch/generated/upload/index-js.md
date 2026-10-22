@@ -4,7 +4,7 @@
 
 - topic_id: `upload.index-js`
 - source_key: `mindplus.v2.extensions.upload`
-- source_fingerprint: `5a559c24c0a98695711e858470c0edb9b8b40cad6d1bcc398f7b1e91024f68c7`
+- source_fingerprint: `136f20c29cd47fe353bb0bd12fdb05ff7ff719b0d588436e30e53df5ae181424`
 
 ## 3. 图形块描述文件 (index.js)
 
@@ -87,8 +87,10 @@ export default Extension;
 
 ### 关键方法说明
 
-- `getCodePrimitives()`: **必须**。返回包含生成代码逻辑的对象实例（即 `Func` 类的实例）。
-- `getInfo()`: **必须**。定义扩展的元数据，包括名称、图标、颜色、积木列表（blocks）和菜单（menus）。
-- `setLocale(locale)`: **必须**。用于响应Mind+设置中的切换语言操作。
+| 方法                    | 作用                               | 是否必须 |
+| :-------------------- | :------------------------------- | :--- |
+| `getCodePrimitives()` | 返回积木代码生成方法对象（`Func` 实例）          | 必须   |
+| `getInfo()`           | 返回扩展积木元信息（名称、图标、颜色、blocks、menus） | 必须   |
+| `setLocale(locale)`   | 响应 IDE 语言切换                      | 必须   |
 
 ---

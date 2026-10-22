@@ -240,6 +240,12 @@ def check_config_schema(config: dict, mode: str, findings: list[dict]) -> dict:
             }
         )
     missing = sorted(required_set - actual_set)
+    if mode == "REALTIME":
+        if config.get("isSupportStage") is True:
+            if "supportDevices" in config:
+                findings.append({"code": "REALTIME_STAGE_SUPPORT_DEVICES_FORBIDDEN"})
+        elif "supportDevices" not in config:
+            missing.append("supportDevices")
     if unexpected:
         findings.append(
             {
@@ -426,14 +432,15 @@ def check_device_conventions(config: dict, findings: list[dict]) -> None:
         )
 
 
-def check_python_requirements(extension: Path, inventory: dict, findings: list[dict]) -> None:
-    dependency_inventory = inventory.get("python_dependency_inventory")
+def check_python_requirements(extension: Path, inventory: dict, findings: list[dict], mode: str = "PYTHON_BLOCK") -> None:
+    language = "PYTHON" if mode == "PYTHON_BLOCK" else "MICROPYTHON"
+    dependency_inventory = inventory.get(f"{language.lower()}_dependency_inventory")
     if not isinstance(dependency_inventory, dict):
-        findings.append({"code": "V1_PYTHON_DEPENDENCY_INVENTORY_MISSING"})
+        findings.append({"code": f"V1_{language}_DEPENDENCY_INVENTORY_MISSING"})
         return
     expected = dependency_inventory.get("expected_requirement_lines")
     if not isinstance(expected, list) or any(not isinstance(item, str) for item in expected):
-        findings.append({"code": "V1_PYTHON_DEPENDENCY_INVENTORY_INCOMPLETE"})
+        findings.append({"code": f"V1_{language}_DEPENDENCY_INVENTORY_INCOMPLETE"})
         return
 
     target = extension / "public" / "requirements.txt"
@@ -442,18 +449,18 @@ def check_python_requirements(extension: Path, inventory: dict, findings: list[d
         if expected:
             findings.append(
                 {
-                    "code": "V2_PYTHON_REQUIREMENTS_MISSING",
+                    "code": f"V2_{language}_REQUIREMENTS_MISSING",
                     "expected": expected,
                     "file": str(target),
                 }
             )
         return
     if not expected:
-        findings.append({"code": "V2_PYTHON_REQUIREMENTS_UNEXPECTED_FILE", "file": str(target)})
+        findings.append({"code": f"V2_{language}_REQUIREMENTS_UNEXPECTED_FILE", "file": str(target)})
     elif actual != expected:
         findings.append(
             {
-                "code": "V2_PYTHON_REQUIREMENTS_MISMATCH",
+                "code": f"V2_{language}_REQUIREMENTS_MISMATCH",
                 "expected": expected,
                 "actual": actual,
                 "file": str(target),
@@ -465,7 +472,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project-root", required=True, type=Path)
     parser.add_argument("--inventory", required=True, type=Path)
-    parser.add_argument("--mode", choices=["UPLOAD", "PYTHON_BLOCK"], default="UNKNOWN")
+    parser.add_argument("--mode", choices=["UPLOAD", "PYTHON_BLOCK", "MICROPYTHON", "REALTIME"], default="UNKNOWN")
     parser.add_argument("--expected-v2-id", help="Approved lowercase alphanumeric V2 id; defaults to inventory candidate")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
@@ -489,6 +496,8 @@ def main() -> int:
 
     mode_facts = inventory.get("v1_entry_inventory", {}).get(args.mode, {}) if isinstance(inventory.get("v1_entry_inventory"), dict) else {}
     expected_opcodes = set(mode_facts.get("block_functions", []))
+    if args.mode in {"MICROPYTHON", "REALTIME"} and not expected_opcodes:
+        findings.append({"code": "V1_MODE_BLOCK_INVENTORY_EMPTY", "mode": args.mode})
     if expected_opcodes:
         target_opcodes = set(re.findall(r"\bopcode\s*:\s*['\"]([^'\"]+)['\"]", index_text))
         namespaced_opcodes = sorted(opcode for opcode in target_opcodes if "." in opcode)
@@ -548,7 +557,7 @@ def main() -> int:
         func_text = ""
     method_names = set(re.findall(r"Func\.prototype\[['\"]([^'\"]+)['\"]\s*=", func_text))
     method_names.update(
-        name for name in re.findall(r"^\s{2,}([A-Za-z_$][\w$]*)\s*\([^)]*\)\s*\{", func_text, re.MULTILINE)
+        name for name in re.findall(r"^\s{2,}(?:async\s+)?([A-Za-z_$][\w$]*)\s*\([^)]*\)\s*\{", func_text, re.MULTILINE)
         if name not in {"constructor", "if", "else", "for", "while", "switch", "catch"}
     )
     namespaced_methods = sorted(name for name in method_names if "." in name)
@@ -564,7 +573,23 @@ def main() -> int:
         missing_methods = sorted(expected_opcodes - method_names)
         if missing_methods:
             findings.append({"code": "FUNC_METHOD_MISSING", "missing": missing_methods, "methods": sorted(method_names)})
-    findings.extend(check_add_include_calls(func_text))
+    if args.mode == "UPLOAD":
+        findings.extend(check_add_include_calls(func_text))
+    if args.mode == "MICROPYTHON":
+        check_python_requirements(extension, inventory, findings, args.mode)
+        if not re.search(r"\bgetCodePrimitives\s*\(", index_text):
+            findings.append({"code": "MICROPYTHON_CODE_PRIMITIVES_MISSING"})
+        if re.search(r"\bgenerator\s*\.\s*addCode\s*\(", func_text):
+            findings.append({"code": "MICROPYTHON_USES_UPLOAD_ADD_CODE"})
+        if re.search(r"\bgenerator\s*\.\s*addWhile\s*\(", func_text):
+            findings.append({"code": "MICROPYTHON_ADD_WHILE_HAS_NO_EFFECT"})
+    if args.mode == "REALTIME":
+        if "spec_is_support_stage" in inventory and config.get("isSupportStage", False) != inventory["spec_is_support_stage"]:
+            findings.append({"code": "REALTIME_STAGE_SPEC_MISMATCH"})
+        if not re.search(r"\bgetPrimitives\s*\(", index_text):
+            findings.append({"code": "REALTIME_PRIMITIVES_MISSING"})
+        if re.search(r"\bgetCodePrimitives\s*\(", index_text) or re.search(r"\bgenerator\s*\.", func_text):
+            findings.append({"code": "REALTIME_USES_CODE_GENERATOR"})
     if args.mode == "PYTHON_BLOCK":
         check_python_requirements(extension, inventory, findings)
         if re.search(r"\bgenerator\s*\.\s*addCode\s*\(", func_text):

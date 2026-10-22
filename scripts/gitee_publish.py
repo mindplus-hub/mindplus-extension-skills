@@ -568,7 +568,7 @@ def validate_new_repository_name(project: Path, repo_name: str) -> None:
     config_path = project / "extension" / "public" / "config.json"
     if config_path.is_file():
         mode = read_json(config_path).get("mode")
-        expected = {"upload": "ul", "python-block": "py"}.get(mode)
+        expected = {"upload": "ul", "python-block": "py", "micropython-block": "mpy", "realtime": "rt"}.get(mode)
         if expected and expected != match[1]:
             raise StageBlocked({"status": "BLOCKED", "reason_code": "INPUT.REPOSITORY_MODE_MISMATCH",
                                 "error": "New repository prefix disagrees with extension config.mode"})

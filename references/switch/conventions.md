@@ -24,12 +24,13 @@
 - `supportDevices` 是对象：`{"dev-DFRobot-<board>": "^<版本>", ...}`，键必须在
   [device-ids.json](device-ids.json) 字典内。适配 runtime `0.0.2` 时采用各板的
   `official_runtime_version_specs["0.0.2"]`（来源：[官方配置语料](generated/upload/config.md)）；
-  当 `meta.runtimeVersion == "0.0.2"` 时，只能列入该官方清单中的 15 款主板，
+  该限制仅适用于 UPLOAD：当 `meta.runtimeVersion == "0.0.2"` 时，只能列入该官方清单中的 15 款主板，
   其余主板尚未适配，不得加入兼容列表。
   `observed_version_specs` 中的 `^0.0.1` 是历史项目范围，不代表 runtime `0.0.2` 的最低版本。
 - 二者表达整体设备范围；单积木的 `board/boards` 是可见性条件，不能互相替代
   （见 [upload-mode.md](upload-mode.md)）。
-- 三种合法组合（按扩展类型选一种）：
+- 以下三种组合用于 UPLOAD；PYTHON_BLOCK 不配置这两个字段。MICROPYTHON 必填非空 supportDevices；REALTIME 模块必填非空 supportDevices，舞台省略。两种新模式均不配置 supportArch，细节见各自模式文档。
+- 上传模式的三种合法组合（按扩展类型选一种）：
   - **设备范围**：声明 supportDevices、省略 supportArch（espnow/ds1302/C4001）；
   - **全架构**：省略 supportDevices、写 `supportArch: ["all"]`（BMP58X），表示支持所有主板；这是合法声明，审核不能仅因使用 `"all"` 或未逐板枚举而报问题；
   - **架构族**（仅 upload 模式）：写 `supportArch: ["<platform>:<arch>"]`，架构取主板
@@ -37,7 +38,7 @@
 - 官方语义：supportArch 与 supportDevices 同时设置时 **supportArch 覆盖** supportDevices；
   无证据不要同时写两者。
 - 面向零基础用户选板：把字典里的**板名**（arduinoUno、unihikerK10…）列给用户选择，
-  不要求用户知道设备 ID。目标板不在字典里时按 device-ids.json 的
+  不要求用户知道设备 ID。目标板不在字典里时按所选模式允许的方式使用 device-ids.json 的
   `unknown_device_recovery` 三条路径处理，绝不拼造 ID。
 
 ## author（作者）

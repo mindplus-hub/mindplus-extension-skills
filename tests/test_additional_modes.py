@@ -122,7 +122,8 @@ class AdditionalModeTests(unittest.TestCase):
                     primitive = "getPrimitives" if mode == "REALTIME" else "getCodePrimitives"
                     (extension / "index.js").write_text("class Extension { " + primitive + "() { return this.funcs; } getInfo() { return {"
                         "color1:'#00b0f0',color2:'#0099cc',color3:'#007799', blocks:[{opcode:'read',text:formatMessage({id:'demo.read'})}]}; }}")
-                    (extension / "func.js").write_text("class Func {\n  async read(args, util) { return 1; }\n}")
+                    (extension / "func.js").write_text("class Func {\n  async read(args, util) { return 1; }\n}" if mode == "REALTIME"
+                        else "class Func {\n  read(generator, block, parameter) { generator.addWhile('poll', 'poll()', true); return ['value', generator.ORDER_ATOMIC]; }\n}")
                     args = [sys.executable, "-X", "utf8", str(ROOT / "scripts/switch/check_converted_extension.py"),
                             "--project-root", str(folder), "--inventory", str(folder / "inventory.json"), "--mode", mode]
                     result = subprocess.run(args, capture_output=True, text=True, encoding="utf-8")

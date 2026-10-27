@@ -4,7 +4,7 @@
 
 - topic_id: `micropython.config`
 - source_key: `mindplus.v2.extensions.micropython`
-- source_fingerprint: `3d1a0758ca9325dcf3610e0448f0bc820c96e3094199fae8efe5ef8392094db2`
+- source_fingerprint: `a5d8da7a53a04b8e9b1e567a938b1eff16747b329e85da147cf344e4fde5f481`
 
 ## 2. 配置文件 (public/config.json)
 
@@ -24,7 +24,7 @@
     "zh-cn": "测量温度，范围－55～＋125℃",
     "en": "Detect ambient temperature with large range of -55~+125℃"
   },
-  "cover": "DFR0024.png",
+  "cover": "cover.png",
   "isDevice": false,
   "mode": "micropython-block",
   "main": "main.js",

@@ -154,6 +154,14 @@ git clone https://gitee.com/mind-plus/mindplus-extension-skills.git ".claude/ski
 
 ## 版本更新
 
+- V0.4.1
+   - 上传模式的主板引脚菜单改用 runtime 能力查询，明确软串口边界
+   - 修正 V1 `esp32` 对应掌控板的映射规则，避免误映射到通用 ESP32
+   - 同步 MicroPython 与实时模式语料，修正 `addWhile` 校验
+   - 审核先确认测试场景有效性，错误连接记为 `INVALID_TEST`
+   - 精简报告中的重复发现与检查清单，保留实际证据边界
+   - 明确自动更新从客户端指定的当前 Skill 路径执行，避免误更新备份或打包目录
+
 - V0.4.0
    - 新增 MicroPython（mpy）与实时（模块／舞台）模式支持，覆盖 V1 自动转换、V2 创建、升级与审核
    - 同步两种模式的语料、入口识别、依赖／资源迁移与静态校验

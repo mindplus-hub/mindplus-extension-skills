@@ -4,7 +4,7 @@
 
 - topic_id: `realtime.config`
 - source_key: `mindplus.v2.extensions.realtime`
-- source_fingerprint: `8218b3185368216f4d64c14b3072aab7114fd25e3ecb37534082fbd5718be7ba`
+- source_fingerprint: `fcdda5f7a1b457e33886c11345e3eabcc60fd5863a822a2277a88abc59c10960`
 
 ## 2. 配置文件 (public/config.json)
 
@@ -25,7 +25,7 @@
     "zh-cn": "准确测距，量程2~800cm，兼容urm及SR04超声波",
     "en": "Accurate distance detection with the range 2~800cm"
   },
-  "cover": "images/cover.png",
+  "cover": "cover.png",
   "isDevice": false,
   "mode": "realtime",
   "main": "main.js",
@@ -56,7 +56,7 @@
     "zh-cn": "让设备与设备通过UDP通信",
     "en": "UDP broadcast communication"
   },
-  "cover": "images/udp.jpg",
+  "cover": "cover.png",
   "isDevice": false,
   "mode": "realtime",
   "main": "main.js",

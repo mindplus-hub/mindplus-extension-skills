@@ -4,7 +4,7 @@
 
 - topic_id: `micropython.structure`
 - source_key: `mindplus.v2.extensions.micropython`
-- source_fingerprint: `ddece67d2f857020adccc14868bb757dbc09439b71cca2e4711cbecbc0d08b66`
+- source_fingerprint: `32d094d87deefc19393783db727f979ed421c41d935c53a85ef1db73a5d33131`
 
 ## 1. 扩展包文件结构
 
@@ -18,9 +18,8 @@ ext2-mpy-name/                              # 仓库名称可参考，以ext2-mp
 │   ├── public/                             # 静态资源目录
 │   │   ├── cover.png                       # 封面图
 │   │   ├── config.json                     # 配置文件
-│   │   ├── libraries/                      # MicroPython 扩展库文件目录 (可选)
-│   │   |   └── df_xxx_lib.py               # MicroPython 库文件
-│   |   └── requirements.txt                # MicroPython 项目依赖包 (可选)
+│   │   └── libraries/                      # MicroPython 扩展库文件目录 (可选)
+│   │       └── df_xxx_lib.py               # MicroPython 库文件
 │   ├── icon/                               # 图标资源目录
 │   │   ├── blockIcon.svg                   # 积木图标 (建议使用白色)
 │   │   └── menuIcon.svg                    # 分类菜单图标 (建议使用积木颜色)

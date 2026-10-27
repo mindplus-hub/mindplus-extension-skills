@@ -11,7 +11,7 @@ Only load the topics required by the selected route and observed V1 features.
 | `micropython.generator.add-import` | MICROPYTHON | 1. 导入库模块 addImport | [micropython/generator/add-import.md](micropython/generator/add-import.md) |
 | `micropython.generator.add-init` | MICROPYTHON | 3. 添加初始化区域代码 addInit | [micropython/generator/add-init.md](micropython/generator/add-init.md) |
 | `micropython.generator.add-variable` | MICROPYTHON | 2. 添加全局变量 addVariable | [micropython/generator/add-variable.md](micropython/generator/add-variable.md) |
-| `micropython.generator.add-while` | MICROPYTHON | 5. 添加 while True 头部代码 addWhile （无效果/废弃） | [micropython/generator/add-while.md](micropython/generator/add-while.md) |
+| `micropython.generator.add-while` | MICROPYTHON | 5. 添加 while True 头部代码 addWhile | [micropython/generator/add-while.md](micropython/generator/add-while.md) |
 | `micropython.generator.advanced` | MICROPYTHON | 10. 进阶用法 | [micropython/generator/advanced.md](micropython/generator/advanced.md) |
 | `micropython.generator.core` | MICROPYTHON | micropython, 4. 代码生成文件 (func.js) | [micropython/generator/core.md](micropython/generator/core.md) |
 | `micropython.generator.event-callback` | MICROPYTHON | 6. 创建事件回调函数 | [micropython/generator/event-callback.md](micropython/generator/event-callback.md) |

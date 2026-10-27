@@ -4,7 +4,7 @@
 
 - topic_id: `realtime.index-js`
 - source_key: `mindplus.v2.extensions.realtime`
-- source_fingerprint: `8b5ed02b89277bbc33f07b493ffacf79390d9eb5b9106a84ab66e18f61c1bd39`
+- source_fingerprint: `e255403fdd14dc310c1fc63a528143f8862b19a41d3789fa375e942350a71589`
 
 ## 3. 图形块描述文件 (index.js)
 
@@ -18,8 +18,8 @@
 import ArgumentType from '../utils/argument-type';
 import BlockType from '../utils/block-type';
 import Func from './func';
-import blockIconURI from './image/blockicon.svg';
-import menuIconURI from './image/menuicon.svg';
+import blockIconURI from './icon/blockIcon.svg';
+import menuIconURI from './icon/menuIcon.svg';
 import { setLocaleData, formatMessage, setLocale } from '../utils/translation';
 import LocaleData from './locales';
 
@@ -92,7 +92,7 @@ class Extension {
     }
 
     getDynamicPinMenu() {
-        const deviceId = this.runtime.deviceManager.getCurrentDeviceId();
+        const deviceId = this.runtime.getCurrentDeviceId();
         // 按当前主控返回不同引脚列表
         return ['2', '3', '4', '5'].map(pin => ({ text: pin, value: pin }));
     }
@@ -103,10 +103,10 @@ export default Extension;
 
 ### 关键方法说明
 
-| 方法 | 作用 | 是否必须 |
-| :--- | :--- | :--- |
-| `getPrimitives()` | 返回积木实时执行方法对象（`Func` 实例） | 必须 |
-| `getInfo()` | 返回扩展积木元信息（名称、图标、颜色、blocks、menus） | 必须 |
-| `setLocale(locale)` | 响应 IDE 语言切换 | 必须 |
+| 方法                  | 作用                               | 是否必须 |
+| :------------------ | :------------------------------- | :--- |
+| `getPrimitives()`   | 返回积木实时执行方法对象（`Func` 实例）          | 必须   |
+| `getInfo()`         | 返回扩展积木元信息（名称、图标、颜色、blocks、menus） | 必须   |
+| `setLocale(locale)` | 响应 IDE 语言切换                      | 必须   |
 
 ***

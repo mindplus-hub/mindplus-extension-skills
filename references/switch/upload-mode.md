@@ -41,8 +41,19 @@ extension/
 
 `supportDevices` 表示整体设备范围；单积木 `board/boards` 条件表示可见性条件，二者不能互相替代。只有旧积木确实需要当前设备引脚时才使用 `getBoardPinsByType` 或设备 Runtime；BMP58X 动态 RX/TX 菜单属于条件样式，普通固定字符串/数字参数不能主动套用。
 
+V1 板型映射按实际设备身份核对，不能凭芯片名或名称相似直接对应 V2 ID。Mind+ V1 内置板型 `esp32` 指掌控板，应映射到 `dev-DFRobot-handpyEsp32`，不能映射到通用 `dev-DFRobot-Esp32`；`firebeetleesp32` / `firebeetleesp32e` 保持各自设备身份。板型身份存在歧义时先核对 V1 设备定义或用户确认，再填写 `supportDevices` 和最低版本，不扩大支持范围。
+
+## 主板引脚菜单迁移
+
+- V1 `_menus/<board>.json` 中用于选择当前主板物理引脚的菜单，应迁移为 `runtime.getBoardPinsByType()`；加载 `upload.pins` Topic，并将 `meta.runtimeVersion` 设为至少 `0.0.2`。不要把旧引脚表合并为自建 `pin-menus.json`，也不要以板型映射维护固定 GPIO 列表。普通枚举、模块内部通道及协议值仍按原菜单迁移。
+- 使用 runtime `0.0.2` 引脚 API 时，必须同时核对 `upload.config` Topic 中 `supportDevices` 的各主板最低版本；不能只提高 `meta.runtimeVersion` 而保留旧主板版本。未列入该 runtime 适配范围的主板不得凭旧声明保留；同步更新 README 支持表，并记录兼容范围变化。
+- 根据底层库实际用途选择能力：硬件串口使用 `UART_TX` / `UART_RX`。经典 Uno/Nano（ATmega328P）的 AVR `SoftwareSerial` 使用引脚变化中断（PCINT）接收，TX/RX 分别使用 `DIGITAL_WRITE` / `DIGITAL_READ`；不能用仅表示外部中断的 `EXT_INTERRUPT` 将 RX 错限为 D2/D3。该处理不能推广到 Mega、Leonardo 等板型，须核对实际串口库和主板 PCINT 能力后再筛选；只有库确实依赖外部中断时才使用 `EXT_INTERRUPT`。同一库按平台切换串口实现时按实际实现选择能力，不只按 Tx/Rx 参数名判断。参考 [Arduino SoftwareSerial 说明](https://docs.arduino.cc/learn/built-in-libraries/software-serial)及[官方实现](https://github.com/arduino/ArduinoCore-avr/blob/master/libraries/SoftwareSerial/src/SoftwareSerial.cpp)。
+- 在 `getInfo()` 中获取当前主板菜单，直接保留 runtime 返回的 `text` / `value`，不再翻译主板引脚或给值额外加引号。默认值必须来自返回列表；原默认引脚仍可用时可保留，否则选择有效项并记录默认值变化。空列表不得回退到旧固定引脚表。
+- 仅验证受影响范围：菜单确实跟随 runtime 返回值变化、空列表不崩溃、默认值在菜单内，以及生成代码保留正确的引脚值和 RX/TX 参数顺序。构建或模拟 runtime 通过不等于原生显示、目标编译或硬件通过。
+
 ## index.js / func.js
 
+- 源码保持可读的多行格式：类方法、积木对象、参数和菜单配置按层级展开并统一缩进，不将整个积木定义或多个方法挤成一行。压缩仅用于 Builder 的构建产物。
 - `index.js` 按当前 Builder 引入 `ArgumentType`、`BlockType`、图标、`Func` 和 locales，实现 `setLocale`、`getCodePrimitives`、`getInfo`。
 - block 的 opcode、类型、text、arguments、menu、defaultValue、outputTypes 必须逐行对应语义矩阵。扩展名、积木和菜单显示文字均用 `formatMessage`，并在 `en.json`/`zh-cn.json` 中保持 key 对齐；动态菜单可采用 `menuText` + `buildMenuItems` 样式。
 - V1 enum 通常变成 V2 menu；分别保留显示文字、实际 value 和默认值。

@@ -329,7 +329,7 @@
         "MICROPYTHON"
       ],
       "path": "micropython/config.md",
-      "source_fingerprint": "3d1a0758ca9325dcf3610e0448f0bc820c96e3094199fae8efe5ef8392094db2",
+      "source_fingerprint": "a5d8da7a53a04b8e9b1e567a938b1eff16747b329e85da147cf344e4fde5f481",
       "source_key": "mindplus.v2.extensions.micropython",
       "title": "micropython 2. 配置文件 (public/config.json)",
       "topic_id": "micropython.config",
@@ -395,12 +395,12 @@
         "MICROPYTHON"
       ],
       "path": "micropython/generator/add-while.md",
-      "source_fingerprint": "cdc5d44dac96c5d0cb9f7a87b433b58ac47cd87608394f306aa2592c96c66d9a",
+      "source_fingerprint": "43640ab3eb12aa349aad2a4cfcdcf05602f04c628125b9e38c03c8ef44dc943b",
       "source_key": "mindplus.v2.extensions.micropython",
-      "title": "MicroPython 5. 添加 while True 头部代码 addWhile （无效果/废弃）",
+      "title": "MicroPython 5. 添加 while True 头部代码 addWhile",
       "topic_id": "micropython.generator.add-while",
       "triggers": [
-        "5. 添加 while True 头部代码 addWhile （无效果/废弃）"
+        "5. 添加 while True 头部代码 addWhile"
       ]
     },
     {
@@ -515,7 +515,7 @@
         "MICROPYTHON"
       ],
       "path": "micropython/structure.md",
-      "source_fingerprint": "ddece67d2f857020adccc14868bb757dbc09439b71cca2e4711cbecbc0d08b66",
+      "source_fingerprint": "32d094d87deefc19393783db727f979ed421c41d935c53a85ef1db73a5d33131",
       "source_key": "mindplus.v2.extensions.micropython",
       "title": "micropython 1. 扩展包文件结构",
       "topic_id": "micropython.structure",
@@ -734,7 +734,7 @@
         "REALTIME"
       ],
       "path": "realtime/config.md",
-      "source_fingerprint": "8218b3185368216f4d64c14b3072aab7114fd25e3ecb37534082fbd5718be7ba",
+      "source_fingerprint": "fcdda5f7a1b457e33886c11345e3eabcc60fd5863a822a2277a88abc59c10960",
       "source_key": "mindplus.v2.extensions.realtime",
       "title": "realtime 2. 配置文件 (public/config.json)",
       "topic_id": "realtime.config",
@@ -748,7 +748,7 @@
         "REALTIME"
       ],
       "path": "realtime/execution.md",
-      "source_fingerprint": "9cda2f4159e325e2dadff2faa4b250ac7ae9244c65e3192a5ab50292f69232a8",
+      "source_fingerprint": "33a366569849398e022edd2b261f0b378815fd62e06b5fa04d4e0a9492b73356",
       "source_key": "mindplus.v2.extensions.realtime",
       "title": "realtime 4. 积木执行文件 (func.js)",
       "topic_id": "realtime.execution",
@@ -762,7 +762,7 @@
         "REALTIME"
       ],
       "path": "realtime/firmata.md",
-      "source_fingerprint": "4ceaeec6a5bfc30c8330dcfc4aa67b4e64b3c6824e4ca94260f112feddb6267b",
+      "source_fingerprint": "2a75d8e92e67aa7fcc0d6a29f2d2d168e301c891a5b29d3c658752c72e4beabb",
       "source_key": "mindplus.v2.extensions.realtime",
       "title": "realtime 6. Firmata 相关 API",
       "topic_id": "realtime.firmata",
@@ -776,7 +776,7 @@
         "REALTIME"
       ],
       "path": "realtime/index-js.md",
-      "source_fingerprint": "8b5ed02b89277bbc33f07b493ffacf79390d9eb5b9106a84ab66e18f61c1bd39",
+      "source_fingerprint": "e255403fdd14dc310c1fc63a528143f8862b19a41d3789fa375e942350a71589",
       "source_key": "mindplus.v2.extensions.realtime",
       "title": "realtime 3. 图形块描述文件 (index.js)",
       "topic_id": "realtime.index-js",
@@ -818,7 +818,7 @@
         "REALTIME"
       ],
       "path": "realtime/structure.md",
-      "source_fingerprint": "dbcf4655c4efc2a2b95937f518a6a6905e53922faf4bbc7ff51d4c144129c4d4",
+      "source_fingerprint": "1822bc12fd057f26c04c2b50c1104e27bb2c7b38c92d701baf612b5ccb00530b",
       "source_key": "mindplus.v2.extensions.realtime",
       "title": "realtime 1. 扩展包文件结构",
       "topic_id": "realtime.structure",

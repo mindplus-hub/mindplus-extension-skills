@@ -4,7 +4,7 @@
 
 - topic_id: `realtime.firmata`
 - source_key: `mindplus.v2.extensions.realtime`
-- source_fingerprint: `4ceaeec6a5bfc30c8330dcfc4aa67b4e64b3c6824e4ca94260f112feddb6267b`
+- source_fingerprint: `2a75d8e92e67aa7fcc0d6a29f2d2d168e301c891a5b29d3c658752c72e4beabb`
 
 ## 6. Firmata 相关 API
 
@@ -138,6 +138,54 @@ if (this.device.firmata.serialWriteIsAvailable()) {
 } else {
     util.yield(); // 下一帧重试
 }
+```
+
+### 6.3 DFRobot 私有协议（节选）
+
+基于 Firmata 扩展的私有命令，常见用途如下：
+
+> 不同主控版本的方法名和参数可能不同，以当前主控实际接口为准
+
+| 功能          | 命令码    | 常用方法示例                                                                                                                                                                                                                                 |
+| :---------- | :----- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 红外传感器       | `0x00` | `sendIR(type, pin, value, bit)`；`reportIR(pin, key)` ; `reportOnceIR(pin)`                                                                                                                                                             |
+| 超声波         | `0x01` | `reportSonar(trig, echo)`                                                                                                                                                                                                              |
+| 蜂鸣器音调       | `0x02` | `reportTone(pin, tone, beat)`                                                                                                                                                                                                          |
+| 引脚脉冲宽度      | `0x03` | `reportPulseIn(pin, level, timeout)`                                                                                                                                                                                                   |
+| microbit 点阵 | `0x05` | `showBitmap(bitmap)`；`showString(string)`；`showImage(image)`；`drawPixel(x, y, light)`；`matrixClear()`；`stopAnimation()`；`setBrightness(brightness)`                                                                                    |
+| 蜂鸣器音乐       | `0x09` | `reportTone(pin, tone, beat)` ; `playSound(pin, sound, flag)`；`playNote(pin, note, beat)`；`playNoteOff()`；`setTicksTempo(pin, ticks, tempo)`；`setSpeed(speed)`                                                                         |
+| DHT11/DHT22 | `0x0D` | `readDHT(pin, dht)`；`reportDHT(pin, dht)`                                                                                                                                                                                              |
+| I2C 地址扫描    | `0x0E` | `i2cScan()`，返回 Promise，结果为扫描响应字符串                                                                                                                                                                                                      |
+| 无线通信        | `0x10` | `openWireless(type)`；`setWirelessChannel(channel)`；`sendStrByWireless(string)`                                                                                                                                                         |
+| DS18B20     | `0x11` | `getDs18b20(pin)`，返回 Promise，结果为解析后的温度数值                                                                                                                                                                                               |
+| 电机          | `0x13` | `setMotor(index, dir, speed)`                                                                                                                                                                                                          |
+| WS2812      | `0x14` | `initWs2812(pin, num, bright)`；`setWs2812Rgb(num, color)`；`setWs2812Rotate(num)`；`Ws2812Clear()`；`Ws2812SetBrightness(brightness)`                                                                                                     |
+| OLED12864   | `0x16` | `oled12864PrintTextXY(x, y, text, textLen)`；`oled12864imageDrawing(x, y, width, height, image, imgLen)`；`oled12864FillScreen(color)`；`oled12864PointDrawing(x, y)`；`oled12864LineDrawing(x1, y1, x2, y2)`；`oled12864ClearInLine(line)` |
+| 指南针         | `0x17` | `calibrate()`，启动指南针校准                                                                                                                                                                                                                  |
+| 加速度范围       | `0x19` | `accelerationSetRange(range)`                                                                                                                                                                                                          |
+| 数据上报标志      | `0x20` | `setBusy1(boo)`；`reportMicrobitLightness(boo)`，属于主控通信及上报控制，模块扩展不建议自行调用                                                                                                                                                                 |
+| 复位          | `0x7F` | 收到后恢复引脚状态并触发 `reset` 事件；未提供专用发送方法。`reset()` 发送的是标准 Firmata 复位命令 `0xFF`                                                                                                                                                                 |
+
+示例（超声波 / 蜂鸣器 / 红外 / 脉冲）：
+```javascript
+// 超声波距离 (cm)
+this.device.firmata.reportSonar(trigPin, echoPin);
+
+// 蜂鸣器
+this.device.firmata.reportTone(pin, parseInt(tone), parseInt(beat));
+
+// 红外一次读取（当前示例接口）
+this.device.firmata.reportOnceIR(pin);
+
+// 脉冲宽度 (us)
+this.device.firmata.reportPulseIn(
+	pin,
+	level === 'HIGH' ? 1 : 0,
+	parseInt(timeout)
+);
+
+// 系统运行时间 (ms)，来自上报数据
+this.device.firmata.reportData.millis;
 ```
 
 ***

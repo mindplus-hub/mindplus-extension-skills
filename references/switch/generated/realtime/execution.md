@@ -4,7 +4,7 @@
 
 - topic_id: `realtime.execution`
 - source_key: `mindplus.v2.extensions.realtime`
-- source_fingerprint: `9cda2f4159e325e2dadff2faa4b250ac7ae9244c65e3192a5ab50292f69232a8`
+- source_fingerprint: `33a366569849398e022edd2b261f0b378815fd62e06b5fa04d4e0a9492b73356`
 
 ## 4. 积木执行文件 (func.js)
 
@@ -15,7 +15,7 @@
 ```javascript
 opcodeName(args, util) {
     // args: 积木参数，键名与 arguments 中定义一致（如 args.PIN）
-    // util: Scratch 运行时工具（如 util.yield() 用于等待串口空闲）
+    // util: 运行时工具（如 util.yield() 用于等待串口空闲）
 }
 ```
 
@@ -67,6 +67,6 @@ export default Func;
 - 硬件操作前应检查 `device.isConnected()`。
 - 引脚名到 Firmata 引脚号的转换使用 `firmata.pinPortConversionTab[pin]`。
 - 并发写串口时使用 `serialWriteIsAvailable()` + `util.yield()`，避免指令冲突。
-- 异步操作返回 `Promise`，Scratch 运行时会自动等待结果。
+- 异步操作返回 `Promise`，运行时会自动等待结果。
 
 ***

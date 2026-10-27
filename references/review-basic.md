@@ -116,3 +116,7 @@ python scripts/mpa.py handoff --work-root <work> --run-id <run> --workflow REVIE
 `--state` 可以省略：`handoff` 会按 `status`/`outcome` 推导（PASS 即 TERMINAL），显式写只是自证；`--evidence` 每项一条，缺项会被拒。校验器返回 `REVIEW.BASIC_NOT_READY` 时先看 `error` 文本：它区分「输入缺字段或字段非法」和「审核本身未通过」，前者补字段、后者才需要重跑检查。
 
 后续需要复盘或复用完整 Basic 证据时，使用 `--keep-evidence` 保留运行记录与报告；`REPORTED_FINDINGS` 终态会自动保留其证据。其他未保留的成功运行会清理记录，清理后的路径不可继续核验。
+# 测试场景有效性
+
+动态审核先确认真实返回类型、初始化、作用域、板型和参数前提。字符串 reporter 接文本/字符串消费者；不得用数值等待槽通用承接所有 reporter。审核构造的不合理连接造成的失败记录为 INVALID_TEST，保留错误并修正场景，不计 P0，不否定合法用法已通过的证据。只有合法用法下确认的功能影响才按问题分级。报告须同时说明触发连接、输入值、实际代码/错误、正确用法及真实截图（缺图说明原因），不能仅在聊天解释。缺少动态证据仍如实 BLOCKED。
+

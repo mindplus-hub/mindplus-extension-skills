@@ -581,8 +581,6 @@ def main() -> int:
             findings.append({"code": "MICROPYTHON_CODE_PRIMITIVES_MISSING"})
         if re.search(r"\bgenerator\s*\.\s*addCode\s*\(", func_text):
             findings.append({"code": "MICROPYTHON_USES_UPLOAD_ADD_CODE"})
-        if re.search(r"\bgenerator\s*\.\s*addWhile\s*\(", func_text):
-            findings.append({"code": "MICROPYTHON_ADD_WHILE_HAS_NO_EFFECT"})
     if args.mode == "REALTIME":
         if "spec_is_support_stage" in inventory and config.get("isSupportStage", False) != inventory["spec_is_support_stage"]:
             findings.append({"code": "REALTIME_STAGE_SPEC_MISMATCH"})

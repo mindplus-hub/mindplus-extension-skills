@@ -1,21 +1,21 @@
 {
   "bundle_id": "mindplus-switch-references",
-  "content_sha256": "974b83199ebf1ad9a0e063cfb317f92ba6be143dafc43868842f3c567a62ff37",
+  "content_sha256": "0060617500e8946185df7eca813a2ae3b4b1b1cda966d048bb6d5064a3b87f96",
   "files": [
     {
       "path": "index.json",
-      "sha256": "b62d93312e10a22503c4d243a8495d686511336a5807e47a9f46a2d0f850d655",
-      "size": 47554
+      "sha256": "9f28d77707231b753d81d5f4f43cac6f2bad2ff7a21859731b0a504f82cf94fd",
+      "size": 47508
     },
     {
       "path": "index.md",
-      "sha256": "d1d3a0bead137ef9d911cb112c3beaffe50d7b8ae801e1ff445fdde3e216e665",
-      "size": 13632
+      "sha256": "035f7df6a7a4187b4ddfcff5b9880d47402679fc32b22f1b1357e519c6cef6f4",
+      "size": 13609
     },
     {
       "path": "micropython/config.md",
-      "sha256": "f80c75287533cd166c2cfa728340a823dc3802982fae84e60b5d0481d5e6d57b",
-      "size": 4361
+      "sha256": "e2881fa243143510969c8c2a0fc4b448943d1edc27071ad44a0697e2989e5ac4",
+      "size": 4359
     },
     {
       "path": "micropython/generator/add-function.md",
@@ -39,8 +39,8 @@
     },
     {
       "path": "micropython/generator/add-while.md",
-      "sha256": "8f90c4fe71acbf76e8884d04e699fe650d66c36d1a5f15b485b963b123a7c336",
-      "size": 860
+      "sha256": "a6bf6105f76ab17a3926b39404f80d88bea035eb8b4c0e9f76dd81513db7746f",
+      "size": 853
     },
     {
       "path": "micropython/generator/advanced.md",
@@ -84,8 +84,8 @@
     },
     {
       "path": "micropython/structure.md",
-      "sha256": "2ff9456cc43741bc6b3e764f0f46df5a8a3b4dca833e3c0eba77a386366ceabe",
-      "size": 2112
+      "sha256": "fd4a89c4609fa969f3b52fea5a6b64e8ec4b678c5a4750e3f2c38c21bb53a073",
+      "size": 2021
     },
     {
       "path": "python/config.md",
@@ -154,23 +154,23 @@
     },
     {
       "path": "realtime/config.md",
-      "sha256": "c0db10b9122f5ef7cd088d95b72e7dd6919a7c9d998cfeb727208a60091c1ea7",
-      "size": 5446
+      "sha256": "2db9b5c2194bb2347c744c66320398c86bbbdc9930893694fa32401409dbda31",
+      "size": 5434
     },
     {
       "path": "realtime/execution.md",
-      "sha256": "a24e28fe02d67f5ef1d568cdf45c38a8d3959dba43552c7b443db41ca7b25baf",
-      "size": 2506
+      "sha256": "0a9c94cd94e3285bd2b59d5b96727541524342d504178927391aeab871a66f37",
+      "size": 2490
     },
     {
       "path": "realtime/firmata.md",
-      "sha256": "fd776d4f883082590df480451592de6df7bdead89f1e58d6e6694d8b573be8bf",
-      "size": 3688
+      "sha256": "0de385147b16fe7f30fe072c9fb8809b9b1a3391f7cb48c30daa69e7d10f66c8",
+      "size": 9670
     },
     {
       "path": "realtime/index-js.md",
-      "sha256": "2e2b50b9eb59a7d53784ed0c31104ba8fc05c1bc76f9506245e650deeb2d7cd7",
-      "size": 3624
+      "sha256": "4a19276b2d3727fc53ff5c8f192a2163215d2c1dd91ffd62c3a069a8381586d5",
+      "size": 3744
     },
     {
       "path": "realtime/locales.md",
@@ -184,8 +184,8 @@
     },
     {
       "path": "realtime/structure.md",
-      "sha256": "e49db8dbf67320943327b474a91408efabca997ccaf31970a8767b22761402bc",
-      "size": 1896
+      "sha256": "64e0b83c5dd472bf51c8a1491c183984ee4cc2ecfc67318f4dae88003d02996b",
+      "size": 1908
     },
     {
       "path": "shared/block/core.md",
@@ -429,7 +429,7 @@
     }
   ],
   "min_skill_version": "0.4.0",
-  "release_id": "refs-974b83199ebf",
+  "release_id": "refs-0060617500e8",
   "schema_version": 1,
   "supported_modes": [
     "UPLOAD",

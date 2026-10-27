@@ -4,7 +4,7 @@
 
 - topic_id: `realtime.structure`
 - source_key: `mindplus.v2.extensions.realtime`
-- source_fingerprint: `dbcf4655c4efc2a2b95937f518a6a6905e53922faf4bbc7ff51d4c144129c4d4`
+- source_fingerprint: `1822bc12fd057f26c04c2b50c1104e27bb2c7b38c92d701baf612b5ccb00530b`
 
 ## 1. 扩展包文件结构
 
@@ -13,7 +13,7 @@
 ```
 ext2-rt-name/                              # 仓库名称可参考，以ext2-rt-为前缀
 ├── extension/                              # 扩展库源码目录
-│   ├── func.js                             # 生成代码
+│   ├── func.js                             # 积木实时执行逻辑
 │   ├── index.js                            # 图形块定义主文件
 │   ├── public/                             # 静态资源目录
 │   │   ├── cover.png                       # 封面图

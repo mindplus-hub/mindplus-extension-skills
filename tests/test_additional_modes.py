@@ -69,11 +69,44 @@ class AdditionalModeTests(unittest.TestCase):
         for mode in ("UPLOAD", "PYTHON_BLOCK", "MICROPYTHON", "REALTIME"):
             with self.subTest(mode=mode):
                 config = self.config(mode)
-                if mode in {"MICROPYTHON", "REALTIME"}:
+                # UPLOAD also needs a device scope: supportDevices is required
+                # (the official Wiki marks it 必填 for module extensions), so the
+                # skeleton alone is incomplete without one.
+                if mode in {"UPLOAD", "MICROPYTHON", "REALTIME"}:
                     config["supportDevices"] = {"dev-DFRobot-unihikerK10": "^0.0.1"}
                 findings = []
                 check_config_schema(config, mode, findings)
                 self.assertEqual(findings, [])
+
+    def test_upload_requires_a_device_scope(self):
+        """UPLOAD without supportDevices/supportArch is a P0 config gap.
+
+        The device scope answers "which boards can run this library" and is
+        independent of whether the extension calls the pin Runtime API; an
+        extension with no scope can be selected for no board at all.
+        """
+        config = self.config("UPLOAD")
+        findings = []
+        check_config_schema(config, "UPLOAD", findings)
+        codes = {x["code"] for x in findings}
+        self.assertIn("V2_CONFIG_REQUIRED_FIELDS_MISSING", codes)
+        self.assertIn("V2_CONFIG_DEVICE_SCOPE_MISSING", codes)
+
+        # supportArch alone is the whole-architecture alternative: it satisfies
+        # the device scope even though supportDevices is absent.
+        config = self.config("UPLOAD")
+        config["supportArch"] = ["all"]
+        findings = []
+        check_config_schema(config, "UPLOAD", findings)
+        codes = {x["code"] for x in findings}
+        self.assertNotIn("V2_CONFIG_DEVICE_SCOPE_MISSING", codes)
+
+        # ... and a non-empty supportDevices satisfies it too.
+        config = self.config("UPLOAD")
+        config["supportDevices"] = {"dev-DFRobot-arduinoUno": "^0.0.1"}
+        findings = []
+        check_config_schema(config, "UPLOAD", findings)
+        self.assertEqual(findings, [])
         config = self.config("REALTIME")
         findings = []
         check_config_schema(config, "REALTIME", findings)

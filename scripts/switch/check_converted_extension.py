@@ -301,6 +301,33 @@ def check_config_schema(config: dict, mode: str, findings: list[dict]) -> dict:
             }
         )
 
+    # Conditional requirements (e.g. UPLOAD device scope): at least one of the
+    # listed non-empty fields must be present. Absence of all of them is a P0
+    # gap, not a benign default -- without a device scope the extension cannot
+    # be selected for any board.
+    for rule in profile.get("conditional_required", []) or []:
+        if not isinstance(rule, dict):
+            continue
+        candidates = rule.get("any_of") or []
+        if not isinstance(candidates, list) or not candidates:
+            continue
+        satisfied = False
+        for name in candidates:
+            value = config.get(name)
+            if isinstance(value, (dict, list)) and value:
+                satisfied = True
+                break
+        if not satisfied:
+            findings.append(
+                {
+                    "code": "V2_CONFIG_DEVICE_SCOPE_MISSING",
+                    "mode": mode,
+                    "fields": candidates,
+                    "message": rule.get("reason")
+                    or "At least one non-empty device scope field is required.",
+                }
+            )
+
     nested_profiles = profile.get("nested_fields")
     if isinstance(nested_profiles, dict):
         for parent, nested in nested_profiles.items():

@@ -81,7 +81,13 @@ def build_config(source_config: dict, inventory: dict, mode: str, schema: dict) 
         }
     )
     result = {field: values[field] for field in required}
-    if mode in {"MICROPYTHON", "REALTIME"} and isinstance(source_config.get("supportDevices"), dict):
+    # A device scope cannot be fabricated: keep it out of the skeleton unless
+    # the source actually declares one. The conversion checker then reports
+    # V2_CONFIG_DEVICE_SCOPE_MISSING until V1 board evidence is mapped, instead
+    # of an empty object silently looking complete.
+    if not isinstance(source_config.get("supportDevices"), dict):
+        result.pop("supportDevices", None)
+    else:
         result["supportDevices"] = source_config["supportDevices"]
     if mode == "REALTIME" and isinstance(source_config.get("isSupportStage"), bool):
         result["isSupportStage"] = source_config["isSupportStage"]

@@ -57,10 +57,10 @@
         "main",
         "mode",
         "libraryConfig",
-        "meta"
+        "meta",
+        "supportDevices"
       ],
       "optional_fields": [
-        "supportDevices",
         "supportArch"
       ],
       "non_empty_if_present": [
@@ -101,7 +101,16 @@
             "runtimeVersion": "string"
           }
         }
-      }
+      },
+      "conditional_required": [
+        {
+          "any_of": [
+            "supportDevices",
+            "supportArch"
+          ],
+          "reason": "UPLOAD needs a device scope: non-empty supportDevices, or non-empty supportArch which overrides it."
+        }
+      ]
     },
     "PYTHON_BLOCK": {
       "v2_mode": "python-block",

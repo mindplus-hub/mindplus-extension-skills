@@ -154,6 +154,9 @@ git clone https://gitee.com/mind-plus/mindplus-extension-skills.git ".claude/ski
 
 ## 版本更新
 
+- V0.4.2
+   - 修正已知问题
+
 - V0.4.1
    - 上传模式的主板引脚菜单改用 runtime 能力查询，明确软串口边界
    - 修正 V1 `esp32` 对应掌控板的映射规则，避免误映射到通用 ESP32

@@ -1,6 +1,6 @@
 # 官方语料检索协议（official corpus fallback）
 
-内置语料（generated Wiki 事实、conventions 词典、block-organization）无法解答时的
+内置语料（generated Wiki 事实、conventions 词典、block-organization、[能力案例](capability-patterns.md)）无法解答时的
 **第一回退层**：检索 Gitee 全站带 `MindPlus-Ext2` Topic 的公开扩展仓库。
 本协议对 CREATE 与 CONVERT 同效。
 

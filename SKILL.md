@@ -1,7 +1,7 @@
 ---
 name: mindplus-extension-skills
 metadata:
-  version: "0.4.1"
+  version: "0.4.2"
 description: Create, upgrade and convert Mind+ extensions across upload, Python, MicroPython (mpy) and realtime modes, with Lite source discovery, Basic review and authorized Gitee publishing.
 ---
 

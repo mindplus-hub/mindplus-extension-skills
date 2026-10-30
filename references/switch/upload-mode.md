@@ -37,9 +37,9 @@ extension/
 └── func.js
 ```
 
-先按 [config-schema.md](config-schema.md) 的 `UPLOAD` profile 生成配置：顶层字段只能来自白名单，必需字段不能缺失，V1 的 `email`、`license`、`isBoard`、`platform`、`asset` 不得泄漏。新 V2 `id` 与旧 `compatibilityId` 按共享规则分别生成，保留可验证的 `author` 和语言文本；`mode` 固定 `upload`，样例扩展 `isDevice` 为 `false`，`main` 使用当前 Builder 入口。`sku` 和 `meta.runtimeVersion` 没有证据时写 `""`；`libraryConfig` 无外部全局 Arduino 库时写 `[]`。`supportDevices`、`supportArch` 只有证据支持时出现，不要用空结构占位。禁止添加 `boardConfig`。
+先按 [config-schema.md](config-schema.md) 的 `UPLOAD` profile 生成配置：顶层字段只能来自白名单，必需字段不能缺失，V1 的 `email`、`license`、`isBoard`、`platform`、`asset` 不得泄漏。新 V2 `id` 与旧 `compatibilityId` 按共享规则分别生成，保留可验证的 `author` 和语言文本；`mode` 固定 `upload`，样例扩展 `isDevice` 为 `false`，`main` 使用当前 Builder 入口。`sku` 没有型号证据时写 `""`；`libraryConfig` 无外部全局 Arduino 库时写 `[]`。`supportDevices` 必填且非空，板卡来自 V1 `asset.arduinoC.board` 等声明；整架构范围时改用非空 `supportArch`（覆盖 `supportDevices`）。设备范围与该扩展是否使用 Runtime 引脚 API 无关：不使用 `getBoardPinsByType` 只说明 `meta.runtimeVersion` 可以写 `"0.0.1"`，不构成省略 `supportDevices` 的理由。禁止添加 `boardConfig`。
 
-`supportDevices` 表示整体设备范围；单积木 `board/boards` 条件表示可见性条件，二者不能互相替代。只有旧积木确实需要当前设备引脚时才使用 `getBoardPinsByType` 或设备 Runtime；BMP58X 动态 RX/TX 菜单属于条件样式，普通固定字符串/数字参数不能主动套用。
+`supportDevices` 表示整体设备范围；单积木 `board/boards` 条件表示可见性条件，二者不能互相替代：设备范围回答“这个库能装到哪些板子上”，board 条件回答“这块积木什么时候显示”。只有旧积木确实需要当前设备引脚时才使用 `getBoardPinsByType` 或设备 Runtime；BMP58X 动态 RX/TX 菜单属于条件样式，普通固定字符串/数字参数不能主动套用。
 
 V1 板型映射按实际设备身份核对，不能凭芯片名或名称相似直接对应 V2 ID。Mind+ V1 内置板型 `esp32` 指掌控板，应映射到 `dev-DFRobot-handpyEsp32`，不能映射到通用 `dev-DFRobot-Esp32`；`firebeetleesp32` / `firebeetleesp32e` 保持各自设备身份。板型身份存在歧义时先核对 V1 设备定义或用户确认，再填写 `supportDevices` 和最低版本，不扩大支持范围。
 

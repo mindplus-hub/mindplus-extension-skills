@@ -2,6 +2,7 @@
 
 本文件是 CREATE 与 CONVERT 共享的惯例层：generated/ 里的 Wiki 事实回答"字段和 API 是什么"，
 本文件回答"真实项目里大家怎么写"。每条惯例都带证据来源；没有证据的写法不要采用。
+遇到动态引脚、实例初始化／reporter 或图像编码依赖问题时，按需读取 [能力案例](capability-patterns.md) 的对应小节；案例用于理解适用条件，不覆盖本词典、模式契约或校验器。
 设备 ID、sku、supportArch 的机器可读字典见 [device-ids.json](device-ids.json)，
 由 `scripts/switch/check_converted_extension.py` 强制校验。
 

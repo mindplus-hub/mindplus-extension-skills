@@ -76,7 +76,7 @@ V1 注解中 `.defl="..."` 外层引号是注解语法，不是默认值本身�
 ## `config.json` 字段契约
 
 - 生成前读取 [`config-schema.md`](config-schema.md)；它是四种 V2 模式的顶层字段白名单和必需字段清单；V1 自动转换覆盖四种模式的已注册入口。V1 `email`、`license`、`isBoard`、`platform`、`asset` 不得进入 V2 配置。
-- 字符串元数据没有可验证描述时写 `""`；`meta.runtimeVersion` 没有实际 Runtime API 证据时写 `""`。`libraryConfig` 等必需数组使用 schema 的空数组默认值；`supportDevices`、`supportArch` 等结构型可选字段没有证据时省略，不能写一个会改变语义的空结构。
+- 字符串元数据没有可验证描述时写 `""`。`meta.runtimeVersion` 写扩展实际依赖的 runtime API 最低版本：只用 `0.0.1` 能力（`setLocale`/`getCodePrimitives`/`getInfo`、`Generator.*`）就写 `"0.0.1"`，只有用到 `getBoardPinsByType` 这类 `0.0.2` API 才写 `"0.0.2"`；写成 `""` 只表示依赖版本无法确定，不是省事的默认值。`libraryConfig` 等必需数组使用 schema 的空数组默认值；`supportDevices`、`supportArch` 是设备范围声明，UPLOAD 至少给出一个非空项，不能写空结构，也不能因为未使用引脚 API 就一并省略。
 - `config.json` 的严格字段、JSON 类型和固定值检查必须在唯一一次 Builder build 之前完成；检查失败时先修正或记录敏感节点，不用构建成功掩盖配置错误。
 
 ## 二级菜单

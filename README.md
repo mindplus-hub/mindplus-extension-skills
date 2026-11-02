@@ -154,6 +154,9 @@ git clone https://gitee.com/mind-plus/mindplus-extension-skills.git ".claude/ski
 
 ## 版本更新
 
+- V0.4.3
+   - 补充上传模式本地 C++ 库封装指引：大段协议、算法或重复逻辑可移入自带 `.h/.cpp`，积木主要生成调用
+   
 - V0.4.2
    - 修正已知问题
 

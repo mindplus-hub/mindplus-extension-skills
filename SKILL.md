@@ -1,7 +1,7 @@
 ---
 name: mindplus-extension-skills
 metadata:
-  version: "0.4.2"
+  version: "0.4.3"
 description: Create, upgrade and convert Mind+ extensions across upload, Python, MicroPython (mpy) and realtime modes, with Lite source discovery, Basic review and authorized Gitee publishing.
 ---
 
@@ -10,6 +10,8 @@ description: Create, upgrade and convert Mind+ extensions across upload, Python,
 Create, convert or upgrade an extension, review its artifact, then publish if authorized. Lite selects the development source; Basic checks publication readiness. The five leaves belong to this one self-contained skill. For maintenance read [architecture.md](references/architecture.md).
 
 V2 creation, upgrade and review cover UPLOAD, PYTHON_BLOCK, MICROPYTHON and REALTIME (module/stage). Mode contracts: [upload](references/switch/upload-mode.md), [Python](references/switch/python-block-mode.md), [MicroPython](references/switch/micropython-block-mode.md), [realtime](references/switch/realtime-mode.md). Fresh V1 conversion covers all four registered modes; device extensions are outside producer profiles.
+
+For upload development, keep generated Arduino code concise: consider a bundled `.h/.cpp` library for large or repeated implementation logic, leaving parameter handling and calls in `func.js`. See the [upload code organization guidance](references/switch/upload-mode.md#生成代码体量与本地-c-库).
 
 ## Entry and routing
 

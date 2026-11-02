@@ -65,6 +65,41 @@ V1 板型映射按实际设备身份核对，不能凭芯片名或名称相似�
 - `addInclude` 的实参只写**裸头文件名**，不写 `#include` 指令、尖括号或引号。运行时实现（upload-gui generator，2026-09-15 核对）就是一参 `addInclude('X.h')` → `#include <X.h>`、两参 `addInclude('键', 'X.h')` → `#include "X.h"`：两个实参都被**原样**塞进指令里，`id` 只多承担一个去重/覆盖键的作用。因此一参时 `id` 本身也不能带尖括号，两参时第二个参数是头文件名而不是整条指令。V1 的 `Generator.addInclude(id, '#include <X.h>')` 第二个参数是整条指令，照抄到 V2 会生成 `#include "#include <X.h>"`，编译必然失败；正确写法是丢掉 `#include`、尖括号和引号，只留 `X.h`。`check_converted_extension.py` 会检查 `func.js` 里的字符串字面量实参（计算得来的实参不判断）。注意生成的 `upload.generator.add-include` Topic 措辞会误导：它把 `code` 写成"实际生成代码"、把 `id` 举例成 `<MPython.h>`；按运行时实现，这两个实参都只能是**裸名字**，以本文件的说明为准。
 - COMMAND 返回语句；REPORTER/BOOLEAN 按当前 Builder 优先级返回 `[code, priority]`。普通 STRING 不因类型名自动添加 `symbol/menu`；V1 `shadow="string"` 则按共享规则添加 `inputParams.symbol: '""'`，`shadow="normal"` 不显示引号。
 
+## 生成代码体量与本地 C++ 库
+
+适用于上传模式的创建、升级和转换。这是代码组织建议，不是强制拆库或固定行数门槛。
+
+- 少量直观语句直接生成即可；已有库提供了所需 API 时优先调用，不再重复实现。
+- 单个积木展开大段协议处理、算法或数据表，多个积木重复同一段实现，或 `func.js` 中的 C++ 字符串已难以维护时，考虑将逻辑封装为函数或类，放入扩展自带的 `.h/.cpp` 库，让生成程序主要保留 include、必要的对象／初始化和调用语句。
+- `generator.addFunction()` 适合少量需要去重的辅助函数，但函数体仍会进入生成的 Arduino 程序；只把大段代码移入 `addFunction()`，不能达到隐藏实现、缩短生成程序的效果。生成源码更简洁也不代表编译后的固件一定更小。
+
+库放在扩展资源目录，而不是放在开发电脑的 Arduino 全局目录。例如：
+
+```text
+extension/
+├── func.js
+└── public/libraries/MindPlusCommand/
+    ├── MindPlusCommand.h
+    └── MindPlusCommand.cpp
+```
+
+`.h` 提供带扩展前缀的函数声明或类接口；`.cpp` 包含对应头文件并实现协议／算法、内部状态和数据表，使用 Arduino API 时显式包含 `Arduino.h`。遵循所用 Arduino 库的目录和元数据约定，已有库的 `src/`、`library.properties`、依赖及许可证应保留。不要将 `.cpp` 当头文件 include，也不要同时把同一实现写入库和 `addFunction()`。
+
+例如，将原本大段命令组包实现移入库，由头文件声明 `void mpCommandSend(uint8_t command, int value);`，`func.js` 中只生成调用（示意方法，参数键与实际积木一致）：
+
+```javascript
+sendCommand(generator, block, parameter) {
+  generator.addInclude('MindPlusCommand.h');
+  return `mpCommandSend(${parameter.CMD.code}, ${parameter.VALUE.code});\n`;
+}
+```
+
+`parameter.*.code` 是待生成的 C++ 表达式，应作为实参传入，不能在 JavaScript 中求值或写死到库源码。REPORTER／BOOLEAN 同样生成函数调用表达式，并保留原有 `[code, priority]` 返回形式。只有确实需要对象和初始化时才生成对应的 `addObject`／`addSetup`。
+
+自带库无需加入 `libraryConfig`；该字段仍只声明外部全局 Arduino 库。封装应保留原有参数求值、调用顺序、初始化时机、返回值和多实例状态语义；尤其不能将原本每个积木／对象独立的状态合成一个共享全局变量。转换时保留 V1 库原件，不借此修改来源库或改变旧行为。
+
+验证复用当前生产／Basic 检查：确认构建产物包含所需 `.h/.cpp` 资源；用代表性积木及重复调用检查生成代码仅引用所需接口，参数和状态行为保持一致。Builder 打包成功只证明资源打包，不证明 C++ 可编译；涉及新库时，以目标主板的实际编译结果确认头文件解析、`.cpp` 编译链接和依赖可用，未执行则明确记录未验证。
+
 ## 颜色与图标
 
 - `color1`、`color2`、`color3` 必须存在且不能全部相同；优先使用 V1 `//% color="#xxxxxx"` 作为

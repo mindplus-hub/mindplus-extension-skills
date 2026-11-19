@@ -6,6 +6,8 @@ When a check is due, run `python <absolute path of this skill directory>/scripts
 
 For a user-reported newer release, add `--refresh` to bypass the one-hour cache. On success, require the returned `installation_root` to be the active skill and `installed_version` to match its `VERSION`; updating another copy is not success. On `UPDATED`, reload only this directory's `SKILL.md`, then read references when needed. On `SKIPPED` or failure, briefly report the reason and continue with the unchanged installed version; do not retry the same check automatically.
 
+On a Release API HTTP 403 or 429, the updater checks the same repository's public `/releases/latest` page once and applies the same package and SHA-256 checks.
+
 ## Download integrity
 
 Select the latest stable Release's explicit `-workbuddy.zip` or `-universal.zip` according to the active layout, plus its exact same-name `.zip.sha256` attachment. Do not fall back to Gitee's automatic source archive or an older release when required attachments are missing. Every installation downloads the checksum again, even when release selection uses the cache. `--check-only` reports availability, not successful package verification.

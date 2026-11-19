@@ -20,6 +20,7 @@ import time
 import urllib.request
 import zipfile
 from pathlib import Path, PurePosixPath
+from urllib.error import HTTPError
 from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -81,6 +82,11 @@ class ReleaseRedirect(urllib.request.HTTPRedirectHandler):
 
 
 def download(url: str, limit: int = LIMIT) -> bytes:
+    data, _ = fetch(url, limit)
+    return data
+
+
+def fetch(url: str, limit: int) -> tuple[bytes, str]:
     validate_download_url(url)
     req = urllib.request.Request(url, headers={"User-Agent": "mindplus-extension-skills-updater/0.2.3", "Accept-Encoding": "identity"})
     started = time.monotonic()
@@ -102,7 +108,7 @@ def download(url: str, limit: int = LIMIT) -> bytes:
                 raise IntegrityError("Release response exceeds size limit")
         if expected is not None and len(data) != expected:
             raise IntegrityError("Incomplete Release download")
-    return bytes(data)
+    return bytes(data), response.url
 
 
 def verified_download(asset: dict) -> tuple[bytes, str]:
@@ -150,6 +156,39 @@ def choose(releases: list, current: tuple, kind: str):
         raise IntegrityError("Release requires exactly one matching SHA-256 attachment")
     asset["checksum"] = checksums[0]
     return number, asset
+
+
+def release_from_page() -> dict:
+    page, final_url = fetch(f"{RELEASE_PAGE}latest", 1024 * 1024)
+    tag = re.fullmatch(rf"{re.escape(RELEASE_PAGE)}tag/(v?\d+\.\d+\.\d+)", final_url)
+    if not tag:
+        raise ValueError("Gitee's public latest release page did not identify a stable release")
+    downloads = f"{RELEASE_PAGE}download/{tag[1]}/"
+    path = re.escape(urlparse(downloads).path)
+    links = re.findall(rf'''<a\s+href=(["'])(?:https://gitee\.com)?{path}([^"'/?#]+)\1''',
+                       page.decode("utf-8"))
+    return {"tag_name": tag[1], "assets": [
+        {"name": name, "browser_download_url": downloads + name} for _, name in links
+    ]}
+
+
+def fetch_releases() -> list:
+    releases = []
+    for page in range(1, 11):
+        try:
+            data = download(f"{RELEASES}?page={page}&per_page=100")
+        except HTTPError as exc:
+            if exc.code not in (403, 429):
+                raise
+            exc.close()
+            return [release_from_page()]
+        batch = json.loads(data)
+        if not isinstance(batch, list):
+            raise ValueError("Invalid releases response")
+        releases.extend(batch)
+        if len(batch) < 100:
+            break
+    return releases
 
 
 def version_digest(root: Path) -> str:
@@ -383,15 +422,7 @@ def update(root: Path, check_only: bool = False, refresh: bool = False) -> dict:
         except ValueError:
             cached = None
     if cached is None:
-        releases = []
-        for page in range(1, 11):
-            batch = json.loads(download(f"{RELEASES}?page={page}&per_page=100"))
-            if not isinstance(batch, list):
-                raise ValueError("Invalid releases response")
-            releases.extend(batch)
-            if len(batch) < 100:
-                break
-        selected = choose(releases, current, kind)
+        selected = choose(fetch_releases(), current, kind)
         store_cache(root, current, kind, selected)
     result["cache_hit"] = cached is not None
     if not selected:

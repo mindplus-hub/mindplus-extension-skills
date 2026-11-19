@@ -154,6 +154,9 @@ git clone https://gitee.com/mind-plus/mindplus-extension-skills.git ".claude/ski
 
 ## 版本更新
 
+- V0.4.4
+   - 修复 Gitee Release API 返回 403 或 429 时的自动升级。脚本会改查同一仓库的公开发布页，并在安装前校验对应 ZIP 的 SHA-256
+
 - V0.4.3
    - 补充上传模式本地 C++ 库封装指引：大段协议、算法或重复逻辑可移入自带 `.h/.cpp`，积木主要生成调用
    

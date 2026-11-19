@@ -4,6 +4,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from urllib.error import HTTPError
 from unittest.mock import Mock, patch
 
 from test_update_and_shadow import updater, packer, archive
@@ -14,6 +15,41 @@ class IntegrityTests(unittest.TestCase):
         name = "mindplus-extension-skills-0.2.3-" + ("workbuddy" if kind == "wb" else "universal") + ".zip"
         return {"name": name, "browser_download_url": "https://gitee.com/package.zip",
                 "checksum": {"name": name + ".sha256", "browser_download_url": "https://gitee.com/package.zip.sha256"}}
+
+    def test_rate_limited_api_installs_verified_release_from_public_page(self):
+        tag = "v0.2.3"
+        downloads = updater.RELEASE_PAGE + "download/" + tag + "/"
+        for status, kind in ((403, "wb"), (429, "universal")):
+            with self.subTest(status=status), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp) / "skill"
+                root.mkdir()
+                updater.unpack(archive(kind, number="0.2.2"), root, (0, 2, 2), kind)
+                name = self.asset(kind)["name"]
+                path = updater.urlparse(downloads).path
+                page = (f'<a href="{path}{name}">ZIP</a>'
+                        f'<a href="{path}{name}.sha256">SHA-256</a>').encode()
+                data = archive(kind, number="0.2.3")
+                checksum = f"{hashlib.sha256(data).hexdigest()}  {name}\n".encode()
+
+                def fetch(url, limit):
+                    if url.startswith(updater.RELEASES + "?"):
+                        raise HTTPError(url, status, "Rate Limit Exceeded", {}, None)
+                    if url == updater.RELEASE_PAGE + "latest":
+                        return page, updater.RELEASE_PAGE + "tag/" + tag
+                    payloads = {downloads + name: data, downloads + name + ".sha256": checksum}
+                    return payloads[url], url
+
+                with patch.object(updater, "fetch", side_effect=fetch) as request, \
+                     patch.object(updater, "cache_path", return_value=Path(tmp) / "cache"), \
+                     patch.object(updater, "backup_path", return_value=Path(tmp) / "previous.zip"):
+                    result = updater.update(root, refresh=True)
+                self.assertEqual(result["status"], "UPDATED")
+                self.assertEqual(result["installed_version"], "0.2.3")
+                self.assertTrue(result["sha256_verified"])
+                self.assertEqual([call.args[0] for call in request.call_args_list], [
+                    updater.RELEASES + "?page=1&per_page=100", updater.RELEASE_PAGE + "latest",
+                    downloads + name + ".sha256", downloads + name,
+                ])
 
     def test_updates_both_layouts_and_rechecks_cached_checksum(self):
         for kind in ("wb", "universal"):

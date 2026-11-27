@@ -1,0 +1,440 @@
+{
+  "bundle_id": "mindplus-switch-references",
+  "content_sha256": "0060617500e8946185df7eca813a2ae3b4b1b1cda966d048bb6d5064a3b87f96",
+  "files": [
+    {
+      "path": "index.json",
+      "sha256": "9f28d77707231b753d81d5f4f43cac6f2bad2ff7a21859731b0a504f82cf94fd",
+      "size": 47508
+    },
+    {
+      "path": "index.md",
+      "sha256": "035f7df6a7a4187b4ddfcff5b9880d47402679fc32b22f1b1357e519c6cef6f4",
+      "size": 13609
+    },
+    {
+      "path": "micropython/config.md",
+      "sha256": "e2881fa243143510969c8c2a0fc4b448943d1edc27071ad44a0697e2989e5ac4",
+      "size": 4359
+    },
+    {
+      "path": "micropython/generator/add-function.md",
+      "sha256": "9a16c9c7becb56a380e6e00ad73688eec87a4b4adb06b54751841412e5159b11",
+      "size": 1062
+    },
+    {
+      "path": "micropython/generator/add-import.md",
+      "sha256": "8f13642520e83d0f5188a511c9c6963e1942b6c6ebf19eb1a90eba6889a45e6a",
+      "size": 746
+    },
+    {
+      "path": "micropython/generator/add-init.md",
+      "sha256": "f151e5c58ddea2b9c99de0497146d45d0caf85c925a4e2e0f81faa44228ea5f7",
+      "size": 880
+    },
+    {
+      "path": "micropython/generator/add-variable.md",
+      "sha256": "7720345d316289eeadd3c1cdc66962371f8ae965d4cffde96ec7f5972ab99f3b",
+      "size": 763
+    },
+    {
+      "path": "micropython/generator/add-while.md",
+      "sha256": "a6bf6105f76ab17a3926b39404f80d88bea035eb8b4c0e9f76dd81513db7746f",
+      "size": 853
+    },
+    {
+      "path": "micropython/generator/advanced.md",
+      "sha256": "91e0b00353fc0d1f4d403b370c2abee250445c0fc289d6ce74913ee6b152fef9",
+      "size": 865
+    },
+    {
+      "path": "micropython/generator/core.md",
+      "sha256": "3a86f0fe7d6dd0267098d6c7bccac8cb26f0c72e911cd8713b0e0e2ea92049d3",
+      "size": 898
+    },
+    {
+      "path": "micropython/generator/event-callback.md",
+      "sha256": "a8fb3890ac1b8b9d1315c6a280eddc25541ca53b74d89f3756baa64f06446f73",
+      "size": 559
+    },
+    {
+      "path": "micropython/generator/get-setup.md",
+      "sha256": "125e8f89da104cd7fa1a4e125252f59557b9c1cbc0e473d85c0204f462d0101e",
+      "size": 706
+    },
+    {
+      "path": "micropython/generator/get-static-function.md",
+      "sha256": "42f40a79fc7e98c649ec85de7c36aef3ed246c8ba56d09c8a1c52c6e7b9c91de",
+      "size": 740
+    },
+    {
+      "path": "micropython/generator/inline-code.md",
+      "sha256": "25b6a144cce5d9d80deafe589d47cf724daecd0540de824bb516b6b61436b312",
+      "size": 712
+    },
+    {
+      "path": "micropython/index-js.md",
+      "sha256": "6d0870bbdf176a309a75fa9e635fa472942c6ffeb454d0da11d0dbade136844a",
+      "size": 2734
+    },
+    {
+      "path": "micropython/locales.md",
+      "sha256": "3b63052748616c9e0b105f9b9b122268dc52eb3156b6687261b401b5d62ad69d",
+      "size": 459
+    },
+    {
+      "path": "micropython/structure.md",
+      "sha256": "fd4a89c4609fa969f3b52fea5a6b64e8ec4b678c5a4750e3f2c38c21bb53a073",
+      "size": 2021
+    },
+    {
+      "path": "python/config.md",
+      "sha256": "6e79c2c52e6dff401126c25e7e30b9639c15b54390f36fdfd6c0965eae94b10d",
+      "size": 4148
+    },
+    {
+      "path": "python/generator/add-function.md",
+      "sha256": "aed7659a04ac3cdbe37ebaa6f33cec4316083534b2364b09570fb912d94763d0",
+      "size": 1111
+    },
+    {
+      "path": "python/generator/add-import.md",
+      "sha256": "fd1ebf6523ec15cf49dee035d4197669dcc0bb0833deebdb3e13fdfbaf7cbecc",
+      "size": 761
+    },
+    {
+      "path": "python/generator/add-init.md",
+      "sha256": "3837f1ab6ae871cdd6f6fa4b218b2d396c404529cfbb7fc404a749305e982cfc",
+      "size": 913
+    },
+    {
+      "path": "python/generator/add-variable.md",
+      "sha256": "1a326401931131cc84938ba019bef53c1096e543d10727a96ee64699e290659f",
+      "size": 795
+    },
+    {
+      "path": "python/generator/advanced.md",
+      "sha256": "f1a76ea95d5514c7802ca322ed1a0c8b7dd18c2c3b427c89abf9b24cbb8ceefe",
+      "size": 878
+    },
+    {
+      "path": "python/generator/core.md",
+      "sha256": "95c8f2177eff204bc314a011b8f88e50759d73584df256b0ac6dc240e9f87811",
+      "size": 752
+    },
+    {
+      "path": "python/generator/event-callback.md",
+      "sha256": "93e52f68ed9a6137b32d2800d07fd59e37a13a300a7983cce7af3e25653dd16d",
+      "size": 571
+    },
+    {
+      "path": "python/generator/inline-code.md",
+      "sha256": "258474a8f3aaa080d4c940b9e15887598f45aeb203cc48f11ea1bb815210bb50",
+      "size": 705
+    },
+    {
+      "path": "python/index-js.md",
+      "sha256": "459f0ed28c02f95417defb675608996066dea1455b5057a1976ac4e38115a6a4",
+      "size": 2431
+    },
+    {
+      "path": "python/locales.md",
+      "sha256": "47421ed52a2e127ffca4285be7fb8c8fac68a0158138fc64b17eaa5e2e704ce1",
+      "size": 942
+    },
+    {
+      "path": "python/requirements.md",
+      "sha256": "20ae20737a223ec498d0b5180e41891eb6c9eee066881e2f5c239fe9fc84c5b8",
+      "size": 539
+    },
+    {
+      "path": "python/structure.md",
+      "sha256": "20ed7da841f39f3fec12f734028b5f51094f7618177d2bdcc39c722b31fdf5f5",
+      "size": 2087
+    },
+    {
+      "path": "realtime/config.md",
+      "sha256": "2db9b5c2194bb2347c744c66320398c86bbbdc9930893694fa32401409dbda31",
+      "size": 5434
+    },
+    {
+      "path": "realtime/execution.md",
+      "sha256": "0a9c94cd94e3285bd2b59d5b96727541524342d504178927391aeab871a66f37",
+      "size": 2490
+    },
+    {
+      "path": "realtime/firmata.md",
+      "sha256": "0de385147b16fe7f30fe072c9fb8809b9b1a3391f7cb48c30daa69e7d10f66c8",
+      "size": 9670
+    },
+    {
+      "path": "realtime/index-js.md",
+      "sha256": "4a19276b2d3727fc53ff5c8f192a2163215d2c1dd91ffd62c3a069a8381586d5",
+      "size": 3744
+    },
+    {
+      "path": "realtime/locales.md",
+      "sha256": "ce928a759dacb902d1024347c28bd4c174618f00a613e97d732bd9bebd2316ad",
+      "size": 535
+    },
+    {
+      "path": "realtime/stage.md",
+      "sha256": "274fa10eddeac48045aea390affaff4400bcef39bd2b82165077e8b8b24a9e0b",
+      "size": 1170
+    },
+    {
+      "path": "realtime/structure.md",
+      "sha256": "64e0b83c5dd472bf51c8a1491c183984ee4cc2ecfc67318f4dae88003d02996b",
+      "size": 1908
+    },
+    {
+      "path": "shared/block/core.md",
+      "sha256": "506c5cc1d3aec9ab86f41c57f17b5b4b7551b0a1a0f5ad63ecb287672d30ac19",
+      "size": 730
+    },
+    {
+      "path": "shared/block/definition.md",
+      "sha256": "010abf9b5464172180c612dfd4997882a2f2e95dbd163a1854abc4d6c773ddf7",
+      "size": 1965
+    },
+    {
+      "path": "shared/block/examples.md",
+      "sha256": "2afa062a5a625c4a05b41af6e381d96dd3c907d858148bb4df19930403023e9d",
+      "size": 1346
+    },
+    {
+      "path": "shared/block/menus.md",
+      "sha256": "bb6abf30a5304f00973665be751c4b82f9a83a6f06b5b41dedb84d60ef3bc167",
+      "size": 1096
+    },
+    {
+      "path": "shared/block/special.md",
+      "sha256": "31b02a9359a1f6cd376d0ba4a15931c3e3fa296a41ace8443215a8420863eb9c",
+      "size": 8627
+    },
+    {
+      "path": "shared/builder-workspace.md",
+      "sha256": "b462327881b5dc7f035d8496ab185668a16ca967e60570096714f49f001fda98",
+      "size": 2842
+    },
+    {
+      "path": "shared/config-identity.md",
+      "sha256": "d3e2d338dfaccc5186bed7c98d7e49faf7d5068b3203fad89c238f0315e51aae",
+      "size": 6900
+    },
+    {
+      "path": "shared/fields/angle.md",
+      "sha256": "a0522da970336cf54ad4ef8830ac0624322fac9b19dcbca0680fd4e8931dafbf",
+      "size": 1071
+    },
+    {
+      "path": "shared/fields/boolean.md",
+      "sha256": "d670f7feffa2981e56fb1303ec9cbfdae70061b2eebbd82f1d96e1f7fc3ed6c7",
+      "size": 707
+    },
+    {
+      "path": "shared/fields/builtinimg.md",
+      "sha256": "428e8e874a9e8199ac3620fcf793b805863387b0bd62b17f371ffebc00c35b68",
+      "size": 1351
+    },
+    {
+      "path": "shared/fields/color.md",
+      "sha256": "9b10100dc3818289c330c4689b263279036b27997780ed6c15558cd099373709",
+      "size": 898
+    },
+    {
+      "path": "shared/fields/colorpalette.md",
+      "sha256": "d05b4bb011fa9bca12c95e2baf3c8df3cad8e2051f0fb1bf06e3bba07ce65aec",
+      "size": 1728
+    },
+    {
+      "path": "shared/fields/dirsettings.md",
+      "sha256": "eb06db98f37645601e7327d41b74d1d7a7ea81185b51102d5187085ed7858460",
+      "size": 1102
+    },
+    {
+      "path": "shared/fields/dropdown.md",
+      "sha256": "d58ee5eb6a490fd35822da80549a81763ce6a2f42173294af4437f6d820aa63c",
+      "size": 3532
+    },
+    {
+      "path": "shared/fields/eventheadinner.md",
+      "sha256": "44acd1dc537155990fbb3d6ac1401b304c4259d6a70a0566b9957f7b77d68e0a",
+      "size": 1714
+    },
+    {
+      "path": "shared/fields/formsetting.md",
+      "sha256": "3d54d33d1dccb7b595ca59d3234dc51d2ba8ea9af11dd8fc831b64ff32b19123",
+      "size": 4932
+    },
+    {
+      "path": "shared/fields/imgpreview.md",
+      "sha256": "85f27aa794c5302df7042c516f5a91ae01cdce25358980a21d96651e93555d42",
+      "size": 1687
+    },
+    {
+      "path": "shared/fields/imgsettings.md",
+      "sha256": "ee72c827e08949c4e656bc27b088ca9827a4877fda90f0033beb93fdb294a34c",
+      "size": 1096
+    },
+    {
+      "path": "shared/fields/infraredtext.md",
+      "sha256": "e84f2810a0ed91398505b383f87b07437b69f79f189001c28b444073ebe8395b",
+      "size": 942
+    },
+    {
+      "path": "shared/fields/matrix.md",
+      "sha256": "ebe91aa48949ac316f58dbaf6c6f4a9b229f627695a486ce9845934ace61f34a",
+      "size": 704
+    },
+    {
+      "path": "shared/fields/matrixicons.md",
+      "sha256": "127c1066bd6b84b45055e9d8cfb4965eae91df4c528dd9f82d97e83154960784",
+      "size": 5576
+    },
+    {
+      "path": "shared/fields/mqttparameter.md",
+      "sha256": "824f8410fb8f88b938c53a1fad769251f3c1eaef18286518603ff759b6b6dbdb",
+      "size": 761
+    },
+    {
+      "path": "shared/fields/note.md",
+      "sha256": "da4b176601506650e3cdffb077bb009816fc643f3af157c6247983c8499fa01c",
+      "size": 844
+    },
+    {
+      "path": "shared/fields/number.md",
+      "sha256": "6c5ada362e1edd1521f52564955fd9aa178b187ca1c10378d62ee4e1db02cdf4",
+      "size": 1681
+    },
+    {
+      "path": "shared/fields/obloqparameter.md",
+      "sha256": "b460fc10d020d2e1c61e6c464f65a3515e35d0862d5494f1f30cbaeb1a03cb98",
+      "size": 1169
+    },
+    {
+      "path": "shared/fields/onlineimgsetting.md",
+      "sha256": "dc96b0e66aa022a2fde1ffab6fef76f3d06b75a9d1e7365ba234c5253b8503b8",
+      "size": 786
+    },
+    {
+      "path": "shared/fields/piano.md",
+      "sha256": "f4ac67365bb2517f683cc040101b23e6b3910408106a7c5a1296efb0ecb15599",
+      "size": 865
+    },
+    {
+      "path": "shared/fields/slider.md",
+      "sha256": "fe40687f2c972ee837df2cee672c8c5f12ef2892939fc02eb2b6c36ae24c203d",
+      "size": 1429
+    },
+    {
+      "path": "shared/fields/string.md",
+      "sha256": "3ed8924e2c9312a5503fb30e65e9227c0a218446ad04de0e9d84458a4f480872",
+      "size": 891
+    },
+    {
+      "path": "shared/fields/textarea.md",
+      "sha256": "9aee4aa258bf9cd8d8e0c161c201602bc61e70b8f939e5ef3205e46f2b9acb7b",
+      "size": 1193
+    },
+    {
+      "path": "shared/fields/textpreview.md",
+      "sha256": "b4f1f785cb0164b056f702f96c058df70bb631a3f4573a28a8b3b716adc5b052",
+      "size": 1844
+    },
+    {
+      "path": "shared/runtime.md",
+      "sha256": "9d181bd3b1afb197e384adc118b12c63291060c83262f4b28b737f600b034fd9",
+      "size": 3419
+    },
+    {
+      "path": "shared/v1-compatibility.md",
+      "sha256": "91de9fe07a3cf7513216f8865355eb38004a2571d702b3896aae9f98aa49edad",
+      "size": 939
+    },
+    {
+      "path": "upload/config.md",
+      "sha256": "798598a9b2be923935fed680014994b31b554c609ddd76b7b492280aa8d1b579",
+      "size": 8070
+    },
+    {
+      "path": "upload/generator/add-const.md",
+      "sha256": "6d49025523acf4baa4712aaa7eccc8a6bd49dcf8fc5343b7f1dabd151dbb6fa6",
+      "size": 1653
+    },
+    {
+      "path": "upload/generator/add-define.md",
+      "sha256": "e7e4113e2500f210412377de57ae0747c7bbfb974e10dcb932f5789664effff6",
+      "size": 886
+    },
+    {
+      "path": "upload/generator/add-function.md",
+      "sha256": "92915a5481a6be4abd852d30029838d07d1a6aa69b3f8cfb8330c81524484dc9",
+      "size": 1123
+    },
+    {
+      "path": "upload/generator/add-include.md",
+      "sha256": "a9b529f50638ecbb1f2d585554a202715ea2c895bef64e69c6a1b31de72f6c13",
+      "size": 924
+    },
+    {
+      "path": "upload/generator/add-object.md",
+      "sha256": "fdbfbedd7fb417853e58d42af2b92c51f44b90dc5313636dc7fda39ecd034abf",
+      "size": 924
+    },
+    {
+      "path": "upload/generator/add-setup.md",
+      "sha256": "93e800d5f2a1be506836aaadd45ffc6371508c1d60e1b70cfb816be03aa6eb93",
+      "size": 988
+    },
+    {
+      "path": "upload/generator/add-variable.md",
+      "sha256": "b14df1462afbbd98e75efab62fde4b151687959a3bda250d0620c69a68599fa2",
+      "size": 1247
+    },
+    {
+      "path": "upload/generator/advanced.md",
+      "sha256": "a60f5cb297b7aa88f62fd2202d55ea0ac3b23fc01083c0c0c0e2e8606915bd18",
+      "size": 828
+    },
+    {
+      "path": "upload/generator/core.md",
+      "sha256": "fe3bc84a0af4179eb5289a93383fde19716e70abf992799ec57d7760c8eb3ac3",
+      "size": 1676
+    },
+    {
+      "path": "upload/generator/inline-code.md",
+      "sha256": "6751e27eda370e535adecffbf8aea8945ea15cd6dbdd9d0f4888e3b34d1bf97c",
+      "size": 1109
+    },
+    {
+      "path": "upload/index-js.md",
+      "sha256": "8b91ac741a2dac745b123e9e16ab8476167afa3a104ced43b8fed7539f7c08c8",
+      "size": 3182
+    },
+    {
+      "path": "upload/locales.md",
+      "sha256": "57d65607ac44c862af3d6b49765041a31ae95a3cb1d148bc1db5c286c9697fe1",
+      "size": 904
+    },
+    {
+      "path": "upload/pins.md",
+      "sha256": "b21a0b1475e75037599ab791a295bfb98500d9beefe030714be543907d447382",
+      "size": 4713
+    },
+    {
+      "path": "upload/structure.md",
+      "sha256": "fa08760d545d1756b8a315bc40d50890ec7e9428bdbf301b466898dedc7cc9bb",
+      "size": 1974
+    }
+  ],
+  "min_skill_version": "0.4.0",
+  "release_id": "refs-0060617500e8",
+  "schema_version": 1,
+  "supported_modes": [
+    "UPLOAD",
+    "PYTHON_BLOCK",
+    "MICROPYTHON",
+    "REALTIME"
+  ]
+}

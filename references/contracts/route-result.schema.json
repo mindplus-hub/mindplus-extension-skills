@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "mindplus-agent.route-result/v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "state", "status", "reason_code", "message", "facts", "workflows", "leaf_references"],
+  "properties": {
+    "schema_version": {"const": "mindplus-agent.route-result/v1"},
+    "state": {"enum": ["RUNNING", "WAITING_USER", "TERMINAL"]},
+    "status": {"enum": ["PASS", "BLOCKED"]},
+    "reason_code": {"type": ["string", "null"]},
+    "message": {"type": "string"},
+    "facts": {"type": "object"},
+    "workflows": {
+      "type": "array",
+      "items": {"enum": ["CONVERT_FRESH", "CREATE_FRESH", "UPGRADE_EXISTING", "REVIEW_EXISTING", "PUBLISH_GITEE"]}
+    },
+    "leaf_references": {"type": "array", "items": {"type": "string"}}
+  }
+}

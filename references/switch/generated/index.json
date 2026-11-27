@@ -1,0 +1,1674 @@
+{
+  "bundle_id": "mindplus-switch-references",
+  "route_profiles": {
+    "MICROPYTHON": {
+      "always": [
+        "shared.builder-workspace",
+        "shared.config-identity",
+        "shared.v1-compatibility",
+        "shared.block.core",
+        "shared.block.definition",
+        "micropython.structure",
+        "micropython.config",
+        "micropython.index-js",
+        "micropython.generator.core",
+        "micropython.locales"
+      ],
+      "features": {
+        "add-function": [
+          "micropython.generator.add-function"
+        ],
+        "add-import": [
+          "micropython.generator.add-import"
+        ],
+        "add-init": [
+          "micropython.generator.add-init"
+        ],
+        "add-variable": [
+          "micropython.generator.add-variable"
+        ],
+        "add-while": [
+          "micropython.generator.add-while"
+        ],
+        "advanced": [
+          "micropython.generator.advanced"
+        ],
+        "board-condition": [
+          "shared.runtime",
+          "micropython.config"
+        ],
+        "dependencies": [
+          "micropython.structure"
+        ],
+        "dynamic-menu": [
+          "shared.block.menus",
+          "shared.block.special",
+          "shared.field.dropdown"
+        ],
+        "event-callback": [
+          "micropython.generator.event-callback"
+        ],
+        "examples": [
+          "shared.block.examples"
+        ],
+        "field-dropdown": [
+          "shared.field.dropdown"
+        ],
+        "field-number": [
+          "shared.field.number"
+        ],
+        "field-slider": [
+          "shared.field.slider"
+        ],
+        "field-string": [
+          "shared.field.string"
+        ],
+        "get-setup": [
+          "micropython.generator.get-setup"
+        ],
+        "get-static-function": [
+          "micropython.generator.get-static-function"
+        ],
+        "inline-code": [
+          "micropython.generator.inline-code"
+        ],
+        "local-library": [
+          "micropython.structure"
+        ],
+        "menu": [
+          "shared.block.menus"
+        ],
+        "runtime": [
+          "shared.runtime"
+        ],
+        "separator": [
+          "shared.block.special"
+        ],
+        "submenu": [
+          "shared.block.special"
+        ],
+        "validation": [
+          "shared.block.special",
+          "micropython.generator.advanced"
+        ]
+      }
+    },
+    "PYTHON_BLOCK": {
+      "always": [
+        "shared.builder-workspace",
+        "shared.config-identity",
+        "shared.v1-compatibility",
+        "shared.block.core",
+        "shared.block.definition",
+        "python.structure",
+        "python.config",
+        "python.index-js",
+        "python.generator.core",
+        "python.locales"
+      ],
+      "features": {
+        "add-function": [
+          "python.generator.add-function"
+        ],
+        "add-import": [
+          "python.generator.add-import"
+        ],
+        "add-init": [
+          "python.generator.add-init"
+        ],
+        "add-variable": [
+          "python.generator.add-variable"
+        ],
+        "advanced": [
+          "python.generator.advanced"
+        ],
+        "dependencies": [
+          "python.requirements"
+        ],
+        "dynamic-menu": [
+          "shared.block.menus",
+          "shared.block.special",
+          "shared.field.dropdown"
+        ],
+        "event-callback": [
+          "python.generator.event-callback"
+        ],
+        "examples": [
+          "shared.block.examples"
+        ],
+        "field-dropdown": [
+          "shared.field.dropdown"
+        ],
+        "field-number": [
+          "shared.field.number"
+        ],
+        "field-slider": [
+          "shared.field.slider"
+        ],
+        "field-string": [
+          "shared.field.string"
+        ],
+        "inline-code": [
+          "python.generator.inline-code"
+        ],
+        "local-library": [
+          "python.structure"
+        ],
+        "menu": [
+          "shared.block.menus"
+        ],
+        "runtime": [
+          "shared.runtime"
+        ],
+        "separator": [
+          "shared.block.special"
+        ],
+        "validation": [
+          "shared.block.special",
+          "python.generator.advanced"
+        ]
+      }
+    },
+    "REALTIME": {
+      "always": [
+        "shared.builder-workspace",
+        "shared.config-identity",
+        "shared.v1-compatibility",
+        "shared.block.core",
+        "shared.block.definition",
+        "realtime.structure",
+        "realtime.config",
+        "realtime.index-js",
+        "realtime.execution",
+        "realtime.locales"
+      ],
+      "features": {
+        "advanced": [
+          "shared.runtime",
+          "realtime.execution"
+        ],
+        "board-condition": [
+          "shared.runtime",
+          "realtime.config",
+          "realtime.firmata"
+        ],
+        "dynamic-menu": [
+          "shared.block.menus",
+          "shared.block.special",
+          "shared.field.dropdown"
+        ],
+        "examples": [
+          "shared.block.examples"
+        ],
+        "field-dropdown": [
+          "shared.field.dropdown"
+        ],
+        "field-number": [
+          "shared.field.number"
+        ],
+        "field-slider": [
+          "shared.field.slider"
+        ],
+        "field-string": [
+          "shared.field.string"
+        ],
+        "firmata": [
+          "realtime.firmata",
+          "realtime.execution"
+        ],
+        "local-library": [
+          "realtime.structure"
+        ],
+        "menu": [
+          "shared.block.menus"
+        ],
+        "runtime": [
+          "shared.runtime"
+        ],
+        "separator": [
+          "shared.block.special"
+        ],
+        "stage": [
+          "realtime.stage"
+        ],
+        "submenu": [
+          "shared.block.special"
+        ]
+      }
+    },
+    "UPLOAD": {
+      "always": [
+        "shared.builder-workspace",
+        "shared.config-identity",
+        "shared.v1-compatibility",
+        "shared.block.core",
+        "shared.block.definition",
+        "upload.structure",
+        "upload.config",
+        "upload.index-js",
+        "upload.generator.core",
+        "upload.locales"
+      ],
+      "features": {
+        "add-const": [
+          "upload.generator.add-const"
+        ],
+        "add-define": [
+          "upload.generator.add-define"
+        ],
+        "add-function": [
+          "upload.generator.add-function"
+        ],
+        "add-include": [
+          "upload.generator.add-include"
+        ],
+        "add-object": [
+          "upload.generator.add-object"
+        ],
+        "add-setup": [
+          "upload.generator.add-setup"
+        ],
+        "add-variable": [
+          "upload.generator.add-variable"
+        ],
+        "advanced": [
+          "upload.generator.advanced"
+        ],
+        "board-condition": [
+          "shared.runtime",
+          "upload.pins"
+        ],
+        "dynamic-menu": [
+          "shared.block.menus",
+          "shared.block.special",
+          "shared.field.dropdown"
+        ],
+        "examples": [
+          "shared.block.examples"
+        ],
+        "field-dropdown": [
+          "shared.field.dropdown"
+        ],
+        "field-number": [
+          "shared.field.number"
+        ],
+        "field-slider": [
+          "shared.field.slider"
+        ],
+        "field-string": [
+          "shared.field.string"
+        ],
+        "inline-code": [
+          "upload.generator.inline-code"
+        ],
+        "menu": [
+          "shared.block.menus"
+        ],
+        "runtime": [
+          "shared.runtime"
+        ],
+        "separator": [
+          "shared.block.special"
+        ],
+        "validation": [
+          "shared.block.special"
+        ]
+      }
+    }
+  },
+  "schema_version": 1,
+  "supported_modes": [
+    "UPLOAD",
+    "PYTHON_BLOCK",
+    "MICROPYTHON",
+    "REALTIME"
+  ],
+  "topics": [
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/config.md",
+      "source_fingerprint": "a5d8da7a53a04b8e9b1e567a938b1eff16747b329e85da147cf344e4fde5f481",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "micropython 2. 配置文件 (public/config.json)",
+      "topic_id": "micropython.config",
+      "triggers": [
+        "micropython",
+        "2. 配置文件 (public/config.json)"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/generator/add-function.md",
+      "source_fingerprint": "0542d042e3aadfd35cf7bfd02ba62c8706c2d9c238339d710ac71fda0431b944",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "MicroPython 4. 添加全局函数 addFunction",
+      "topic_id": "micropython.generator.add-function",
+      "triggers": [
+        "4. 添加全局函数 addFunction"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/generator/add-import.md",
+      "source_fingerprint": "2ebb115e71e201290e938a2195cec3375fe82e7c2b9882742d68f6293a4350c1",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "MicroPython 1. 导入库模块 addImport",
+      "topic_id": "micropython.generator.add-import",
+      "triggers": [
+        "1. 导入库模块 addImport"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/generator/add-init.md",
+      "source_fingerprint": "058763febd8c0b6a0488f7c9af6e062cb3e88880c7162a7f5b73604a763121fb",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "MicroPython 3. 添加初始化区域代码 addInit",
+      "topic_id": "micropython.generator.add-init",
+      "triggers": [
+        "3. 添加初始化区域代码 addInit"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/generator/add-variable.md",
+      "source_fingerprint": "7fbe1d5a2af2837eea0f4debd2b1e61a0dc930d44ea44e7be7c9a1d3f078022d",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "MicroPython 2. 添加全局变量 addVariable",
+      "topic_id": "micropython.generator.add-variable",
+      "triggers": [
+        "2. 添加全局变量 addVariable"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/generator/add-while.md",
+      "source_fingerprint": "43640ab3eb12aa349aad2a4cfcdcf05602f04c628125b9e38c03c8ef44dc943b",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "MicroPython 5. 添加 while True 头部代码 addWhile",
+      "topic_id": "micropython.generator.add-while",
+      "triggers": [
+        "5. 添加 while True 头部代码 addWhile"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/generator/advanced.md",
+      "source_fingerprint": "5dc0b6b7b0ff0f838d936f7e820288dbfa5f14628b8bc280fe689f263f967d51",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "MicroPython 10. 进阶用法",
+      "topic_id": "micropython.generator.advanced",
+      "triggers": [
+        "10. 进阶用法"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/generator/core.md",
+      "source_fingerprint": "5cdcd793de79709615fe23a9ea77eeb2525c83c519392679fa089041540ead4e",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "micropython 4. 代码生成文件 (func.js)",
+      "topic_id": "micropython.generator.core",
+      "triggers": [
+        "micropython",
+        "4. 代码生成文件 (func.js)"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/generator/event-callback.md",
+      "source_fingerprint": "6aee74a1a713f8008ae40a4bc8163999238658c3d5454602052785520800b65b",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "MicroPython 6. 创建事件回调函数",
+      "topic_id": "micropython.generator.event-callback",
+      "triggers": [
+        "6. 创建事件回调函数"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/generator/get-setup.md",
+      "source_fingerprint": "4bb9c93531dec96b9d7e71d0950c791a8e0722118bfbc8c765f6d4dafdaea36d",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "MicroPython 8. 获取已生成的初始化代码 getSetup",
+      "topic_id": "micropython.generator.get-setup",
+      "triggers": [
+        "8. 获取已生成的初始化代码 getSetup"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/generator/get-static-function.md",
+      "source_fingerprint": "8505745aa4431383a50f6a470047c40e0394f1b3deb8e24db1e41a32847a9255",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "MicroPython 9. 获取已生成的静态函数 getStaticFunction",
+      "topic_id": "micropython.generator.get-static-function",
+      "triggers": [
+        "9. 获取已生成的静态函数 getStaticFunction"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/generator/inline-code.md",
+      "source_fingerprint": "1fa45f1e610b1cb1482d9578f76fae0a940319ae0b08b3e8369cd27e91553204",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "MicroPython 7. 在积木位置生成 code",
+      "topic_id": "micropython.generator.inline-code",
+      "triggers": [
+        "7. 在积木位置生成 code"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/index-js.md",
+      "source_fingerprint": "0ce8ce367026424b5a1ff5062c26c82be63cd9f1630bfddc010187eba059c762",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "micropython 3. 图形块描述文件 (index.js)",
+      "topic_id": "micropython.index-js",
+      "triggers": [
+        "micropython",
+        "3. 图形块描述文件 (index.js)"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/locales.md",
+      "source_fingerprint": "7833060432a8cf71702f9bec004329161a4db2fd02dff6ba80bf0a681a0627b9",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "micropython 5. 翻译资源文件 (locales)",
+      "topic_id": "micropython.locales",
+      "triggers": [
+        "micropython",
+        "5. 翻译资源文件 (locales)"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON"
+      ],
+      "path": "micropython/structure.md",
+      "source_fingerprint": "32d094d87deefc19393783db727f979ed421c41d935c53a85ef1db73a5d33131",
+      "source_key": "mindplus.v2.extensions.micropython",
+      "title": "micropython 1. 扩展包文件结构",
+      "topic_id": "micropython.structure",
+      "triggers": [
+        "micropython",
+        "1. 扩展包文件结构"
+      ]
+    },
+    {
+      "modes": [
+        "PYTHON_BLOCK"
+      ],
+      "path": "python/config.md",
+      "source_fingerprint": "969aa6c7bc904a1aa6753c0862ac5b978b18fb239b93fbc360f55824c8b59310",
+      "source_key": "mindplus.v2.extensions.python",
+      "title": "Python 积木模式 config.json",
+      "topic_id": "python.config",
+      "triggers": [
+        "config.json",
+        "python-block",
+        "isDevice",
+        "runtimeVersion"
+      ]
+    },
+    {
+      "modes": [
+        "PYTHON_BLOCK"
+      ],
+      "path": "python/generator/add-function.md",
+      "source_fingerprint": "cf5422ebc798b3a643c9169b2d9da93fcf3b44a625382990dadd3312778c411c",
+      "source_key": "mindplus.v2.extensions.python",
+      "title": "Python Generator addFunction",
+      "topic_id": "python.generator.add-function",
+      "triggers": [
+        "addFunction",
+        "全局函数",
+        "辅助函数"
+      ]
+    },
+    {
+      "modes": [
+        "PYTHON_BLOCK"
+      ],
+      "path": "python/generator/add-import.md",
+      "source_fingerprint": "ea7d357abbbe0b88fc7f86eda8905f4cf3c3488a60ff0c27dbd4650587b5d1bc",
+      "source_key": "mindplus.v2.extensions.python",
+      "title": "Python Generator addImport",
+      "topic_id": "python.generator.add-import",
+      "triggers": [
+        "addImport",
+        "import",
+        "导入库模块"
+      ]
+    },
+    {
+      "modes": [
+        "PYTHON_BLOCK"
+      ],
+      "path": "python/generator/add-init.md",
+      "source_fingerprint": "85549e69a73ef8e38ff5bd9dc518f87e1362d8f97e3d8c84a30173c791ea6e93",
+      "source_key": "mindplus.v2.extensions.python",
+      "title": "Python Generator addInit",
+      "topic_id": "python.generator.add-init",
+      "triggers": [
+        "addInit",
+        "addInitHeader",
+        "初始化区域"
+      ]
+    },
+    {
+      "modes": [
+        "PYTHON_BLOCK"
+      ],
+      "path": "python/generator/add-variable.md",
+      "source_fingerprint": "7344a3add14728157b3c49ad1a2ed26467d57315c9cfbac7871d856e738943c7",
+      "source_key": "mindplus.v2.extensions.python",
+      "title": "Python Generator addVariable",
+      "topic_id": "python.generator.add-variable",
+      "triggers": [
+        "addVariable",
+        "addDeclaration",
+        "全局变量"
+      ]
+    },
+    {
+      "modes": [
+        "PYTHON_BLOCK"
+      ],
+      "path": "python/generator/advanced.md",
+      "source_fingerprint": "6701d5d68f1ea4cefb0d01d1f36548fab92b0119a3e174b729906047f460a370",
+      "source_key": "mindplus.v2.extensions.python",
+      "title": "Python Generator 进阶用法",
+      "topic_id": "python.generator.advanced",
+      "triggers": [
+        "addComment",
+        "get_asset_path_by_name",
+        "addErrorPrompt",
+        "进阶"
+      ]
+    },
+    {
+      "modes": [
+        "PYTHON_BLOCK"
+      ],
+      "path": "python/generator/core.md",
+      "source_fingerprint": "fdb94b4973b3ec0ea5075b3f7239a6f16dd60ad08bdc09331d50a36d7cd42fe3",
+      "source_key": "mindplus.v2.extensions.python",
+      "title": "Python func.js 核心结构",
+      "topic_id": "python.generator.core",
+      "triggers": [
+        "func.js",
+        "generator",
+        "parameter",
+        "Python"
+      ]
+    },
+    {
+      "modes": [
+        "PYTHON_BLOCK"
+      ],
+      "path": "python/generator/event-callback.md",
+      "source_fingerprint": "79626602d5d8a77e2cb5b14f6704cd8141d4cfe1e4fd0a42e7aa1c51f2c3c33c",
+      "source_key": "mindplus.v2.extensions.python",
+      "title": "Python Generator 事件回调函数",
+      "topic_id": "python.generator.event-callback",
+      "triggers": [
+        "事件",
+        "回调",
+        "callback",
+        "HAT"
+      ]
+    },
+    {
+      "modes": [
+        "PYTHON_BLOCK"
+      ],
+      "path": "python/generator/inline-code.md",
+      "source_fingerprint": "424e50b44e9d0c6ee9abaf55783830e692306c10710483d9514133c4b3b6a667",
+      "source_key": "mindplus.v2.extensions.python",
+      "title": "Python Generator 积木位置代码",
+      "topic_id": "python.generator.inline-code",
+      "triggers": [
+        "addCode",
+        "return code",
+        "积木位置"
+      ]
+    },
+    {
+      "modes": [
+        "PYTHON_BLOCK"
+      ],
+      "path": "python/index-js.md",
+      "source_fingerprint": "76f5ead4ff9252357c365ac567ad9e9dd59c6245a4de6bf4ec24141bbecfee2e",
+      "source_key": "mindplus.v2.extensions.python",
+      "title": "Python 积木模式 index.js",
+      "topic_id": "python.index-js",
+      "triggers": [
+        "index.js",
+        "getInfo",
+        "getCodePrimitives",
+        "ArgumentType",
+        "BlockType"
+      ]
+    },
+    {
+      "modes": [
+        "PYTHON_BLOCK"
+      ],
+      "path": "python/locales.md",
+      "source_fingerprint": "05a954addb713726da77821d31b90ca6ac1139b5be6fda5036f57d1ebf5b3c2d",
+      "source_key": "mindplus.v2.extensions.python",
+      "title": "Python 积木模式翻译资源",
+      "topic_id": "python.locales",
+      "triggers": [
+        "locales",
+        "translation",
+        "setLocale",
+        "多语言"
+      ]
+    },
+    {
+      "modes": [
+        "PYTHON_BLOCK"
+      ],
+      "path": "python/requirements.md",
+      "source_fingerprint": "f7eea43d87263c0e24349ebc473751a2704f15d7d7b0256a0f392b126e8abcb8",
+      "source_key": "mindplus.v2.extensions.python",
+      "title": "Python requirements.txt 依赖管理",
+      "topic_id": "python.requirements",
+      "triggers": [
+        "requirements.txt",
+        "asset.python.dependencies",
+        "pip",
+        "依赖"
+      ]
+    },
+    {
+      "modes": [
+        "PYTHON_BLOCK"
+      ],
+      "path": "python/structure.md",
+      "source_fingerprint": "4488537bdc360f2bc5b024cfe76c67d250624de15695f0e60b1a611f0fccabdd",
+      "source_key": "mindplus.v2.extensions.python",
+      "title": "Python 积木模式扩展目录结构",
+      "topic_id": "python.structure",
+      "triggers": [
+        "目录",
+        "public",
+        "requirements.txt",
+        "libraries",
+        "python-block"
+      ]
+    },
+    {
+      "modes": [
+        "REALTIME"
+      ],
+      "path": "realtime/config.md",
+      "source_fingerprint": "fcdda5f7a1b457e33886c11345e3eabcc60fd5863a822a2277a88abc59c10960",
+      "source_key": "mindplus.v2.extensions.realtime",
+      "title": "realtime 2. 配置文件 (public/config.json)",
+      "topic_id": "realtime.config",
+      "triggers": [
+        "realtime",
+        "2. 配置文件 (public/config.json)"
+      ]
+    },
+    {
+      "modes": [
+        "REALTIME"
+      ],
+      "path": "realtime/execution.md",
+      "source_fingerprint": "33a366569849398e022edd2b261f0b378815fd62e06b5fa04d4e0a9492b73356",
+      "source_key": "mindplus.v2.extensions.realtime",
+      "title": "realtime 4. 积木执行文件 (func.js)",
+      "topic_id": "realtime.execution",
+      "triggers": [
+        "realtime",
+        "4. 积木执行文件 (func.js)"
+      ]
+    },
+    {
+      "modes": [
+        "REALTIME"
+      ],
+      "path": "realtime/firmata.md",
+      "source_fingerprint": "2a75d8e92e67aa7fcc0d6a29f2d2d168e301c891a5b29d3c658752c72e4beabb",
+      "source_key": "mindplus.v2.extensions.realtime",
+      "title": "realtime 6. Firmata 相关 API",
+      "topic_id": "realtime.firmata",
+      "triggers": [
+        "realtime",
+        "6. Firmata 相关 API"
+      ]
+    },
+    {
+      "modes": [
+        "REALTIME"
+      ],
+      "path": "realtime/index-js.md",
+      "source_fingerprint": "e255403fdd14dc310c1fc63a528143f8862b19a41d3789fa375e942350a71589",
+      "source_key": "mindplus.v2.extensions.realtime",
+      "title": "realtime 3. 图形块描述文件 (index.js)",
+      "topic_id": "realtime.index-js",
+      "triggers": [
+        "realtime",
+        "3. 图形块描述文件 (index.js)"
+      ]
+    },
+    {
+      "modes": [
+        "REALTIME"
+      ],
+      "path": "realtime/locales.md",
+      "source_fingerprint": "581cadddd9eaa9b4904d7c6237845a0b85f61c78a9aa962754edf18ec0712260",
+      "source_key": "mindplus.v2.extensions.realtime",
+      "title": "realtime 5. 翻译资源文件 (locales)",
+      "topic_id": "realtime.locales",
+      "triggers": [
+        "realtime",
+        "5. 翻译资源文件 (locales)"
+      ]
+    },
+    {
+      "modes": [
+        "REALTIME"
+      ],
+      "path": "realtime/stage.md",
+      "source_fingerprint": "cd056ae555a963b64379bd3d96ad307355dae767486b1ec326afd74efcf8a15a",
+      "source_key": "mindplus.v2.extensions.realtime",
+      "title": "realtime 7. 舞台扩展补充说明",
+      "topic_id": "realtime.stage",
+      "triggers": [
+        "realtime",
+        "7. 舞台扩展补充说明"
+      ]
+    },
+    {
+      "modes": [
+        "REALTIME"
+      ],
+      "path": "realtime/structure.md",
+      "source_fingerprint": "1822bc12fd057f26c04c2b50c1104e27bb2c7b38c92d701baf612b5ccb00530b",
+      "source_key": "mindplus.v2.extensions.realtime",
+      "title": "realtime 1. 扩展包文件结构",
+      "topic_id": "realtime.structure",
+      "triggers": [
+        "realtime",
+        "1. 扩展包文件结构"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/block/core.md",
+      "source_fingerprint": "e2759d80af876fba17b02d342004f8e5946c0914b45c57cdb1f57347d23a403d",
+      "source_key": "mindplus.v2.extensions.common-block",
+      "title": "Block 核心结构",
+      "topic_id": "shared.block.core",
+      "triggers": [
+        "getInfo",
+        "blocks",
+        "menus",
+        "颜色",
+        "图标"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/block/definition.md",
+      "source_fingerprint": "4f8d0c1bd7d68f60649aa7ba6ef74c7d2aed18fbab8f87da7ab833d1cd21958f",
+      "source_key": "mindplus.v2.extensions.common-block",
+      "title": "Block 定义字段",
+      "topic_id": "shared.block.definition",
+      "triggers": [
+        "opcode",
+        "blockType",
+        "text",
+        "group",
+        "arguments"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/block/examples.md",
+      "source_fingerprint": "941d4866e0a2cc55fe20b2ca63615be9ec1e1df41448887b885c3ffff0f8d4bd",
+      "source_key": "mindplus.v2.extensions.common-block",
+      "title": "Block 模板示例",
+      "topic_id": "shared.block.examples",
+      "triggers": [
+        "下拉框",
+        "输入校验",
+        "数值范围",
+        "模板"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/block/menus.md",
+      "source_fingerprint": "754611ca427c10f4ba4836de86116ac9b5fbc8d40ab0ec6341838965948222be",
+      "source_key": "mindplus.v2.extensions.common-block",
+      "title": "菜单定义",
+      "topic_id": "shared.block.menus",
+      "triggers": [
+        "menu",
+        "menus",
+        "动态菜单",
+        "acceptReporters"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/block/special.md",
+      "source_fingerprint": "ea9dbf6180adca5b9f7a997315b6b255826c2b7f8bd69fd39f7a28e259dac42f",
+      "source_key": "mindplus.v2.extensions.common-block",
+      "title": "Block 特殊用法",
+      "topic_id": "shared.block.special",
+      "triggers": [
+        "联动",
+        "校验",
+        "field 符号",
+        "二级菜单"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/builder-workspace.md",
+      "source_fingerprint": "031fdfd056c4d99ff5a65c23073c37ba333bdf07ae51a713f4dcc35c3eb16335",
+      "source_key": "mindplus.v2.extensions.overview",
+      "title": "Builder 根目录、初始化、构建与 README 事实",
+      "topic_id": "shared.builder-workspace",
+      "triggers": [
+        "Builder",
+        "extension/",
+        "README.md",
+        "npm install",
+        "npm run build"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/config-identity.md",
+      "source_fingerprint": "ff1ad9fbf989e2dc1e52419130f6d108fe147d4511f4f4360c4d03b852e60a49",
+      "source_key": "mindplus.v2.extensions.overview",
+      "title": "扩展身份字段约束",
+      "topic_id": "shared.config-identity",
+      "triggers": [
+        "config.json",
+        "id",
+        "author",
+        "身份"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/fields/angle.md",
+      "source_fingerprint": "384a328768d2fe03686ee7235d43c86f0747b4647df14b8fab9e7517c16c1ae4",
+      "source_key": "mindplus.v2.extensions.common-field",
+      "title": "4. 角度 (ANGLE)",
+      "topic_id": "shared.field.angle",
+      "triggers": [
+        "4. 角度 (ANGLE)",
+        "angle",
+        "ANGLE"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/fields/boolean.md",
+      "source_fingerprint": "122ea5fd137a371c8302b2788d3408fe3b946648855bf90084c6db54ab46532f",
+      "source_key": "mindplus.v2.extensions.common-field",
+      "title": "5. 布尔值 (BOOLEAN)",
+      "topic_id": "shared.field.boolean",
+      "triggers": [
+        "5. 布尔值 (BOOLEAN)",
+        "boolean",
+        "BOOLEAN"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/fields/builtinimg.md",
+      "source_fingerprint": "b471c6f556a446597e20fbd79edf6834433ea6fdbe5f8d0547e2ad46bb1e8385",
+      "source_key": "mindplus.v2.extensions.common-field",
+      "title": "21. 内置图像资源 (BUILTINIMG)",
+      "topic_id": "shared.field.builtinimg",
+      "triggers": [
+        "21. 内置图像资源 (BUILTINIMG)",
+        "builtinimg",
+        "BUILTINIMG"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/fields/color.md",
+      "source_fingerprint": "7bc88d65904c0c2c7f5e4d9af84c4a912913b7b5e4757a7825e641aa3748dbd1",
+      "source_key": "mindplus.v2.extensions.common-field",
+      "title": "8. 取色器 (COLOR)",
+      "topic_id": "shared.field.color",
+      "triggers": [
+        "8. 取色器 (COLOR)",
+        "color",
+        "COLOR"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/fields/colorpalette.md",
+      "source_fingerprint": "ea81f1d5ab5e9bcf0e1acb4845f6e295dbcd9d6ecfefbd01b578651693531f7d",
+      "source_key": "mindplus.v2.extensions.common-field",
+      "title": "7. 色板 (COLORPALETTE)",
+      "topic_id": "shared.field.colorpalette",
+      "triggers": [
+        "7. 色板 (COLORPALETTE)",
+        "colorpalette",
+        "COLORPALETTE"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/fields/dirsettings.md",
+      "source_fingerprint": "eef18366877162394af1747790fe07e3cc487ff19dd0e194d677c068811c43a7",
+      "source_key": "mindplus.v2.extensions.common-field",
+      "title": "14. 路径设置 (DIRSETTINGS)",
+      "topic_id": "shared.field.dirsettings",
+      "triggers": [
+        "14. 路径设置 (DIRSETTINGS)",
+        "dirsettings",
+        "DIRSETTINGS"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/fields/dropdown.md",
+      "source_fingerprint": "2596a97eb78853365bb3ff0cb2466e8c0a904d8d728145d14463e48fc211059a",
+      "source_key": "mindplus.v2.extensions.common-field",
+      "title": "3. 下拉框",
+      "topic_id": "shared.field.dropdown",
+      "triggers": [
+        "3. 下拉框",
+        "dropdown"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/fields/eventheadinner.md",
+      "source_fingerprint": "373eca71fd85b2c0369c15e11d9d138da1fe0ad657f72586e0b5b777d150e922",
+      "source_key": "mindplus.v2.extensions.common-field",
+      "title": "24. 事件头内置积木 (EVENTHEADINNER)",
+      "topic_id": "shared.field.eventheadinner",
+      "triggers": [
+        "24. 事件头内置积木 (EVENTHEADINNER)",
+        "eventheadinner",
+        "EVENTHEADINNER"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/fields/formsetting.md",
+      "source_fingerprint": "90cd06f008be95f09cfe5f1eb80ec7346402617c30654d8b1ceb8eeb0fa31d0c",
+      "source_key": "mindplus.v2.extensions.common-field",
+      "title": "13. 表单设置 (FORMSETTING)",
+      "topic_id": "shared.field.formsetting",
+      "triggers": [
+        "13. 表单设置 (FORMSETTING)",
+        "formsetting",
+        "FORMSETTING"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/fields/imgpreview.md",
+      "source_fingerprint": "050547d14bee11067551262ba4a3c451125b7793e672588e89faf30c408d5c9f",
+      "source_key": "mindplus.v2.extensions.common-field",
+      "title": "19. 图片预览 (IMGPREVIEW)",
+      "topic_id": "shared.field.imgpreview",
+      "triggers": [
+        "19. 图片预览 (IMGPREVIEW)",
+        "imgpreview",
+        "IMGPREVIEW"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/fields/imgsettings.md",
+      "source_fingerprint": "c2a33a573d1ef2eaeda25b3468e5e2e793c66115a69866dabf43398fb7b4030b",
+      "source_key": "mindplus.v2.extensions.common-field",
+      "title": "17. 图片设置 (IMGSETTINGS)",
+      "topic_id": "shared.field.imgsettings",
+      "triggers": [
+        "17. 图片设置 (IMGSETTINGS)",
+        "imgsettings",
+        "IMGSETTINGS"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/fields/infraredtext.md",
+      "source_fingerprint": "01fab08a026c066448dbc260a1c72097bfaaa064d377da5e0473a36b03b92b6d",
+      "source_key": "mindplus.v2.extensions.common-field",
+      "title": "22. 红外遥控器 (INFRAREDTEXT)",
+      "topic_id": "shared.field.infraredtext",
+      "triggers": [
+        "22. 红外遥控器 (INFRAREDTEXT)",
+        "infraredtext",
+        "INFRAREDTEXT"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/fields/matrix.md",
+      "source_fingerprint": "b19e5a17abf1a50c0d73abec9f7b21e385082a24450d046308c6ed1473149c5c",
+      "source_key": "mindplus.v2.extensions.common-field",
+      "title": "11. 点阵1 (MATRIX)",
+      "topic_id": "shared.field.matrix",
+      "triggers": [
+        "11. 点阵1 (MATRIX)",
+        "matrix",
+        "MATRIX"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/fields/matrixicons.md",
+      "source_fingerprint": "d9ce9f0bb27f93efd6280bab3443ac67a02de506c769818a651f9ee92cd41065",
+      "source_key": "mindplus.v2.extensions.common-field",
+      "title": "12. 点阵2 (MATRIXICONS)",
+      "topic_id": "shared.field.matrixicons",
+      "triggers": [
+        "12. 点阵2 (MATRIXICONS)",
+        "matrixicons",
+        "MATRIXICONS"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/fields/mqttparameter.md",
+      "source_fingerprint": "b2bff4fa2cdf86bcf9530c55ae2b6d2612bb4e0ca4729b85a0d632223044d244",
+      "source_key": "mindplus.v2.extensions.common-field",
+      "title": "16. MQTT初始化 (MQTTPARAMETER)",
+      "topic_id": "shared.field.mqttparameter",
+      "triggers": [
+        "16. MQTT初始化 (MQTTPARAMETER)",
+        "mqttparameter",
+        "MQTTPARAMETER"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/fields/note.md",
+      "source_fingerprint": "a98a58965e2edb2e30130fe782945061649d081399a1aaf050ad64537201a14e",
+      "source_key": "mindplus.v2.extensions.common-field",
+      "title": "10. 琴键 (NOTE)",
+      "topic_id": "shared.field.note",
+      "triggers": [
+        "10. 琴键 (NOTE)",
+        "note",
+        "NOTE"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/fields/number.md",
+      "source_fingerprint": "6adac962df63ab2667aec2c696c73c861258bf9c1b61e51071a93166cfe8e02b",
+      "source_key": "mindplus.v2.extensions.common-field",
+      "title": "1. 数值型 (NUMBER)",
+      "topic_id": "shared.field.number",
+      "triggers": [
+        "1. 数值型 (NUMBER)",
+        "number",
+        "NUMBER"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/fields/obloqparameter.md",
+      "source_fingerprint": "e09d68b34ddd5de419033073eadeda09479275be9b06af11cef6a54dc3b1c435",
+      "source_key": "mindplus.v2.extensions.common-field",
+      "title": "15. OBLOQ初始化 (OBLOQPARAMETER)",
+      "topic_id": "shared.field.obloqparameter",
+      "triggers": [
+        "15. OBLOQ初始化 (OBLOQPARAMETER)",
+        "obloqparameter",
+        "OBLOQPARAMETER"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/fields/onlineimgsetting.md",
+      "source_fingerprint": "da2d3a03f3a2a2a1d26c23c7710202c720a537c23064194bf897bf32c788c30d",
+      "source_key": "mindplus.v2.extensions.common-field",
+      "title": "18. 在线图片设置 (ONLINEIMGSETTING)",
+      "topic_id": "shared.field.onlineimgsetting",
+      "triggers": [
+        "18. 在线图片设置 (ONLINEIMGSETTING)",
+        "onlineimgsetting",
+        "ONLINEIMGSETTING"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/fields/piano.md",
+      "source_fingerprint": "1e6b71fd72b0ad0c5f136b2d6c17126f3be7bfe06a622ee11d5914dde0371931",
+      "source_key": "mindplus.v2.extensions.common-field",
+      "title": "9. 钢琴键 (PIANO)",
+      "topic_id": "shared.field.piano",
+      "triggers": [
+        "9. 钢琴键 (PIANO)",
+        "piano",
+        "PIANO"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/fields/slider.md",
+      "source_fingerprint": "443fe06e0a1bb8732fdc1cf0372f7aa661aa4bccba24bde30ce3e8dc90d55469",
+      "source_key": "mindplus.v2.extensions.common-field",
+      "title": "6. 滑动输入条 (SLIDER)",
+      "topic_id": "shared.field.slider",
+      "triggers": [
+        "6. 滑动输入条 (SLIDER)",
+        "slider",
+        "SLIDER"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/fields/string.md",
+      "source_fingerprint": "f8a748533bde75ac60a22cbfde4e5cdadcd93d6174ccc873e39438bab2b27dcf",
+      "source_key": "mindplus.v2.extensions.common-field",
+      "title": "2. 文本输入框 (STRING)",
+      "topic_id": "shared.field.string",
+      "triggers": [
+        "2. 文本输入框 (STRING)",
+        "string",
+        "STRING"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/fields/textarea.md",
+      "source_fingerprint": "cf05e699cbe216c652c9aee6504821bb2dd10a9c78fbaa5fc2d7ff10dd1a7bb3",
+      "source_key": "mindplus.v2.extensions.common-field",
+      "title": "23. 文本域 (TEXTAREA)",
+      "topic_id": "shared.field.textarea",
+      "triggers": [
+        "23. 文本域 (TEXTAREA)",
+        "textarea",
+        "TEXTAREA"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/fields/textpreview.md",
+      "source_fingerprint": "bf7ba18c9494570592665cc55db2390524ed8f9858e49b67c71987485eba8004",
+      "source_key": "mindplus.v2.extensions.common-field",
+      "title": "20. 文本预览 (TEXTPREVIEW)",
+      "topic_id": "shared.field.textpreview",
+      "triggers": [
+        "20. 文本预览 (TEXTPREVIEW)",
+        "textpreview",
+        "TEXTPREVIEW"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/runtime.md",
+      "source_fingerprint": "377beeaa169577c0987312586ccd3bc0b3c42d31cb16fcd7d4f9a4f555237222",
+      "source_key": "mindplus.v2.extensions.common-runtime",
+      "title": "Runtime API 与扩展钩子",
+      "topic_id": "shared.runtime",
+      "triggers": [
+        "runtime",
+        "getCurrentDeviceId",
+        "getDevice",
+        "getBoardPinsByType",
+        "setLocale",
+        "getInfo"
+      ]
+    },
+    {
+      "modes": [
+        "MICROPYTHON",
+        "PYTHON_BLOCK",
+        "REALTIME",
+        "UPLOAD"
+      ],
+      "path": "shared/v1-compatibility.md",
+      "source_fingerprint": "7d6e88618b00f5676a29a319db4d0283dcc08ab8c007685b39c89ec87b64059b",
+      "source_key": "mindplus.v2.extensions.faq",
+      "title": "V1 项目兼容与 compatibilityId",
+      "topic_id": "shared.v1-compatibility",
+      "triggers": [
+        "V1",
+        "compatibilityId",
+        "opcode",
+        "function"
+      ]
+    },
+    {
+      "modes": [
+        "UPLOAD"
+      ],
+      "path": "upload/config.md",
+      "source_fingerprint": "22cdaf0c7df3297c8227979b4811820096332d637e60c809e658abe806775348",
+      "source_key": "mindplus.v2.extensions.upload",
+      "title": "上传模式 config.json",
+      "topic_id": "upload.config",
+      "triggers": [
+        "config.json",
+        "supportDevices",
+        "supportArch",
+        "libraryConfig",
+        "runtimeVersion",
+        "isDevice"
+      ]
+    },
+    {
+      "modes": [
+        "UPLOAD"
+      ],
+      "path": "upload/generator/add-const.md",
+      "source_fingerprint": "f911e9d169e305b6c303e2bf0e73284c026015e628150fecfd2085c0b990d812",
+      "source_key": "mindplus.v2.extensions.upload",
+      "title": "Generator addConst",
+      "topic_id": "upload.generator.add-const",
+      "triggers": [
+        "addConst",
+        "静态常量",
+        "PROGMEM"
+      ]
+    },
+    {
+      "modes": [
+        "UPLOAD"
+      ],
+      "path": "upload/generator/add-define.md",
+      "source_fingerprint": "488ba77b96771596664e61282a96ca2f08614d5012af53e8551e76f05e98982c",
+      "source_key": "mindplus.v2.extensions.upload",
+      "title": "Generator addDefine",
+      "topic_id": "upload.generator.add-define",
+      "triggers": [
+        "addDefine",
+        "define",
+        "宏"
+      ]
+    },
+    {
+      "modes": [
+        "UPLOAD"
+      ],
+      "path": "upload/generator/add-function.md",
+      "source_fingerprint": "1bc7cf1bb3f710107be7fdfc7694bbd381620127e25a66a0555e82abdd0044d7",
+      "source_key": "mindplus.v2.extensions.upload",
+      "title": "Generator addFunction",
+      "topic_id": "upload.generator.add-function",
+      "triggers": [
+        "addFunction",
+        "静态函数",
+        "辅助函数"
+      ]
+    },
+    {
+      "modes": [
+        "UPLOAD"
+      ],
+      "path": "upload/generator/add-include.md",
+      "source_fingerprint": "d590612aa5752339b1ecccfd7820e956c082c55996f91cc02a75fdebd0e12c8c",
+      "source_key": "mindplus.v2.extensions.upload",
+      "title": "Generator addInclude",
+      "topic_id": "upload.generator.add-include",
+      "triggers": [
+        "addInclude",
+        "include",
+        "头文件"
+      ]
+    },
+    {
+      "modes": [
+        "UPLOAD"
+      ],
+      "path": "upload/generator/add-object.md",
+      "source_fingerprint": "e8a2de675f7ed4c1695e4e05b858ad6b43f106c90d8a3687b4f5f5bd16fbdfa5",
+      "source_key": "mindplus.v2.extensions.upload",
+      "title": "Generator addObject",
+      "topic_id": "upload.generator.add-object",
+      "triggers": [
+        "addObject",
+        "全局对象"
+      ]
+    },
+    {
+      "modes": [
+        "UPLOAD"
+      ],
+      "path": "upload/generator/add-setup.md",
+      "source_fingerprint": "d42418550a47faac516784c382ed06c1913028a1806075b346d38e9930ac7e16",
+      "source_key": "mindplus.v2.extensions.upload",
+      "title": "Generator setup 代码",
+      "topic_id": "upload.generator.add-setup",
+      "triggers": [
+        "addSetup",
+        "setup",
+        "初始化"
+      ]
+    },
+    {
+      "modes": [
+        "UPLOAD"
+      ],
+      "path": "upload/generator/add-variable.md",
+      "source_fingerprint": "48fda7e113a13b7197e0c3a5fe73ba0cde4b873628da764513cbed2769983204",
+      "source_key": "mindplus.v2.extensions.upload",
+      "title": "Generator addVariable",
+      "topic_id": "upload.generator.add-variable",
+      "triggers": [
+        "addVariable",
+        "全局变量"
+      ]
+    },
+    {
+      "modes": [
+        "UPLOAD"
+      ],
+      "path": "upload/generator/advanced.md",
+      "source_fingerprint": "2b22f17e56cb4074bfadf2e996c832695c4f63f44d7ef510f67e0f59d7221b6c",
+      "source_key": "mindplus.v2.extensions.upload",
+      "title": "Generator 进阶用法",
+      "topic_id": "upload.generator.advanced",
+      "triggers": [
+        "进阶",
+        "覆盖",
+        "优先级"
+      ]
+    },
+    {
+      "modes": [
+        "UPLOAD"
+      ],
+      "path": "upload/generator/core.md",
+      "source_fingerprint": "b03ae18706a777ada79a35c2ea9758b473a46140d0a8c5931607fa48e255b42f",
+      "source_key": "mindplus.v2.extensions.upload",
+      "title": "上传模式 func.js 核心结构",
+      "topic_id": "upload.generator.core",
+      "triggers": [
+        "func.js",
+        "generator",
+        "parameter",
+        "优先级"
+      ]
+    },
+    {
+      "modes": [
+        "UPLOAD"
+      ],
+      "path": "upload/generator/inline-code.md",
+      "source_fingerprint": "cc942036f109d9cff97fc1f7f441999820510b7cc466219c315c3b0b4501db4f",
+      "source_key": "mindplus.v2.extensions.upload",
+      "title": "Generator 积木位置代码",
+      "topic_id": "upload.generator.inline-code",
+      "triggers": [
+        "return code",
+        "Loop",
+        "积木位置",
+        "REPORTER"
+      ]
+    },
+    {
+      "modes": [
+        "UPLOAD"
+      ],
+      "path": "upload/index-js.md",
+      "source_fingerprint": "136f20c29cd47fe353bb0bd12fdb05ff7ff719b0d588436e30e53df5ae181424",
+      "source_key": "mindplus.v2.extensions.upload",
+      "title": "上传模式 index.js",
+      "topic_id": "upload.index-js",
+      "triggers": [
+        "index.js",
+        "getInfo",
+        "getCodePrimitives",
+        "ArgumentType",
+        "BlockType"
+      ]
+    },
+    {
+      "modes": [
+        "UPLOAD"
+      ],
+      "path": "upload/locales.md",
+      "source_fingerprint": "b7311c64ef616099e13ace9183521af59c343e32962421019760eb0d97ce588e",
+      "source_key": "mindplus.v2.extensions.upload",
+      "title": "上传模式翻译资源",
+      "topic_id": "upload.locales",
+      "triggers": [
+        "locales",
+        "translation",
+        "setLocale",
+        "多语言"
+      ]
+    },
+    {
+      "modes": [
+        "UPLOAD"
+      ],
+      "path": "upload/pins.md",
+      "source_fingerprint": "7db7b9f56bc3c93dbd546f076d9686984d239577c1bcf6fb0cf3c8e17fd0bd44",
+      "source_key": "mindplus.v2.extensions.upload",
+      "title": "上传模式引脚规范",
+      "topic_id": "upload.pins",
+      "triggers": [
+        "pins",
+        "board",
+        "getBoardPinsByType",
+        "UART",
+        "PWM",
+        "ADC"
+      ]
+    },
+    {
+      "modes": [
+        "UPLOAD"
+      ],
+      "path": "upload/structure.md",
+      "source_fingerprint": "b5388eb8835469f808d7abeb4fd2c5dffe80b2eae94337e782011d06addf84eb",
+      "source_key": "mindplus.v2.extensions.upload",
+      "title": "上传模式扩展目录结构",
+      "topic_id": "upload.structure",
+      "triggers": [
+        "目录",
+        "public",
+        "index.js",
+        "func.js",
+        "libraries"
+      ]
+    }
+  ]
+}

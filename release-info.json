@@ -1,0 +1,12 @@
+{
+  "name": "mindplus-extension-skills",
+  "display_name": "Mind+ 扩展开发助手",
+  "display_name_en": "MindPlus Extension Assistant",
+  "description": "Create/Update or freshly convert Mind+ V2 extensions, review existing extensions, and publish projects to Gitee",
+  "description_zh": "辅助创建/升级Mind+V2扩展库、将V1库转换到V2库兼容、Gitee仓库创建上传",
+  "description_en": "Create/Update or freshly convert Mind+ V2 extensions, review existing extensions, and publish projects to Gitee",
+  "version": "0.4.4",
+  "author": "MindPlus",
+  "repository": "https://gitee.com/mind-plus/mindplus-extension-skills",
+  "support_url": "https://mindplus.dfrobot.com.cn/mp2/Extensions/"
+}

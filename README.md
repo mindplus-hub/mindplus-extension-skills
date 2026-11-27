@@ -1,0 +1,295 @@
+# MindPlus Extension Skills
+
+Mind+扩展库用着不顺手？需要新的功能？试试这个skill也能体验一把开发的快乐！
+
+## 支持的功能
+
+| 功能 | 内容 |
+| --- | --- |
+| 创建 V2 扩展 | 从需求整理规格，准备最新稳定版 Builder 脚手架，生成配置、积木、代码生成器、资源和说明 |
+| V1 → V2 转换 | 分析一个 V1 扩展及所选模式，保留有依据的身份、参数、依赖和行为，转换到新的 V2 目录 |
+| Lite 查重 | 进入开发流程后查询官方目录和 Gitee；author 与 id 均相同则复用已有库／授权 fork，仅 id 相同则给新目录追加作者后缀，中文转拼音 |
+| 已有 V2 升级 | 实现功能并提升扩展版本；非本人仓库使用个人令牌 fork 并核验后修改 |
+| Basic 审核 | 产物完成后核查配置、源码与恶意代码风险，验证构建、积木显示和代表性行为；最终扩展 ZIP 不超过 5,000,000 字节 |
+| Gitee 发布 | Basic 通过后，按授权提交并推送；核验发布目标、远端引用、可见性和仓库 Topic `MindPlus-Ext2` |
+| 组合任务 | 创建后发布、转换后发布、升级后发布、审核后发布；包含开发后的 Basic 和发布前门槛 |
+
+## 架构说明
+
+开发任务按“路由 → Lite 查重 → 开发 → Basic 审核”执行，通过后按需发布。已有项目可直接进入 Basic；单独请求发布也须先通过 Basic。未通过或缺少验证时保留产物、说明原因，不发布。
+
+![开发、审核与发布流程](./struct.jpg)
+
+- **按需加载**：问答只读相关资料，不联网更新、不创建运行记录；项目工作按会话复用更新检查，只读选中的流程。离线、固定版本和 skill 本地维护跳过自动更新。
+- **脚本处理重复工作**：路由、哈希、结果交接、静态检查和发布步骤由脚本处理；成功结果不再人工重复校验，必要的阶段完整性检查仍执行。
+- **最小有效验证**：开发后统一进入 Basic，复用适用证据；只报告问题时按需构建，不因没有产物自动构建。GUI 观察面板并用最小工程验证代表性、改动和风险路径，不强制拖出全部积木或导出工程，不默认跑全量测试。
+- **区分完成程度**：分别报告源码检查、构建和积木验证结果；未执行的检查不记为通过，也不据此宣称设备可用。
+- **支持中断恢复**：运行记录保存当前流程和结果，通过 `resume` 恢复；相同 run ID 不能被另一个请求覆盖。
+
+## 常用任务怎么提
+
+| 目标 | 提示词示例 |
+| --- | --- |
+| 新建 | “使用 mindplus-extension-skills，为这个库创建 V2 扩展，先确认积木功能，输出到一个新目录。” |
+| 转换 | “将这里的 V1 转换为 V2，保留默认行为，完成 Basic 审核，不发布。” |
+| 升级 | “为这个已有 V2 增加指定功能，保留原有行为，提升版本并完成 Basic 审核；非本人仓库先 fork。” |
+| 普通审核 | “用 BASIC 审核这个扩展，列出具体问题，不修改文件。” |
+| 创建后发布 | “完成创建并通过 Basic 后，提交并推送到我指定的 Gitee 仓库。” |
+| 独立发布 | “复用当前有效的 Basic 证据，将项目提交并推送到指定仓库和分支；缺少验证先说明。” |
+| 发布前 Basic | “审查恶意代码风险、构建与积木显示／行为，确认扩展 ZIP 不超过 5 MB 后发布。” |
+
+> 创建／转换请提供来源和新的输出目录；发布请给出明确目标和提交／推送授权
+
+fork 和本 skill 的发布流程需要本地个人令牌，即使 Git 使用 SSH 也不跳过发布前的令牌检查。Windows 本机推荐使用 Windows 凭据管理器：
+
+1. 打开「控制面板 → 用户帐户 → 凭据管理器 → Windows 凭据」，添加普通凭据。
+2. Internet 地址填 `git:https://gitee.com`。
+3. 用户名填 Gitee 登录名，密码填 Gitee 个人访问令牌（PAT）。密码字段不会被 skill 输出或写入仓库。
+
+skill 通过 Git Credential Manager 执行 `git credential fill` 读取该凭据；请确认 Git 配置包含 `credential.helper=manager` 或 `manager-core`。令牌只在当前进程内存中用于 Gitee API 和 HTTPS Git 认证。
+
+环境变量 `GITEE_TOKEN` / `GITEE_ACCESS_TOKEN` 仅作为显式 CI／测试覆盖；非 Windows 主机还支持用户目录下的单行 `.gitee-token`。Gitee Go 发布工作流中的 `MP_RELEASE_TOKEN` 是平台密文变量，与本机凭据管理器分开。
+
+**不要将 token 放进聊天、仓库、URL 或命令参数，创建扩展本身不要求 Gitee token。**
+
+新建库作者优先使用用户指定名，否则从当前登录账号、Git 或电脑用户名选取并转换为英文署名；无特别要求不使用 DFRobot、MindPlus；已有库保留原作者。
+
+## 安装方法
+
+### Codex
+
+安装位置按客户端配置选择，以下目录分别相对于用户主目录或项目根目录：
+
+| 范围 | 相对安装目录 |
+| --- | --- |
+| 用户级，跨项目使用 | `.codex/skills/mindplus-extension-skills/` |
+| 项目级，随项目共享 | `.codex/skills/mindplus-extension-skills/` |
+
+在选定的安装基目录中执行：
+
+```powershell
+New-Item -ItemType Directory -Force ".codex/skills" | Out-Null
+git clone https://gitee.com/mind-plus/mindplus-extension-skills.git ".codex/skills/mindplus-extension-skills"
+```
+
+如果目标已存在，不必再次 clone。安装后查看技能列表；CLI / IDE 可用 `/skills`，并通过 `$` 选择技能：
+
+```text
+$mindplus-extension-skills 帮我把 extensions/v1-demo 转换到 extensions/v2-demo，只做转换和基础检查。
+```
+
+桌面端也可在技能界面选择后补充任务。未识别时重开会话或重启客户端。已有版本若使用其他技能目录，应以该客户端显示的实际来源为准，避免重复安装同名副本。见 [Codex 官方技能文档](https://learn.chatgpt.com/docs/build-skills)。
+
+### Claude Code
+
+将整个目录放到用户主目录或项目根目录下的 `.claude/skills/mindplus-extension-skills/`。
+
+在选定的安装基目录中执行：
+
+```powershell
+New-Item -ItemType Directory -Force ".claude/skills" | Out-Null
+git clone https://gitee.com/mind-plus/mindplus-extension-skills.git ".claude/skills/mindplus-extension-skills"
+```
+
+在 Claude Code 中调用：
+
+```text
+/mindplus-extension-skills 审核 extensions/v2-demo，使用 BASIC，只报告问题和建议。
+```
+
+也可通过自然语言明确要求使用该技能。若会话启动时尚不存在技能父目录，安装后重启会话。见 [Claude Code 官方技能文档](https://code.claude.com/docs/en/skills)。
+
+### WorkBuddy
+
+可在以下方法二选一：
+
+- （推荐）直接在技能市场搜索 `Mind+ 扩展开发助手`即可下载使用
+
+- 使用本地技能包导入入口：
+
+1. 从 [发行版](https://gitee.com/mind-plus/mindplus-extension-skills/releases/) 下载名称含 `workbuddy` 的 ZIP，保留完整包内容。
+2. 打开 **技能 → 添加技能 → 上传技能**，选择本地技能包并导入。
+3. 在已安装列表中确认 `mindplus-extension-skills` 已启用，并让任务可以访问扩展所在目录。
+4. 在对话中明确说明：
+
+```text
+请使用 mindplus-extension-skills，为这个传感器创建 Mind+ V2 上传模式扩展。
+需求和库源码在 extensions/sensor-source，输出到 extensions/sensor-v2。
+先整理规格并完成创建和基础检查，不发布。
+```
+
+### Others：其他 Agent
+
+支持 Agent Skills 目录的工具，可以按其文档将完整目录放入技能搜索路径；不同工具的目录和调用符号可能不同，不要默认都使用 `.claude/skills` 或 `$`。
+
+没有原生 Skill 功能，但能读文件和执行命令的工具，可以把仓库放在可访问的位置，在任务开始时明确指定入口：
+
+```text
+请先完整读取 tools/mindplus-extension-skills/SKILL.md，
+以该目录为技能根目录，按路由只加载本次需要的参考文件，
+使用其 scripts 中的工具完成任务。
+
+本次目标：将 extensions/v1-demo 转换到 extensions/v2-demo。
+转换后进行 Basic 审查，不发布；缺少运行验证时列出待验证项。
+```
+
+也可以在该工具支持的项目指令文件中保留这段入口提示。只支持聊天、无法访问技能目录或运行脚本的工具，可以讨论方案，但不能直接执行本项目的完整流程。
+
+## 目录导览
+
+| 路径 | 用途 |
+| --- | --- |
+| [SKILL.md](SKILL.md) | Agent 入口、路由和主要边界 |
+| [scripts/mpa.py](scripts/mpa.py) | 启动、交接、推进、恢复与清理 |
+| [references/workflows/](references/workflows/) | 五个叶流程及按需加载的完整验收说明 |
+| [references/switch/](references/switch/) | 创建和转换共用的模式、规范和参考资料 |
+| [references/contracts/](references/contracts/) | 请求、规格和 handoff 的数据结构 |
+| [scripts/switch/](scripts/switch/) | 来源分析、脚手架和静态检查工具 |
+| [agents/openai.yaml](agents/openai.yaml) | Codex 展示和调用元数据 |
+| [tests/](tests/) | 路由、校验、发布及回归测试 |
+
+进一步了解实现约定，可阅读 [架构说明](references/architecture.md)、[证据与审核等级](references/evidence.md) 和 [结果交接协议](references/handoff.md)。
+
+自更新会按安装布局选择 ZIP，并核对同名 `.zip.sha256` 文件；下载或校验失败不会安装。Release 的通用源码包保留原目录结构。
+
+## 版本更新
+
+- V0.4.4
+   - 修复 Gitee Release API 返回 403 或 429 时的自动升级。脚本会改查同一仓库的公开发布页，并在安装前校验对应 ZIP 的 SHA-256
+
+- V0.4.3
+   - 补充上传模式本地 C++ 库封装指引：大段协议、算法或重复逻辑可移入自带 `.h/.cpp`，积木主要生成调用
+   
+- V0.4.2
+   - 修正已知问题
+
+- V0.4.1
+   - 上传模式的主板引脚菜单改用 runtime 能力查询，明确软串口边界
+   - 修正 V1 `esp32` 对应掌控板的映射规则，避免误映射到通用 ESP32
+   - 同步 MicroPython 与实时模式语料，修正 `addWhile` 校验
+   - 审核先确认测试场景有效性，错误连接记为 `INVALID_TEST`
+   - 精简报告中的重复发现与检查清单，保留实际证据边界
+   - 明确自动更新从客户端指定的当前 Skill 路径执行，避免误更新备份或打包目录
+
+- V0.4.0
+   - 新增 MicroPython（mpy）与实时（模块／舞台）模式支持，覆盖 V1 自动转换、V2 创建、升级与审核
+   - 同步两种模式的语料、入口识别、依赖／资源迁移与静态校验
+
+- V0.3.15
+   - 更新语料库
+
+- V0.3.14
+   - 更新语料库
+
+- V0.3.13
+   - 修复 Python 标准库及目标环境内置库（如 M10 的 `unihiker`）缺 requirements 声明的误报
+   - 统一 Basic、问题分级与转换流程的依赖判断，减少重复规则；仅需额外安装的第三方库缺声明时提醒 P1
+   - 保持最小验证与证据复用，发布必需检查和授权门槛不变
+
+- V0.3.12
+   - 问答和 skill 本地维护不自动更新；项目任务按会话复用检查，显式更新或已知新版本仍可触发
+   - 报告型审核按需构建，仓库 URL 不再被当作发布就绪请求
+   - Basic 压缩 GUI 操作与重复取证，优先复用有效结果；八项必需检查、ZIP 限制、恶意代码审查和发布完整性／授权门禁不变
+   - 修复supportArch误报
+
+- V0.3.11
+   - Python 模式下 `public/requirements.txt` 缺库不再作为 P0：多数环境已预装该库，真缺库会在自测／运行阶段直接失败，改按 P1 提醒并记录包名与未验证范围
+   - P0 的“必需依赖／资源缺失”收窄为加载与运行必需的入口、config、本地库源码及已引用的封面／图标资源
+   - 新增“契约要求字段完整出现、不等于字段必须有值”：`compatibilityId`、`sku`、`meta.runtimeVersion` 等按契约留空不是缺陷，不列任何等级；`required_fields` 只校验字段存在、类型与固定值，不再把“Empty compatibilityId”一类空字段当成 P1
+   - 同步到审核与转换文档：Basic 审核、转换 pre-build 扫描的依赖差异都不再单独阻断 build，保真要求（照抄 V1 声明、不主动丢行）不变
+
+- V0.3.10
+   - 审核新增“报告优先”分支：只要问题清单时输出发现与未执行项，不强制产出 REVIEWED_BASIC
+   - 明确更新后只重载入口文件、脚本按 CLI 契约直接调用，避免复读文档与脚本源码
+   - Basic 观察类检查给出默认操作程序与“先判环境、再取证”的顺序，构建产物可按源码摘要复用
+   - 补充八项证据 JSON 完整骨架与 handoff 示例命令
+   - “报告优先”给出明确触发与退出条件，使用仅审核路径的 `REPORTED_FINDINGS` 终态交接并自动保留证据；后续完整 Basic 可复用仍然有效的静态检查
+   - Basic 证据 JSON Schema 将顶层 `status` 设为必填，避免 Schema 通过后被 CLI 拒绝
+
+- V0.3.9
+   - 更新流程结构图
+   - `.gitignore` 补充
+
+- V0.3.8
+   - 运行日志更新拒绝含换行的 `--event`，防止伪造被审核引用的记录行
+   - Basic 审核命令补上与 `verify_file` 一致的状态门，未通过的报告不再被改写为 PASS
+   - 引用发布包下载后核验最终地址仍为 HTTPS，阻止重定向降级替换清单
+   - 运行记录 `run.json` 改为原子写入，中断不再留下失效的截断记录
+   - Git 探测与 Windows 隐藏属性调用增加超时，避免挂起阻塞整个流程
+   - 移除 `mpa.py` 中与交接校验重复的伪造 PASS 检测，避免两处判定分叉
+   - 补充日志注入与 Basic 状态门的回归用例
+
+- V0.3.7
+   - Gitee 候选范围改为全站 `MindPlus-Ext2` Topic
+   - 引用语料包固定使用 LF 检出，避免 Windows 自动换行导致 manifest 哈希校验失败
+
+- V0.3.6
+   - 审核分为开发前 Lite 查重与产物完成后的 Basic 审核，独立发布也须通过 Basic
+   - 发布各阶段重新核验源码、ZIP 和证据摘要，防止复用失效审核结果
+
+- V0.3.5
+   - Gitee 新建扩展仓库校验四类名称与模式前缀，显式设置仓库路径并核验返回身份
+   - 修复二级标签转换缺陷
+   - V1 旧包身份同时识别与源目录并列的 `.mpext`
+   - 规范明确下拉菜单文字必须在 `getInfo()` 调用期间解析
+   - 脚手架发布通道被匿名限流时给出可复现恢复步骤，校验和附件格式错误点名期望写法
+   - 明确 `addInclude` 实参只写文件名
+   - 转换流程补充 V1 打包库（`libraries.zip`）需先解压再校验复制件的前置说明
+   - 运行记录清理结果改为核验，删除失败时如实上报残留记录而非假报成功
+   - 打包自检与缺令牌用例只重置 Git 凭据 helper，本机已存凭据时也能确定性通过
+
+- V0.3.4
+   - 补充 V1 二级标签文字到 V2 SUBMENU 的转换规则，空标签函数不计作功能积木
+
+- V0.3.3
+   - 尝试 Gitee 发布流程优化
+
+- V0.3.2
+   - 修复 Gitee 转公开请求，支持已有仓库显式转公开及中断恢复，保留公开要求并回读核验
+   - 增强入口自更新检查
+
+- V0.3.1
+   - 新建库按模式命名为 `ext2-rt-`、`ext2-ul-`、`ext2-py-`、`ext2-mpy-` 加库名称
+   - 统一过程文件
+
+- V0.3.0
+   - 脚手架默认选择最新稳定 Release，兼容 ZIP 根目录与单层包装目录
+   - 完善全局规范并提升至V3稳定版
+
+- V0.2.4
+   - 补充积木设计与下拉合并规范
+
+- V0.2.3
+   - Release 提供 WorkBuddy、通用源码两个 ZIP 及各自 SHA-256 校验文件
+   - 自更新下载后先校验摘要，再解压安装；校验缺失或失败时保留原版本
+
+- V0.2.2
+   - 新建和 V1 转换项目目录统一校验 `ext2-` 前缀
+   - 增加 cover/banner 规范，区分实物与非实物扩展的构图和文字要求
+
+- V0.2.1
+   - 发布扩展时自动添加并核验仓库 Topic `MindPlus-Ext2`
+   - 审核使用P0/P1/P2三级分类处理
+   - 修改名称为 MindPlus-Extension-Skills
+
+- V0.2.0
+   - 推送正式版
+
+- V0.1.4
+   - 新增已有 V2 升级、扩展版本提升及个人令牌 fork 开发流程。
+   - 版本检查后发现官方相关仓库，询问是否基于已有仓库开发。
+   - 纳入版本检查与更新修复，补充官方仓库检索完整性检查。
+
+- V0.1.3
+   - 更改推荐个人令牌读取方式
+
+- V0.1.2
+   - 内置 WB 打包工具与发布配置，添加 Gitee Go 标签发布工作流
+   - 自动生成 WB ZIP、核对附件内容并维护发行版下载说明
+
+- V0.1.1
+   - 添加自动更新逻辑
+   - 修复 V1 转 V2 中关于 string 的处理
+
+- V0.1.0
+   - 初始化第一个版本

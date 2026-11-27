@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "mindplus-agent.handoff/v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "run_id", "parent_run_id", "workflow", "producer", "state", "status", "outcome", "reason_code", "input_provenance", "project_root", "project_sha256", "artifacts", "checks", "authorizations", "next"],
+  "properties": {
+    "schema_version": {"const": "mindplus-agent.handoff/v1"},
+    "run_id": {"type": "string", "minLength": 1},
+    "parent_run_id": {"type": "string", "minLength": 1},
+    "workflow": {"enum": ["CONVERT_FRESH", "CREATE_FRESH", "UPGRADE_EXISTING", "REVIEW_EXISTING", "PUBLISH_GITEE"]},
+    "producer": {"enum": ["mindplus-switch", "mindplus-create", "mindplus-upgrade", "mindplus-review", "mindplus-gitee-publish"]},
+    "state": {"enum": ["RUNNING", "WAITING_USER", "TERMINAL"]},
+    "status": {"enum": ["NOT_RUN", "PASS", "FAIL", "BLOCKED"]},
+    "outcome": {"type": "string", "minLength": 1},
+    "reason_code": {"type": ["string", "null"]},
+    "input_provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "sha256"],
+      "properties": {
+        "type": {"enum": ["V1_SOURCE", "EXTENSION_SPEC", "EXISTING_V2", "PRODUCER_HANDOFF"]},
+        "path": {"type": ["string", "null"]},
+        "manifest": {"type": ["string", "null"]},
+        "sha256": {"type": "string", "pattern": "^[A-Fa-f0-9]{64}$"},
+        "commit": {"type": ["string", "null"]}
+      }
+    },
+    "project_root": {"type": "string", "minLength": 1},
+    "project_sha256": {"type": "string", "pattern": "^[A-Fa-f0-9]{64}$"},
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "path"],
+        "properties": {
+          "kind": {"type": "string"},
+          "path": {"type": "string"},
+          "sha256": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "layer", "claim", "required", "result", "evidence"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "layer": {"enum": ["STATIC", "HOST_BUILD", "RUNTIME", "EXTERNAL_DEVICE"]},
+          "claim": {"type": "string"},
+          "priority": {"enum": ["P0", "P1", "P2"]},
+          "required": {"type": "boolean"},
+          "result": {"enum": ["PASS", "FAIL", "NOT_RUN", "ACCEPTED_LIMITATION", "CARRIED_RISK"]},
+          "evidence": {"type": "array", "items": {"type": "string"}},
+          "owner": {"type": ["string", "null"]},
+          "trigger": {"type": ["string", "null"]},
+          "confirmed_by": {"enum": ["user", null]}
+        }
+      }
+    },
+    "authorizations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["local_write", "install", "build", "mindplus_ui", "commit", "create_repository", "push", "device_upload"],
+      "properties": {
+        "local_write": {"type": "boolean"},
+        "install": {"type": "boolean"},
+        "build": {"type": "boolean"},
+        "mindplus_ui": {"type": "boolean"},
+        "commit": {"type": "boolean"},
+        "create_repository": {"type": "boolean"},
+        "push": {"type": "boolean"},
+        "device_upload": {"type": "boolean"}
+      }
+    },
+    "next": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["workflow", "condition"],
+        "properties": {
+          "workflow": {"enum": ["REVIEW_EXISTING", "PUBLISH_GITEE"]},
+          "condition": {"type": "string"}
+        }
+      }
+    }
+  }
+}

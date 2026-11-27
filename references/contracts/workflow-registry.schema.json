@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "mindplus-agent.workflow-registry/v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "workflows"],
+  "properties": {
+    "schema_version": {"const": "mindplus-agent.workflow-registry/v1"},
+    "workflows": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["CONVERT_FRESH", "CREATE_FRESH", "UPGRADE_EXISTING", "REVIEW_EXISTING", "PUBLISH_GITEE"],
+      "properties": {
+        "CONVERT_FRESH": {"$ref": "#/$defs/workflow"},
+        "CREATE_FRESH": {"$ref": "#/$defs/workflow"},
+        "UPGRADE_EXISTING": {"$ref": "#/$defs/workflow"},
+        "REVIEW_EXISTING": {"$ref": "#/$defs/workflow"},
+        "PUBLISH_GITEE": {"$ref": "#/$defs/workflow"}
+      }
+    }
+  },
+  "$defs": {
+    "workflow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["leaf", "producer", "allowed_next"],
+      "properties": {
+        "leaf": {"type": "string", "pattern": "^references/workflows/[a-z-]+\\.md$"},
+        "producer": {"type": "string", "minLength": 1},
+        "requires_absent_or_empty_target": {"type": "boolean"},
+        "requires_existing_target": {"type": "boolean"},
+        "required_incoming_outcome": {"type": "string"},
+        "allowed_next": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"enum": ["REVIEW_EXISTING", "PUBLISH_GITEE"]}
+        }
+      }
+    }
+  }
+}

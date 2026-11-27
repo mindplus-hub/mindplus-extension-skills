@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "purpose": "Mind+ V2 supportDevices dictionary shared by creation and conversion. The skill is self-contained: this embedded dictionary plus the generated corpus are all a first-time author needs. Local example projects are never required.",
+  "evidence_policy": "Two evidence sources, both embedded at build time: official development docs (C1, mindplus2-docs-cn upload-mode guide, mirrored in generated/upload/config.md) and verified working ext2 projects (C2, maintainer corpus). New entries require one of these and must record the source here.",
+  "runtime_independence": "Nothing in this file assumes example projects exist on the user machine. Provenance below records where each entry was learned, not a runtime dependency.",
+  "runtime_compatibility_policy": "For UPLOAD with meta.runtimeVersion == 0.0.2, supportDevices may include only the 15 boards with official_runtime_version_specs[0.0.2], as listed in generated/upload/config.md. Other upload boards are not yet adapted; historical observed_version_specs do not establish upload runtime 0.0.2 compatibility. Other modes use their own generated config documentation, not this upload list.",
+  "harvested_at": "2026-10-17",
+  "device_ids": {
+    "dev-DFRobot-arduinoLeonardo": {"observed_version_specs": ["^0.0.1", "^0.0.3"], "evidence": {"verified_projects": ["ext2-ds1302", "ext2-mpu6050"], "official_docs": true}, "official_runtime_version_specs": {"0.0.2": "^0.0.3"}},
+    "dev-DFRobot-arduinoMega2560": {"observed_version_specs": ["^0.0.1", "^0.0.3"], "evidence": {"verified_projects": ["ext2-ds1302", "ext2-mpu6050"], "official_docs": true}, "official_runtime_version_specs": {"0.0.2": "^0.0.3"}},
+    "dev-DFRobot-arduinoNano": {"observed_version_specs": ["^0.0.1", "^0.0.3"], "evidence": {"verified_projects": ["ext2-SU03T01", "ext2-SU03T02", "ext2-SU03T02V2"], "official_docs": true}, "official_runtime_version_specs": {"0.0.2": "^0.0.3"}},
+    "dev-DFRobot-arduinoUno": {"observed_version_specs": ["^0.0.1", "^0.0.3"], "evidence": {"official_docs": true, "verified_projects": ["ext2-LegoDuinoPro", "ext2-SU03T01", "ext2-SU03T02"]}, "official_runtime_version_specs": {"0.0.2": "^0.0.3"}},
+    "dev-DFRobot-dfrobotKitRob0135": {"observed_version_specs": ["^0.0.1"], "evidence": {"official_docs": true}},
+    "dev-DFRobot-Esp32": {"observed_version_specs": ["^0.0.1", "^0.0.2"], "evidence": {"verified_projects": ["ext2-BLESerial", "ext2-MpythonBT", "ext2-espnow"], "official_docs": true}, "official_runtime_version_specs": {"0.0.2": "^0.0.2"}},
+    "dev-DFRobot-Esp32C3": {"observed_version_specs": ["^0.0.1", "^0.0.2"], "evidence": {"verified_projects": ["ext2-mpu6050"], "official_docs": true}, "official_runtime_version_specs": {"0.0.2": "^0.0.2"}},
+    "dev-DFRobot-Esp32S3": {"observed_version_specs": ["^0.0.1", "^0.0.2"], "evidence": {"verified_projects": ["ext2-BLESerial", "ext2-espnow", "ext2-mpu6050"], "official_docs": true}, "official_runtime_version_specs": {"0.0.2": "^0.0.2"}},
+    "dev-DFRobot-firebeetleEsp32": {"observed_version_specs": ["^0.0.1", "^0.0.3"], "evidence": {"verified_projects": ["ext2-BLESerial", "ext2-MpythonBT", "ext2-espnow"], "official_docs": true}, "official_runtime_version_specs": {"0.0.2": "^0.0.3"}},
+    "dev-DFRobot-firebeetleEsp32E": {"observed_version_specs": ["^0.0.1", "^0.0.3"], "evidence": {"verified_projects": ["ext2-BLESerial", "ext2-MpythonBT", "ext2-espnow"], "official_docs": true}, "official_runtime_version_specs": {"0.0.2": "^0.0.3"}},
+    "dev-DFRobot-firebeetleEsp8266": {"observed_version_specs": ["^0.0.1", "^0.0.3"], "evidence": {"verified_projects": ["ext2-mqttcenter"], "official_docs": true}, "official_runtime_version_specs": {"0.0.2": "^0.0.3"}},
+    "dev-DFRobot-handpyESP32S3": {"observed_version_specs": ["^0.0.1", "^0.0.2"], "evidence": {"verified_projects": ["ext2-BLESerial", "ext2-espnow"], "official_docs": true}, "official_runtime_version_specs": {"0.0.2": "^0.0.2"}},
+    "dev-DFRobot-handpyEsp32": {"observed_version_specs": ["^0.0.1", "^0.0.3"], "evidence": {"verified_projects": ["ext2-BLESerial", "ext2-MpythonBT", "ext2-SU03T01"], "official_docs": true}, "official_runtime_version_specs": {"0.0.2": "^0.0.3"}},
+    "dev-DFRobot-microbitV2": {"observed_version_specs": ["^0.0.1", "^0.0.4"], "evidence": {"official_docs": true, "verified_projects": ["ext2-SU03T01", "ext2-SU03T02", "ext2-SU03T02V2"]}, "official_runtime_version_specs": {"0.0.2": "^0.0.4"}},
+    "dev-DFRobot-piPico": {"observed_version_specs": ["^0.0.1", "^0.0.3"], "evidence": {"verified_projects": ["ext2-mpu6050"], "official_docs": true}, "official_runtime_version_specs": {"0.0.2": "^0.0.3"}},
+    "dev-DFRobot-telloEsp32": {"observed_version_specs": ["^0.0.1"], "evidence": {"verified_projects": ["ext2-mpu6050", "ext2-mqttcenter"]}},
+    "dev-DFRobot-unihikerK10": {"observed_version_specs": ["^0.0.1", "^0.0.7"], "evidence": {"verified_projects": ["ext2-BLESerial", "ext2-emsmartfarm", "ext2-espnow"], "official_docs": true}, "official_runtime_version_specs": {"0.0.2": "^0.0.7"}}
+  },
+  "version_spec_format": "^<major>.<minor>.<patch>; observed_version_specs retains historical project ranges. For runtime 0.0.2 use official_runtime_version_specs[0.0.2], sourced from generated/upload/config.md.",
+  "unknown_device_recovery": "Pick boards from this dictionary by board name. If the user's target board is not listed: (1) search public Gitee repositories with the MindPlus-Ext2 Topic for an extension supporting that board and read its config.json supportDevices (official-corpus.md protocol, C1 reference; require C2/C3 before dictionary updates); (2) ask the user for the exact dev-DFRobot-... ID (visible in Mind+ or its official docs); (3) scope by architecture instead via supportArch, or omit supportDevices for a whole-arch extension. Never invent or approximate an ID, and propose the verified new entry as a dictionary update afterwards.",
+  "sku_format": {
+    "empty": "No DFRobot SKU product (communication/board extensions): use \"\".",
+    "single": "One SKU code, e.g. \"SEN0237\".",
+    "multi": "Multiple boards of one family joined with |, e.g. \"SEN0664|SEN0665\".",
+    "pattern": "^$|^[A-Z0-9]+(\\|[A-Z0-9]+)*$"
+  },
+  "support_arch": {
+    "observed_values": ["all", "arduino:avr"],
+    "format_rule": "Each entry is \"all\" or a board architecture prefix: the first two segments of boardConfig.board, e.g. \"arduino:avr\", \"arduino:samd\" (official docs, C1).",
+    "usage": "UPLOAD only: supportArch overrides supportDevices when both are set (official docs). Whole-arch upload extension: [\"all\"] with devices omitted; arch-family upload extension: [\"<platform>:<arch>\"]; device-scoped upload extension: supportDevices only. MICROPYTHON and REALTIME do not declare supportArch; MicroPython and realtime modules require supportDevices, realtime stages omit it. PYTHON_BLOCK declares neither field."
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "schema_version": "mindplus-agent.workflow-registry/v1",
+  "workflows": {
+    "CONVERT_FRESH": {
+      "leaf": "references/workflows/switch.md",
+      "producer": "mindplus-switch",
+      "requires_absent_or_empty_target": true,
+      "allowed_next": [
+        "REVIEW_EXISTING"
+      ]
+    },
+    "CREATE_FRESH": {
+      "leaf": "references/workflows/create.md",
+      "producer": "mindplus-create",
+      "requires_absent_or_empty_target": true,
+      "allowed_next": [
+        "REVIEW_EXISTING"
+      ]
+    },
+    "REVIEW_EXISTING": {
+      "leaf": "references/workflows/review.md",
+      "producer": "mindplus-review",
+      "requires_existing_target": true,
+      "allowed_next": [
+        "PUBLISH_GITEE"
+      ]
+    },
+    "PUBLISH_GITEE": {
+      "leaf": "references/workflows/gitee-publish.md",
+      "producer": "mindplus-gitee-publish",
+      "requires_existing_target": true,
+      "allowed_next": []
+    },
+    "UPGRADE_EXISTING": {
+      "leaf": "references/workflows/upgrade.md",
+      "producer": "mindplus-upgrade",
+      "requires_existing_target": true,
+      "allowed_next": [
+        "REVIEW_EXISTING"
+      ]
+    }
+  }
+}

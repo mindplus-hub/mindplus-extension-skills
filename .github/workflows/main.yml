@@ -1,0 +1,22 @@
+name: Sync from Gitee
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 * * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 同步 Gitee 主分支和标签
+        run: |
+          git fetch --tags https://gitee.com/mind-plus/mindplus-extension-skills.git refs/heads/main
+          git push --atomic origin FETCH_HEAD:refs/heads/main --tags

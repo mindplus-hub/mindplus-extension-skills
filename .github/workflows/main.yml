@@ -14,9 +14,11 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
+          ref: main
           fetch-depth: 0
 
       - name: 同步 Gitee 主分支和标签
         run: |
           git fetch --tags https://gitee.com/mind-plus/mindplus-extension-skills.git refs/heads/main
-          git push --atomic origin FETCH_HEAD:refs/heads/main --tags
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' merge --allow-unrelated-histories --no-edit FETCH_HEAD
+          git push --atomic origin HEAD:refs/heads/main --tags
